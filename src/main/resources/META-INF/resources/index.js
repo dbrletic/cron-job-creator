@@ -1,26 +1,3 @@
-/* const form = document.querySelector('form');
-form.addEventListener('submit', event => {
-  event.preventDefault();
-  const data = {
-    releaseBranch: document.getElementById('releaseBranch').value,
-    userNameFFM: document.getElementById('userNameFFM').value,
-    userPassword: document.getElementById('userPassword').value,
-    groups: document.getElementById('groups').value,
-    browser: document.getElementById('browser').value,
-    url: document.getElementById('url').value,
-    seleniumTestEmailList: document.getElementById('seleniumTestEmailList').value
-  };
-  fetch('http://localhost:8080/ffe-cronjob', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  })
-    .then(response => response.json())
-    .then(data => console.log(data));
-}); */
-
 const serialize_form = form => JSON.stringify(
   Array.from(new FormData(form).entries())
        .reduce((m, [ key, value ]) => Object.assign(m, { [key]: value }), {})
@@ -38,19 +15,24 @@ $('#cronForum').on('submit', function(event) {
     seleniumTestEmailList: document.getElementById('seleniumTestEmailList').value,
     cronJobSchedule: document.getElementById('cronJobSchedule').value
   };
-  const json = JSON.stringify(data);
-  console.log(json);
+  const jsonData = JSON.stringify(data);
+  console.log(jsonData);
   $.ajax({
     type: 'POST',
     url: 'http://localhost:8080/ffe-cronjob',
-    dataType: 'arraybuffer',
-    data: json,
+    data: jsonData,
     contentType: 'application/json',
-    success: function(response) {
-      console.log("Success Response from POST")
+    responseType: 'blob', // Set the response type to blob
+    success: function(response, status, xhr) {
+      let today = new Date().toISOString().slice(0, 10)
+      var blob = new Blob([response], { type: "application/zip" });
+      var link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = 'zipTest.zip';
+      link.download = data.groups + "-" + data.url + "-" + today + ".zip";
       link.click();
+    },
+    error: function(xhr, status, error) {
+      console.log("Error: " + error);
     }
   });
 });
