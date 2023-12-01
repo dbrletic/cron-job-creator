@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>FFE Cronjob HTML Page</title>
+    <!-- <link rel="stylesheet" href="/META-INF/resources/patternfly.css"> -->
+  </head>
+  <body>
+    <div class="container">
+      <h1>Fill out the form to create FFE Selenium Test Cronjobs</h1>
+      <form id="cronForum">
+        <div class="form-group">
+          <label for="releaseBranch">Release Branch:</label>
+          <input type="text" class="form-control" id="releaseBranch">
+        </div>
+        <div class="form-group">
+          <label for="userNameFFM">User Name:</label>
+          <input type="text" class="form-control" id="userNameFFM">
+        </div>
+        <div class="form-group">
+          <label for="userPassword">User Password:</label>
+          <input type="text" class="form-control" id="userPassword">
+        </div>
+        <div class="form-group">
+          <label for="groups">Groups:</label>
+          <input type="text" class="form-control" id="groups">
+        </div>
+        <div class="form-group">
+          <label for="browser">Browser:</label>
+          <input type="text" class="form-control" id="browser">
+        </div>
+        <div class="form-group">
+            <label for="url">Url:</label>
+            <input type="text" class="form-control" id="url">
+        </div>
+        <div class="form-group">
+            <label for="seleniumTestEmailList">Selenium Test EmailList:</label>
+            <input type="text" class="form-control" id="seleniumTestEmailList">
+        </div>
+        <div class="form-group">
+          <label for="cronJobSchedule">Cron Job Schedule:</label>
+          <input type="text" class="form-control" id="cronJobSchedule">
+      </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/index.js"></script>
+    
+  </body>
+</html>

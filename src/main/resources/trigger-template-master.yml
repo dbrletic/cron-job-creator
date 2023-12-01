@@ -1,0 +1,48 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: {{ .Values.cluster }}-selenium-GROUPS-URL-cronjob-tt
+  namespace: tester-pipelines
+spec:
+  params:
+    - description: The Release Branch
+      name: releaseBranch
+    - description: The Username
+      name: userName
+    - description: The Password
+      name: userPassword
+    - description: The Group to use
+      name: groups
+    - description: The test url
+      name: url
+    - description: The type of browser
+      name: browser
+    - description: The Email list for results
+      name: seleniumTestEmailList
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: {{ .Values.cluster }}-selenium-GROUPS-URL-confjob-tt-
+      spec:
+        params:
+          - name: releaseBranch
+            value: $(tt.params.releaseBranch)
+          - name: userName
+            value: $(tt.params.userName)
+          - name: userPassword
+            value: $(tt.params.userPassword)
+          - name: groups
+            value: $(tt.params.groups)
+          - name: url
+            value: $(tt.params.url)
+          - name: browser
+            value: $(tt.params.browser)
+          - name: seleniumTestEmailList
+            value: $(tt.params.seleniumTestEmailList)
+        pipelineRef:
+          name: {{ .Values.cluster }}-selenium-grid-test-pipeline
+        serviceAccountName: pipeline
+        workspaces:
+          - emptyDir: {}
+            name: config-source

@@ -1,0 +1,21 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: {{ .Values.cluster }}-selenium-GROUPS-URL-cronjob-binding
+  namespace: tester-pipelines
+spec:
+  params:
+    - name: releaseBranch
+      value: RELEASEBRANCH
+    - name: userName
+      value: USERNAME
+    - name: userPassword
+      value: USERPASSWORD
+    - name: groups
+      value: GROUPS
+    - name: url
+      value: URL
+    - name: browser
+      value: BROWSER
+    - name: seleniumTestEmailList
+      value: SELENIUMTESTEMAILLIST
