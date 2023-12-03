@@ -24,6 +24,7 @@ $('#cronForum').on('submit', function(event) {
     contentType: 'application/json',
     responseType: 'blob', // Set the response type to blob
     success: function(response, status, xhr) {
+      $("#cronForum")[0].reset();
       let today = new Date().toISOString().slice(0, 10)
       var blob = new Blob([response], { type: "application/zip" });
       var link = document.createElement('a');
