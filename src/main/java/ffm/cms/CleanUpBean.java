@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class CleanUpBean {
     
-    @Scheduled(every="15s")     
+    @Scheduled(every="30s")     
     void cleanUpZips() {
         String projectDir = System.getProperty("user.dir");
         File folder = new File(projectDir);
