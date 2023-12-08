@@ -7,6 +7,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 
 @ApplicationScoped
+/**
+ * Cleans up the left over zip files so there are not any name conflicts. 
+ */
 public class CleanUpBean {
     
     @Scheduled(every="30s")     
