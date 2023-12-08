@@ -12,8 +12,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 
-import io.quarkus.mailer.Mail;
-import io.quarkus.mailer.Mailer;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,7 +20,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 @Path("/ffe-cronjob")
 @ApplicationScoped
@@ -90,21 +87,15 @@ public class CronResource {
             File fileToDelete = FileUtils.getFile(scrFile);
             FileUtils.deleteQuietly(fileToDelete);
         }
-
-        File downloadZip = new File(zipFileLocation);
-        
-
+        File downloadZip = new File(zipFileLocation);        
         System.out.println("Add to response: " + zipFileLocation);
-       
-        System.out.println("Attaching: " + downloadZip.getName());
         System.out.println("Zip is made: " + downloadZip.isFile());
 
-    
         return Response
-        .ok(FileUtils.readFileToByteArray(downloadZip))
-        .type("application/zip")
-        .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
-        .build();
+            .ok(FileUtils.readFileToByteArray(downloadZip))
+            .type("application/zip")
+            .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
+            .build();
     }
     
 }
