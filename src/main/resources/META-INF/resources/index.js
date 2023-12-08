@@ -29,16 +29,18 @@ $('#cronForum').on('submit', function(event) {
       $("#cronForum")[0].reset();
       var link = document.createElement('a');
       let today = new Date().toISOString().slice(0, 10)
-            link.href = window.URL.createObjectURL(response)
-            link.download = data.groups + "-" + data.url + "-" + today + ".zip";
-            document.body.appendChild(link);
-            link.click();
-            
+      link.href = window.URL.createObjectURL(response)
+      link.download = data.groups + "-" + data.url + "-" + today + ".zip";
+      document.body.appendChild(link);
+      link.click();
+      $('#errorMessage').empty();
+      $("#successMessage").show();      
     },
     error: function(xhr, status, error) {
+      $("#successMessage").hide();     
       console.log("Error: " + error);
       $("#cronForum")[0].reset();
-      
+      $("<p>Error: " + error +"</p>").appendTo('#errorMessage');
     }
   });
 });
