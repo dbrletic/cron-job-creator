@@ -17,25 +17,28 @@ $('#cronForum').on('submit', function(event) {
   };
   const jsonData = JSON.stringify(data);
   console.log(jsonData);
-  var host = window.location.hostname;
-  console.log(host);
   $.ajax({
     type: 'POST',
     url: '/ffe-cronjob',
     data: jsonData,
     contentType: 'application/json',
-    responseType: 'blob', // Set the response type to blob
-    success: function(response, status, xhr) {
+    xhrFields:{
+      responseType: 'blob'
+    },
+    success: function(response) {
       $("#cronForum")[0].reset();
-      let today = new Date().toISOString().slice(0, 10)
-      var blob = new Blob([response], { type: "application/zip" });
       var link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = data.groups + "-" + data.url + "-" + today + ".zip";
-      link.click();
+      let today = new Date().toISOString().slice(0, 10)
+            link.href = window.URL.createObjectURL(response)
+            link.download = data.groups + "-" + data.url + "-" + today + ".zip";
+            document.body.appendChild(link);
+            link.click();
+            
     },
     error: function(xhr, status, error) {
       console.log("Error: " + error);
+      $("#cronForum")[0].reset();
+      
     }
   });
 });

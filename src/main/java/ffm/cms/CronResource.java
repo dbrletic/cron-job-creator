@@ -12,6 +12,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 
+import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,9 +30,6 @@ public class CronResource {
 
     @Inject
     private ProcessCronJob cronjobHandler;
-
-    @Inject
-    Mailer mailer;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -74,11 +72,14 @@ public class CronResource {
                 while((length = fis.read(bytes)) >= 0) {
                     zipOut.write(bytes, 0, length);
                 }
+                zipOut.closeEntry();
                 fis.close();
             }
-
+            zipOut.flush();
             zipOut.close();
+            fos.flush();
             fos.close();
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -90,17 +91,20 @@ public class CronResource {
             FileUtils.deleteQuietly(fileToDelete);
         }
 
-        System.out.println("Add to response: " + zipFileLocation);
         File downloadZip = new File(zipFileLocation);
+        
+
+        System.out.println("Add to response: " + zipFileLocation);
+       
         System.out.println("Attaching: " + downloadZip.getName());
         System.out.println("Zip is made: " + downloadZip.isFile());
-        ResponseBuilder response = Response.ok(downloadZip);
-        response.header("Content-Type",  "application/zip");
-        response.header("Content-Disposition", "attachment; filename=" + downloadZip.getName());
-        return response.build();
 
+    
+        return Response
+        .ok(FileUtils.readFileToByteArray(downloadZip))
+        .type("application/zip")
+        .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
+        .build();
     }
-
-   
     
 }
