@@ -17,9 +17,11 @@ $('#cronForum').on('submit', function(event) {
   };
   const jsonData = JSON.stringify(data);
   console.log(jsonData);
+  var host = window.location.hostname;
+  console.log(host);
   $.ajax({
     type: 'POST',
-    url: 'http://localhost:8080/ffe-cronjob',
+    url: '/ffe-cronjob',
     data: jsonData,
     contentType: 'application/json',
     responseType: 'blob', // Set the response type to blob
