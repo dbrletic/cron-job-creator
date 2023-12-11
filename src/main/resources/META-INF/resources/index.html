@@ -6,7 +6,17 @@
     <!-- <link rel="stylesheet" href="/META-INF/resources/patternfly.css"> -->
   </head>
   <body>
-    <div class="container">
+    <div id="mySidenav" class="sidenav">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <a href="#">About</a>
+      <a href="#">Services</a>
+      <a href="#">Clients</a>
+      <a href="#">Contact</a>
+    </div>
+    
+    <!-- Use any element to open the sidenav -->
+    <span onclick="openNav()"><h3>Menu</h3></span>
+    <div class="container" id="main">
       <h2>Fill out the form to create FFE Selenium Test Cronjob Template files</h2>
       <form id="cronForum">
         <fieldset>
@@ -55,7 +65,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
-
+    <link rel="stylesheet" href="index.css">
 
   </body>
 </html>
