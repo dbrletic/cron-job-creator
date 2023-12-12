@@ -5,6 +5,7 @@ import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
+import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -32,14 +33,17 @@ public class OpenshiftResource {
     @GET()
     @Path("/{namespace}/cronjobs")
     @Produces(MediaType.TEXT_HTML)
+    @Blocking
     public TemplateInstance getCurrentCronJobs(@RestPath String namespace){
 
         List<CronJobData> cronJobs = new ArrayList<>();
         List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
+        System.out.print("Listing Cronjob in Namespace: " + namespace);
         for(CronJob job : cronJobList){
             CronJobData currentJob = new CronJobData();
             currentJob.name = job.getMetadata().getName();
             currentJob.schedule = job.getSpec().getSchedule();
+            System.out.println(currentJob.name + ":" + currentJob.schedule );
             cronJobs.add(currentJob);
         }
        // String schedule = cronJobList.get(0).getSpec().getSchedule();
