@@ -39,7 +39,7 @@ public class OpenshiftResource {
         for(CronJob job : cronJobList){
             CronJobData currentJob = new CronJobData();
             currentJob.name = job.getMetadata().getName();
-            currentJob.schdule = job.getSpec().getSchedule();
+            currentJob.schedule = job.getSpec().getSchedule();
             cronJobs.add(currentJob);
         }
        // String schedule = cronJobList.get(0).getSpec().getSchedule();

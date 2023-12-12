@@ -3,5 +3,5 @@ package ffm.cms.model;
 public class CronJobData {
 
     public String name;
-    public String schdule;
+    public String schedule;
 }
