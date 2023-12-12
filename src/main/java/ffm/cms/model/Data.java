@@ -1,4 +1,4 @@
-package ffm.cms;
+package ffm.cms.model;
 
 
 public class Data {
