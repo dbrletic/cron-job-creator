@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import io.fabric8.openshift.api.model.operatorhub.v1alpha1.ResourceList;
+import io.fabric8.openshift.client.OpenShiftClient;
+import jakarta.ws.rs.GET;
 import org.apache.commons.io.FileUtils;
 
 import io.smallrye.common.annotation.Blocking;
@@ -97,5 +100,4 @@ public class CronResource {
             .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
             .build();
     }
-    
 }
