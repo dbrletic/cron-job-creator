@@ -12,8 +12,11 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import net.redhogs.cronparser.CronExpressionDescriptor;
+
 import org.jboss.resteasy.reactive.RestPath;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,11 +37,11 @@ public class OpenshiftResource {
     @Path("/{namespace}/cronjobs")
     @Produces(MediaType.TEXT_HTML)
     @Blocking
-    public TemplateInstance getCurrentCronJobs(@RestPath String namespace){
+    public TemplateInstance getCurrentCronJobs(@RestPath String namespace) throws ParseException{
 
         // Helpful openShiftClient / kubernetes cheatsheet
         //https://github.com/fabric8io/kubernetes-client/blob/main/doc/CHEATSHEET.md#cronjob
-        
+
         List<CronJobData> cronJobs = new ArrayList<>();
         List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
         System.out.print("Listing Cronjob in Namespace: " + namespace);
@@ -46,6 +49,7 @@ public class OpenshiftResource {
             CronJobData currentJob = new CronJobData();
             currentJob.name = job.getMetadata().getName();
             currentJob.schedule = job.getSpec().getSchedule();
+            currentJob.humanReadableMsg = CronExpressionDescriptor.getDescription(currentJob.schedule);
             System.out.println(currentJob.name + ":" + currentJob.schedule );
             cronJobs.add(currentJob);
         }

@@ -21,6 +21,7 @@
             <tr>
                 <th>Name</th>
                 <th>Schedule</th>
+                <th>Schedule Description</th>
             </tr>
         </thead>
         <tbody>
@@ -28,6 +29,7 @@
             <tr>
                 <td>{cronJob.name}</td>
                 <td>{cronJob.schedule}</td>
+                <td>{cronJob.humanReadableMsg}</td>
             </tr>
         {/for}
         </tbody>
