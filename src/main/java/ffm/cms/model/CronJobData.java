@@ -4,4 +4,5 @@ public class CronJobData {
 
     public String name;
     public String schedule;
+    public String cluster;
 }
