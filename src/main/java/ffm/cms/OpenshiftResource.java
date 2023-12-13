@@ -46,8 +46,6 @@ public class OpenshiftResource {
             System.out.println(currentJob.name + ":" + currentJob.schedule );
             cronJobs.add(currentJob);
         }
-       // String schedule = cronJobList.get(0).getSpec().getSchedule();
-        //String name = cronJobList.get(0).getMetadata().getName();
         return Templates.cronJobData(cronJobs);
     }
 }
