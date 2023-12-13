@@ -36,6 +36,9 @@ public class OpenshiftResource {
     @Blocking
     public TemplateInstance getCurrentCronJobs(@RestPath String namespace){
 
+        // Helpful openShiftClient / kubernetes cheatsheet
+        //https://github.com/fabric8io/kubernetes-client/blob/main/doc/CHEATSHEET.md#cronjob
+        
         List<CronJobData> cronJobs = new ArrayList<>();
         List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
         System.out.print("Listing Cronjob in Namespace: " + namespace);
