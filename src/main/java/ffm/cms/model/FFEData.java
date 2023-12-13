@@ -1,7 +1,7 @@
 package ffm.cms.model;
 
 
-public class Data {
+public class FFEData {
 
     private String releaseBranch;
     private String userNameFFM;
@@ -12,7 +12,7 @@ public class Data {
     private String seleniumTestEmailList;
     private String cronJobSchedule;
     
-    public Data(String releaseBranch, String userNameFFM, String userPassword, String groups, String browser,
+    public FFEData(String releaseBranch, String userNameFFM, String userPassword, String groups, String browser,
             String url, String seleniumTestEmailList, String cronJobSchedule) {
         this.releaseBranch = releaseBranch;
         this.userNameFFM = userNameFFM;

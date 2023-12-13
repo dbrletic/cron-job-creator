@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import ffm.cms.model.Data;
+
+import ffm.cms.model.FFEData;
 import org.apache.commons.io.FileUtils;
 
 import io.smallrye.common.annotation.Blocking;
@@ -32,7 +33,7 @@ public class CronResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
-    public Response createFiles(Data data) throws IOException{
+    public Response createFiles(FFEData data) throws IOException{
         System.out.println("Starting up process");
         System.out.println(data.toString());
         List<String> newFilesLocation = new ArrayList<String>();
