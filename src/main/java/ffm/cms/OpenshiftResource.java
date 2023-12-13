@@ -14,13 +14,11 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 
-import net.redhogs.cronparser.Options;
 import org.jboss.resteasy.reactive.RestPath;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @ApplicationScoped
 @Path("/openshift")
@@ -34,7 +32,7 @@ public class OpenshiftResource {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
     }
 
-
+q
     @GET()
     @Path("/{namespace}/cronjobs")
     @Produces(MediaType.TEXT_HTML)
@@ -43,16 +41,21 @@ public class OpenshiftResource {
 
         // Helpful openShiftClient / kubernetes cheatsheet
         //https://github.com/fabric8io/kubernetes-client/blob/main/doc/CHEATSHEET.md#cronjob
-        
+
+        //https://www.npmjs.com/package/cronstrue
+        // To try to get the TiggerBinding https://github.com/fabric8io/kubernetes-client/blob/main/kubernetes-examples/src/main/java/io/fabric8/kubernetes/examples/GenericKubernetesResourceExample.java
+        //https://stackoverflow.com/questions/40858456/how-to-display-a-javascript-var-in-html-body
+
+
         List<CronJobData> cronJobs = new ArrayList<>();
         List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
-        System.out.println("Listing Cronjob in Namespace: " + namespace);
+        System.out.print("Listing Cronjob in Namespace: " + namespace);
         for(CronJob job : cronJobList){
             CronJobData currentJob = new CronJobData();
             currentJob.name = job.getMetadata().getName();
             currentJob.schedule = job.getSpec().getSchedule();
             currentJob.humanReadableMsg = CronExpressionDescriptor.getDescription(currentJob.schedule);
-            System.out.println(currentJob.name + ":" + currentJob.schedule + " : " + currentJob.humanReadableMsg );
+            System.out.println(currentJob.name + ":" + currentJob.schedule );
             cronJobs.add(currentJob);
         }
         return Templates.cronJobData(cronJobs);
