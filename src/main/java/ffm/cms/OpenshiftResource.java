@@ -32,7 +32,6 @@ public class OpenshiftResource {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
     }
 
-q
     @GET()
     @Path("/{namespace}/cronjobs")
     @Produces(MediaType.TEXT_HTML)
