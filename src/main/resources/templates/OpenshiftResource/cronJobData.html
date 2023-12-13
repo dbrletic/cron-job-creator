@@ -12,11 +12,22 @@
 <span onclick="openNav()"><h3>Menu</h3></span>
 <div class="container" id="main">
     <h2>Current List of Selenium CronJobs</h2>
-    <div>
-    {#for cronJob in cronJobs}
-            <p>{cronJob.name} : {cronJob.schedule} </p>
-    {/for}
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Schedule</th>
+            </tr>
+        </thead>
+        <tbody>
+        {#for cronJob in cronJobs}
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.schedule}</td>
+            </tr>
+        {/for}
+        </tbody>
+    </table>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/index.js"></script>
