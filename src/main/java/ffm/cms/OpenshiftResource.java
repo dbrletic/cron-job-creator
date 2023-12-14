@@ -13,6 +13,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import net.redhogs.cronparser.CronExpressionDescriptor;
+import io.fabric8.tekton.client.*;
 
 import org.jboss.resteasy.reactive.RestPath;
 
@@ -27,6 +28,7 @@ public class OpenshiftResource {
     @Inject
     private OpenShiftClient openshiftClient;
 
+
     @CheckedTemplate
     public static class Templates {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
@@ -36,7 +38,7 @@ public class OpenshiftResource {
     @Path("/{namespace}/cronjobs")
     @Produces(MediaType.TEXT_HTML)
     @Blocking
-    public TemplateInstance getCurrentCronJobs(@RestPath String namespace) throws ParseException{
+    public TemplateInstance getCurrentCronJobs(@RestPath String namespace) throws ParseException, Exception{
 
         // Helpful openShiftClient / kubernetes cheatsheet
         //https://github.com/fabric8io/kubernetes-client/blob/main/doc/CHEATSHEET.md#cronjob
@@ -48,6 +50,9 @@ public class OpenshiftResource {
 
         List<CronJobData> cronJobs = new ArrayList<>();
         List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
+        try (final TektonClient client = new KubernetesClientBuilder().build().adapt(TektonClient.class)) {
+            // Do stuff with client
+        } 
         System.out.print("Listing Cronjob in Namespace: " + namespace);
         for(CronJob job : cronJobList){
             CronJobData currentJob = new CronJobData();
