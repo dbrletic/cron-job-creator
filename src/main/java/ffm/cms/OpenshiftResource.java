@@ -48,13 +48,19 @@ public class OpenshiftResource {
         // Helpful openShiftClient / kubernetes cheatsheet
         //https://github.com/fabric8io/kubernetes-client/blob/main/doc/CHEATSHEET.md#cronjob
         
-        //Having to use TektonClient for anything related to pipelines
+        //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
+       
+        //Getting all the CronJobs
+        List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
+
+        //Getting all the TriggerBindings
+        List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();   
+
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
-        List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
-       
-        List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();   
+
+        //Easier to just grab the releaseBranch all once and just map them to the name of the TriggerBinding
         for(TriggerBinding tb : tbList){
            List<Param> params =  tb.getSpec().getParams();
            for(Param param: params){
