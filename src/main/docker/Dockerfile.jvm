@@ -40,12 +40,13 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
     && chmod 540 /deployments/run-java.sh \
     && echo "securerandom.source=file:/dev/urandom" >> /etc/alternatives/jre/conf/security/java.security
 
-# Double making sure user 1001 has root pilivages 
+# Double making sure user 1001 has root pilivages for /deployments folder
 USER root
 RUN chgrp -R 0 /deployments && \
     chmod -R g=u /deployments 
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
+# Turning off FIPS at the Java level, so be careful on OpenShift Clusters that require FIPS
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Dcom.redhat.fips=false"
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --chown=1001 target/quarkus-app/lib/ /deployments/lib/

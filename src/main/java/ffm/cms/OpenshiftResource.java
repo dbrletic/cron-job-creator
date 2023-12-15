@@ -60,7 +60,7 @@ public class OpenshiftResource {
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
 
-        //Easier to just grab the releaseBranch all once and just map them to the name of the TriggerBinding
+        //Easier to just grab the releaseBranch all at once and just map the value to the name of the TriggerBinding
         for(TriggerBinding tb : tbList){
            List<Param> params =  tb.getSpec().getParams();
            for(Param param: params){
