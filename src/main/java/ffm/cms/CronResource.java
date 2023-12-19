@@ -34,7 +34,7 @@ public class CronResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
     public Response createFiles(FFEData data) throws IOException, ParseException{
-        System.out.println("Starting up process");
+        System.out.println("Starting up process for " + data.getGroups() + "-" + data.getUrl()) ;
         System.out.println(data.toString());
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
