@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.cluster }}-selenium-GROUPS-URL-cronjob
   namespace: tester-pipelines
 spec:
-  schedule: "0 1 * * 1-5" # Every Day at 9 pm EST (from UST), Monday to Friday
+  schedule: "SCHEDULE" # HUMAN_READALBE
   jobTemplate:
     spec:
       template:

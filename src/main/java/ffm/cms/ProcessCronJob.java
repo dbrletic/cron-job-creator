@@ -7,15 +7,17 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import net.redhogs.cronparser.CronExpressionDescriptor;
 
 @ApplicationScoped
 public class ProcessCronJob{
 
     
-    public String processCronjob(String groups, String url) throws IOException {
+    public String processCronjob(String schedule, String groups, String url) throws IOException, ParseException {
 
         InputStream inputStream = getClass().getResourceAsStream("/cronjob-selenium-master.yml");
       
@@ -28,6 +30,12 @@ public class ProcessCronJob{
 
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
+
+        //Replace every instance of SCHEDULE with schedule variable
+        outputContent = outputContent.replaceAll("SCHEDULE", schedule);
+
+        //Replacing HUMAN_READABLE with a easy to understand description of the cronjob schedule 
+        outputContent = outputContent.replaceAll("HUMAN_READALBE", CronExpressionDescriptor.getDescription(schedule));
 
         // Write out the output file
         Path outputFile = Paths.get("cronjob-selenium-" + groups + "-" + url + ".yaml");

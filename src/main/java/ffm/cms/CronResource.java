@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -32,7 +33,7 @@ public class CronResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
-    public Response createFiles(FFEData data) throws IOException{
+    public Response createFiles(FFEData data) throws IOException, ParseException{
         System.out.println("Starting up process");
         System.out.println(data.toString());
         List<String> newFilesLocation = new ArrayList<String>();
@@ -42,7 +43,7 @@ public class CronResource {
         ZipOutputStream zipOut;
 
         try{
-            newFilesLocation.add(cronjobHandler.processCronjob(data.getGroups(), data.getUrl()));
+            newFilesLocation.add(cronjobHandler.processCronjob(data.getCronJobSchedule(),data.getGroups(), data.getUrl()));
             newFilesLocation.add(cronjobHandler.processEventListener(data.getGroups(), data.getUrl()));
             newFilesLocation.add(cronjobHandler.processTriggerBinding(data.getGroups(), data.getUrl(), data.getReleaseBranch(), data.getUserNameFFM(), data.getUserPassword(), data.getBrowser(), data.getSeleniumTestEmailList()));
             newFilesLocation.add(cronjobHandler.processTriggerTemplate(data.getGroups(), data.getUrl()));
