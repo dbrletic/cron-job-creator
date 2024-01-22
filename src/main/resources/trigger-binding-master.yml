@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: {{ .Values.cluster }}-selenium-GROUPS-URL-cronjob-binding
+  name: {{ .Values.cluster }}-selenium-GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-binding
   namespace: tester-pipelines
 spec:
   params:

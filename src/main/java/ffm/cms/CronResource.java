@@ -42,11 +42,15 @@ public class CronResource {
         FileOutputStream fos;
         ZipOutputStream zipOut;
 
+        //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
+        String cleanReleaseBranch = data.getReleaseBranch().replace("/", "-");
+        cleanReleaseBranch = cleanReleaseBranch.replace("\\", "-");
+        
         try{
-            newFilesLocation.add(cronjobHandler.processCronjob(data.getCronJobSchedule(),data.getGroups(), data.getUrl()));
-            newFilesLocation.add(cronjobHandler.processEventListener(data.getGroups(), data.getUrl()));
-            newFilesLocation.add(cronjobHandler.processTriggerBinding(data.getGroups(), data.getUrl(), data.getReleaseBranch(), data.getUserNameFFM(), data.getUserPassword(), data.getBrowser(), data.getSeleniumTestEmailList()));
-            newFilesLocation.add(cronjobHandler.processTriggerTemplate(data.getGroups(), data.getUrl()));
+            newFilesLocation.add(cronjobHandler.processCronjob(data.getCronJobSchedule(),data.getGroups(), data.getUrl(), cleanReleaseBranch));
+            newFilesLocation.add(cronjobHandler.processEventListener(data.getGroups(), data.getUrl(), cleanReleaseBranch));
+            newFilesLocation.add(cronjobHandler.processTriggerBinding(data.getGroups(), data.getUrl(), data.getReleaseBranch(), data.getUserNameFFM(), data.getUserPassword(), data.getBrowser(), data.getSeleniumTestEmailList(), cleanReleaseBranch));
+            newFilesLocation.add(cronjobHandler.processTriggerTemplate(data.getGroups(), data.getUrl(), cleanReleaseBranch));
         } catch (IOException e){
             System.out.println(e.getMessage());
             System.out.println(e.getStackTrace());

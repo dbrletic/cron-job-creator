@@ -42,7 +42,7 @@ public class OpenshiftResource {
     @GET()
     @Path("/{namespace}/cronjobs")
     @Produces(MediaType.TEXT_HTML)
-    @Blocking
+    @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCurrentCronJobs(@RestPath String namespace) throws ParseException, Exception{
 
         // Helpful openShiftClient / kubernetes cheatsheet
@@ -60,7 +60,7 @@ public class OpenshiftResource {
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
 
-        //Easier to just grab the releaseBranch all at once and just map the value to the name of the TriggerBinding
+        //Easier to just grab the releaseBranch all once and just map them to the name of the TriggerBinding
         for(TriggerBinding tb : tbList){
            List<Param> params =  tb.getSpec().getParams();
            for(Param param: params){
@@ -69,6 +69,7 @@ public class OpenshiftResource {
                 }
            }
         }
+        //Filling out the values for the linked template
         for(CronJob job : cronJobList){
             CronJobData currentJob = new CronJobData();
             currentJob.name = job.getMetadata().getName();

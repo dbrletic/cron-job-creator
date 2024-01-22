@@ -17,7 +17,7 @@ import net.redhogs.cronparser.CronExpressionDescriptor;
 public class ProcessCronJob{
 
     
-    public String processCronjob(String schedule, String groups, String url) throws IOException, ParseException {
+    public String processCronjob(String schedule, String groups, String url, String cleanReleaseBranch) throws IOException, ParseException {
 
         InputStream inputStream = getClass().getResourceAsStream("/cronjob-selenium-master.yml");
       
@@ -37,14 +37,17 @@ public class ProcessCronJob{
         //Replacing HUMAN_READABLE with a easy to understand description of the cronjob schedule 
         outputContent = outputContent.replaceAll("HUMAN_READALBE", CronExpressionDescriptor.getDescription(schedule));
 
+        //Relace CLEAN_RELEASE_BRANCH with a releaseBranch with no slashes
+        outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
+
         // Write out the output file
-        Path outputFile = Paths.get("cronjob-selenium-" + groups + "-" + url + ".yaml");
+        Path outputFile = Paths.get("cronjob-selenium-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-    public String processEventListener(String groups, String url) throws IOException {
+    public String processEventListener(String groups, String url, String cleanReleaseBranch) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/eventlistener-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -57,14 +60,18 @@ public class ProcessCronJob{
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
 
+        //Relace CLEAN_RELEASE_BRANCH with a releaseBranch with no slashes
+        outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
+        
+
         // Write out the output file
-        Path outputFile = Paths.get("eventlistener-" + groups + "-" + url + ".yaml");
+        Path outputFile = Paths.get("eventlistener-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-    public String processTriggerBinding(String groups, String url, String releaseBranch, String userName, String userPassword, String browser, String seleniumTestEmailList) throws IOException {
+    public String processTriggerBinding(String groups, String url, String releaseBranch, String userName, String userPassword, String browser, String seleniumTestEmailList, String cleanReleaseBranch) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-binding-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -91,16 +98,20 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("BROWSER", browser);
 
         //Replace every instance of "SELENIUMTESTEMAILLIST" with seleniumTestEmailList variable 
-        outputContent = outputContent.replaceAll("SELENIUMTESTEMAILLIST", seleniumTestEmailList);        
+        outputContent = outputContent.replaceAll("SELENIUMTESTEMAILLIST", seleniumTestEmailList);     
+        
+        //Relace CLEAN_RELEASE_BRANCH with a releaseBranch with no slashes
+        outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
+        
 
         // Write out the output file
-        Path outputFile = Paths.get("trigger-binding-" + groups + "-" + url + ".yaml");
+        Path outputFile = Paths.get("trigger-binding-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-     public String processTriggerTemplate(String groups, String url) throws IOException {
+     public String processTriggerTemplate(String groups, String url, String cleanReleaseBranch) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-template-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -113,8 +124,12 @@ public class ProcessCronJob{
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
 
+        //Relace CLEAN_RELEASE_BRANCH with a releaseBranch with no slashes
+        outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
+        
+
         // Write out the output file
-        Path outputFile = Paths.get("trigger-template-" + groups + "-" + url + ".yaml");
+        Path outputFile = Paths.get("trigger-template-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
