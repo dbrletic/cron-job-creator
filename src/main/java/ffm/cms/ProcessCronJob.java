@@ -41,7 +41,7 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
 
         // Write out the output file
-        Path outputFile = Paths.get("cronjob-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("cj-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
