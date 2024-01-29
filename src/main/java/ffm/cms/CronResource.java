@@ -45,6 +45,9 @@ public class CronResource {
         //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
         String cleanReleaseBranch = data.getReleaseBranch().replace("/", "-");
         cleanReleaseBranch = cleanReleaseBranch.replace("\\", "-");
+
+         //Also have to remove any _ since that is not allowed in the name of a cronjob file
+        cleanReleaseBranch = data.getReleaseBranch().replace("_", "-");
         
         try{
             newFilesLocation.add(cronjobHandler.processCronjob(data.getCronJobSchedule(),data.getGroups(), data.getUrl(), cleanReleaseBranch));

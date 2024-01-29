@@ -41,7 +41,7 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
 
         // Write out the output file
-        Path outputFile = Paths.get("cronjob-selenium-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("cronjob-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
@@ -65,7 +65,7 @@ public class ProcessCronJob{
         
 
         // Write out the output file
-        Path outputFile = Paths.get("eventlistener-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("el-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
@@ -105,7 +105,7 @@ public class ProcessCronJob{
         
 
         // Write out the output file
-        Path outputFile = Paths.get("trigger-binding-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("tb-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
@@ -129,7 +129,7 @@ public class ProcessCronJob{
         
 
         // Write out the output file
-        Path outputFile = Paths.get("trigger-template-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("tt-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
