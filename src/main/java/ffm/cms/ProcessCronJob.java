@@ -40,7 +40,7 @@ public class ProcessCronJob{
         //Relace CLEAN_RELEASE_BRANCH with a releaseBranch with no slashes
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
 
-        // Write out the output file
+        // Write out the output file for the new cronjob file
         Path outputFile = Paths.get("cj-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
@@ -64,7 +64,7 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
         
 
-        // Write out the output file
+        // Write out the output file for the new eventlistener file
         Path outputFile = Paths.get("el-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
@@ -104,7 +104,7 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
         
 
-        // Write out the output file
+        // Write out the output file for the new trigger binding
         Path outputFile = Paths.get("tb-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
@@ -128,7 +128,7 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
         
 
-        // Write out the output file
+        // Write out the output file the new trigger template 
         Path outputFile = Paths.get("tt-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
