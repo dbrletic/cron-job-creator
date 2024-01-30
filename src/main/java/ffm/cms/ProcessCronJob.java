@@ -82,7 +82,7 @@ public class ProcessCronJob{
         String outputContent = inputContent.replaceAll("CLEAN_GROUPS", cleanGroup);
         
         // Replace every instance of "GROUPS" with groups variable
-        outputContent = inputContent.replaceAll("GROUPS", groups);
+        outputContent = outputContent.replaceAll("GROUPS", groups);
 
         //Replace every instance of "URL" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
