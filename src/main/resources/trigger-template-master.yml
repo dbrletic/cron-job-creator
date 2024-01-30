@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
+  name: selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
   namespace: tester-pipelines
 spec:
   params:

@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob
+  name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob
   namespace: tester-pipelines
 spec:
   schedule: "SCHEDULE" # HUMAN_READALBE
@@ -10,7 +10,7 @@ spec:
       template:
         spec:
           containers:
-          - name: selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-trigger
+          - name: selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-trigger
             image: {{ .Values.baseImageRegistry }}/ffe-curl:0.0.1
             args: ["curl", "-X", "POST", "--data", "{}", "el-{{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob.tester-pipelines.svc.cluster.local:8080"]
             envFrom:
