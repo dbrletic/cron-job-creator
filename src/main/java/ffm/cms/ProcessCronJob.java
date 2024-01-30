@@ -28,9 +28,6 @@ public class ProcessCronJob{
         // Replace every instance of "CLEAN_GROUPS" with cleanGroup variable
         String outputContent = inputContent.replaceAll("CLEAN_GROUPS", cleanGroup);
 
-        // Replace every instance of "groups" with groups variable
-        outputContent = inputContent.replaceAll("GROUPS", groups);
-
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
 
@@ -59,9 +56,6 @@ public class ProcessCronJob{
 
         // Replace every instance of "CLEAN_GROUPS" with cleanGroup variable
         String outputContent = inputContent.replaceAll("CLEAN_GROUPS", cleanGroup);
-
-        // Replace every instance of "group" with groups variable
-        outputContent = inputContent.replaceAll("GROUPS", groups);
 
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
@@ -130,9 +124,6 @@ public class ProcessCronJob{
         // Replace every instance of "CLEAN_GROUPS" with cleanGroup variable
         String outputContent = inputContent.replaceAll("CLEAN_GROUPS", cleanGroup);
         
-        // Replace every instance of "group" with groups variable
-        outputContent = inputContent.replaceAll("GROUPS", groups);
-
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
 
