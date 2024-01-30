@@ -17,7 +17,7 @@ import net.redhogs.cronparser.CronExpressionDescriptor;
 public class ProcessCronJob{
 
     
-    public String processCronjob(String schedule, String groups, String url, String cleanReleaseBranch) throws IOException, ParseException {
+    public String processCronjob(String schedule, String groups, String url, String cleanReleaseBranch, String cleanGroup) throws IOException, ParseException {
 
         InputStream inputStream = getClass().getResourceAsStream("/cronjob-selenium-master.yml");
       
@@ -25,8 +25,11 @@ public class ProcessCronJob{
 
         String inputContent = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
-        // Replace every instance of "group" with groups variable
-        String outputContent = inputContent.replaceAll("GROUPS", groups);
+        // Replace every instance of "CLEAN_GROUPS" with cleanGroup variable
+        String outputContent = inputContent.replaceAll("CLEAN_GROUPS", cleanGroup);
+
+        // Replace every instance of "groups" with groups variable
+        outputContent = inputContent.replaceAll("GROUPS", groups);
 
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
@@ -41,21 +44,24 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
 
         // Write out the output file for the new cronjob file
-        Path outputFile = Paths.get("cj-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("cj-" + cleanGroup + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-    public String processEventListener(String groups, String url, String cleanReleaseBranch) throws IOException {
+    public String processEventListener(String groups, String url, String cleanReleaseBranch, String cleanGroup) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/eventlistener-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         String inputContent = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
+        // Replace every instance of "CLEAN_GROUPS" with cleanGroup variable
+        String outputContent = inputContent.replaceAll("CLEAN_GROUPS", cleanGroup);
+
         // Replace every instance of "group" with groups variable
-        String outputContent = inputContent.replaceAll("GROUPS", groups);
+        outputContent = inputContent.replaceAll("GROUPS", groups);
 
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
@@ -65,21 +71,24 @@ public class ProcessCronJob{
         
 
         // Write out the output file for the new eventlistener file
-        Path outputFile = Paths.get("el-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("el-" + cleanGroup + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-    public String processTriggerBinding(String groups, String url, String releaseBranch, String userName, String userPassword, String browser, String seleniumTestEmailList, String cleanReleaseBranch) throws IOException {
+    public String processTriggerBinding(String groups, String url, String releaseBranch, String userName, String userPassword, String browser, String seleniumTestEmailList, String cleanReleaseBranch, String cleanGroup) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-binding-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         String inputContent = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
+        // Replace every instance of "CLEAN_GROUPS" with cleanGroup variable
+        String outputContent = inputContent.replaceAll("CLEAN_GROUPS", cleanGroup);
+        
         // Replace every instance of "GROUPS" with groups variable
-        String outputContent = inputContent.replaceAll("GROUPS", groups);
+        outputContent = inputContent.replaceAll("GROUPS", groups);
 
         //Replace every instance of "URL" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
@@ -105,21 +114,24 @@ public class ProcessCronJob{
         
 
         // Write out the output file for the new trigger binding
-        Path outputFile = Paths.get("tb-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("tb-" + cleanGroup + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-     public String processTriggerTemplate(String groups, String url, String cleanReleaseBranch) throws IOException {
+     public String processTriggerTemplate(String groups, String url, String cleanReleaseBranch, String cleanGroup) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-template-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         String inputContent = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
+        // Replace every instance of "CLEAN_GROUPS" with cleanGroup variable
+        String outputContent = inputContent.replaceAll("CLEAN_GROUPS", cleanGroup);
+        
         // Replace every instance of "group" with groups variable
-        String outputContent = inputContent.replaceAll("GROUPS", groups);
+        outputContent = inputContent.replaceAll("GROUPS", groups);
 
         //Replace every instance of "{url}" with url variable 
         outputContent = outputContent.replaceAll("URL", url);
@@ -129,7 +141,7 @@ public class ProcessCronJob{
         
 
         // Write out the output file the new trigger template 
-        Path outputFile = Paths.get("tt-" + groups + "-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("tt-" + cleanGroup + "-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();

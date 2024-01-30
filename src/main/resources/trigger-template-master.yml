@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: {{ .Values.cluster }}-selenium-GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
+  name: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
   namespace: tester-pipelines
 spec:
   params:
@@ -23,7 +23,7 @@ spec:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        generateName: {{ .Values.cluster }}-selenium-GROUPS-URL-CLEAN_RELEASE_BRANCH-confjob-tt-
+        generateName: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-confjob-tt-
       spec:
         params:
           - name: releaseBranch

@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: {{ .Values.cluster }}-selenium-GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob
+  name: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob
   namespace: tester-pipelines
 spec:
   namespaceSelector: {}
@@ -10,7 +10,7 @@ spec:
   triggers:
     - bindings:
         - kind: TriggerBinding
-          ref: {{ .Values.cluster }}-selenium-GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-binding
-      name: {{ .Values.cluster }}-selenium-GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-trigger
+          ref: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-binding
+      name: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-trigger
       template:
-        ref: {{ .Values.cluster }}-selenium-GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
+        ref: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
