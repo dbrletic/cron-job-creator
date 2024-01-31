@@ -49,6 +49,9 @@ public class CronResource {
          //Also have to remove any _ since that is not allowed in the name of a cronjob file
         cleanReleaseBranch = cleanReleaseBranch.replace("_", "-");
 
+        //Also have to remove any . since that is not allowed in the meta name of a cronjob file
+        cleanReleaseBranch = cleanReleaseBranch.replace(".", "-");
+
         String cleanGroup = data.getGroups().replace("_", "-");
         
         try{
