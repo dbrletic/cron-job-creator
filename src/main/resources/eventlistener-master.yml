@@ -10,7 +10,7 @@ spec:
   triggers:
     - bindings:
         - kind: TriggerBinding
-          ref: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-binding
-      name: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-trigger
+          ref: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-binding
+      name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-trigger
       template:
-        ref: {{ .Values.cluster }}-selenium-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
+        ref: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
