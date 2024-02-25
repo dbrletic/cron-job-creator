@@ -15,7 +15,7 @@ const serialize_form = form => JSON.stringify(
     console.log(jsonData);
     $.ajax({
       type: 'POST',
-      url: '/ffe-gatling/gatling',
+      url: '/ffe-cronjob/gatling',
       data: jsonData,
       contentType: 'application/json',
       xhrFields:{
@@ -26,7 +26,7 @@ const serialize_form = form => JSON.stringify(
         var link = document.createElement('a');
         let today = new Date().toISOString().slice(0, 10)
         link.href = window.URL.createObjectURL(response)
-        link.download = data.groups + "-" + data.url + "-" + today + ".zip";
+        link.download = "gatling-" + data.url + "-" + today + ".zip";
         document.body.appendChild(link);
         link.click();
         $('#errorMessage').empty();
