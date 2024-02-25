@@ -1,0 +1,13 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: gatling-URL-CLEAN_RELEASE_BRANCH-cronjob-binding
+  namespace: tester-pipelines
+spec:
+  params:
+    - name: releaseBranch
+      value: RELEASEBRANCH
+    - name: url
+      value: URL
+    - name: gatlingTestEmailList
+      value: GATLINGTESTEMAILLIST

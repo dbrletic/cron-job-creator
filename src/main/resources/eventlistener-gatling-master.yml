@@ -1,0 +1,16 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: gatling-URL-CLEAN_RELEASE_BRANCH-cronjob
+  namespace: tester-pipelines
+spec:
+  namespaceSelector: {}
+  resources: {}
+  serviceAccountName: pipeline
+  triggers:
+    - bindings:
+        - kind: TriggerBinding
+          ref: gatling-URL-CLEAN_RELEASE_BRANCH-cronjob-binding
+      name: gatling-URL-CLEAN_RELEASE_BRANCH-cj-trigger
+      template:
+        ref: gatling-URL-CLEAN_RELEASE_BRANCH-cronjob-tt

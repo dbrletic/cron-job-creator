@@ -15,6 +15,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 import io.fabric8.tekton.client.*;
+import io.fabric8.tekton.pipeline.v1.PipelineRun;
+import io.fabric8.tekton.pipeline.v1.PipelineRunList;
 import io.fabric8.tekton.triggers.v1alpha1.Param;
 import io.fabric8.tekton.triggers.v1alpha1.TriggerBinding;
 
@@ -55,7 +57,12 @@ public class OpenshiftResource {
         List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
 
         //Getting all the TriggerBindings
-        List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();   
+        List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();
+        
+        //Getting all the past Pipeline Runes
+        List<PipelineRun> pipelineRunList = tknClient.v1().pipelineRuns().inNamespace(namespace).list().getItems();
+
+
 
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
@@ -69,6 +76,8 @@ public class OpenshiftResource {
                 }
            }
         }
+
+        
         //Filling out the values for the linked template
         for(CronJob job : cronJobList){
             CronJobData currentJob = new CronJobData();

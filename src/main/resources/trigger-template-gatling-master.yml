@@ -1,0 +1,34 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: gatling-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
+  namespace: tester-pipelines
+spec:
+  params:
+    - description: The Release Branch
+      name: releaseBranch
+    - description: The test url
+      name: url
+    - description: The Email list for results
+      name: gatlingTestEmailList
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: gatling-URL-CLEAN_RELEASE_BRANCH-confjob-tt-
+      spec:
+        params:
+          - name: releaseBranch
+            value: $(tt.params.releaseBranch)
+          - name: url
+            value: $(tt.params.url)
+          - name: browser
+            value: $(tt.params.browser)
+          - name: gatlingTestEmailList
+            value: $(tt.params.seleniumTestEmailList)
+        pipelineRef:
+          name: {{ .Values.cluster }}-gatling-test-pipeline
+        serviceAccountName: pipeline
+        workspaces:
+          - emptyDir: {}
+            name: config-source
