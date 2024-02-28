@@ -39,7 +39,9 @@ public class OpenshiftResource {
     @CheckedTemplate
     public static class Templates {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
+        public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
     }
+
 
     @GET()
     @Path("/{namespace}/cronjobs")
@@ -62,21 +64,11 @@ public class OpenshiftResource {
         //Getting all the past Pipeline Runes
         List<PipelineRun> pipelineRunList = tknClient.v1().pipelineRuns().inNamespace(namespace).list().getItems();
 
-
-
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
 
-        //Easier to just grab the releaseBranch all once and just map them to the name of the TriggerBinding
-        for(TriggerBinding tb : tbList){
-           List<Param> params =  tb.getSpec().getParams();
-           for(Param param: params){
-                if(param.getName().equals("releaseBranch")){
-                    bindingParamsToBranch.put(tb.getMetadata().getName(), param.getValue());
-                }
-           }
-        }
-
+        //So there is not duplicate code
+        bindingParamsToBranch = bindParamsToBranch(tbList);
         
         //Filling out the values for the linked template
         for(CronJob job : cronJobList){
@@ -90,5 +82,65 @@ public class OpenshiftResource {
             cronJobs.add(currentJob);
         }
         return Templates.cronJobData(cronJobs);
+    }
+
+    @GET()
+    @Path("/{namespace}/gatling")
+    @Produces(MediaType.TEXT_HTML)
+    @Blocking //Due to the OpenShiftClient need to make this blocking
+    public TemplateInstance getCurrentGatlingCronJobs(@RestPath String namespace) throws ParseException, Exception{
+
+        // Helpful openShiftClient / kubernetes cheatsheet
+        //https://github.com/fabric8io/kubernetes-client/blob/main/doc/CHEATSHEET.md#cronjob
+        
+        //Have to use TektonClient for anything related to pipelines
+        TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
+       
+        //Getting all the CronJobs
+        List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
+
+        //Getting all the TriggerBindings
+        List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();
+        
+        //Getting all the past Pipeline Runes
+        List<PipelineRun> pipelineRunList = tknClient.v1().pipelineRuns().inNamespace(namespace).list().getItems();
+
+    
+        Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
+        List<CronJobData> cronJobs = new ArrayList<>();
+
+        //So there is no duplicate code
+        bindingParamsToBranch = bindParamsToBranch(tbList);
+
+        //Filling out the values for the linked template.
+        for(CronJob job : cronJobList){
+            CronJobData currentJob = new CronJobData();
+            currentJob.name = job.getMetadata().getName();
+            currentJob.schedule = job.getSpec().getSchedule();
+            System.out.println("Verify - " + currentJob.name + ": " + currentJob.schedule);
+            currentJob.humanReadableMsg = CronExpressionDescriptor.getDescription(currentJob.schedule);
+            String bindingName = currentJob.name + "-binding";
+            currentJob.branch = bindingParamsToBranch.get(bindingName);
+            //Only using Cronjob that start with Gatling
+            if(currentJob.name.startsWith("gatling"))
+                cronJobs.add(currentJob);
+        }
+        return Templates.gatlingCronJobData(cronJobs);
+    }
+
+    //Matchines all the releaseBranch to the correct TriggerBinding
+    private Map<String,String> bindParamsToBranch(List<TriggerBinding> tbList){
+        Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
+
+        //Easier to just grab the releaseBranch all once and just map them to the name of the TriggerBinding
+        for(TriggerBinding tb : tbList){
+            List<Param> params =  tb.getSpec().getParams();
+            for(Param param: params){
+                 if(param.getName().equals("releaseBranch")){
+                     bindingParamsToBranch.put(tb.getMetadata().getName(), param.getValue());
+                 }
+            }
+         }
+        return bindingParamsToBranch;
     }
 }
