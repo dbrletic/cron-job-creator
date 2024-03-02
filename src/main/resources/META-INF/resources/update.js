@@ -35,14 +35,15 @@ const serialize_form = form => JSON.stringify(
   
   function fetchData() {
     var xhr = new XMLHttpRequest();
-
-    cronjobName = document.getElementById('verifyConJobName').value;
+    var cronjobName = document.getElementById('verifyConJobName').value;
+    var url = "/openshift/tester-pipeline/verify/" + cronjobName;
     xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
             var response = xhr.responseText;
             document.getElementById('verifyCronJobSchedule').value = response; // Set the response in the "verifyCronJobSchedule" field
         } else {
-            console.error('Request failed with status: ' + xhr.status);
+          document.getElementById('verifyCronJobSchedule').value = "Request failed with status:" + xhr.status;
+          console.error('Request failed with status: ' + xhr.status);
         }
     };
 
@@ -50,7 +51,7 @@ const serialize_form = form => JSON.stringify(
         console.error('Request failed');
     };
 
-    xhr.open('GET', '/{tester-pipeline}/verify/${cronjobName}', true);
+    xhr.open('GET', url, true);
     xhr.send();
 }
 

@@ -156,10 +156,11 @@ public class OpenshiftResource {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/{namespace}/verify/{cronJobName}")
-    public String getCronJobSchedule(@RestPath String namespace, @RestPath String cronJobName) throws IOException, ParseException{
+    public String getCronJobSchedule(@RestPath String namespace, @RestPath String cronJobName){
         
         System.out.println("Verify Schedule for Namepace: " + namespace  +" Cronjob: " + cronJobName);
 
+        
         //Checking to see if the given CronJob is in the system
         if (openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(cronJobName) == null)
             return cronJobName + " not found";

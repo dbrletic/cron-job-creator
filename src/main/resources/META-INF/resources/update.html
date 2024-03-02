@@ -17,11 +17,8 @@
     <!-- Use any element to open the sidenav -->
     <span onclick="openNav()"><h3>Menu</h3></span>
     <div class="container" id="main">
-      <h2>Fill in the forum to update the Schedule and Check Schedule</h2>
-
-
       <div class="contrainer" id="checkCronJobSchedule">
-          <h4>Verify Current CronJob Schedule</h4>
+          <h3>Verify Current CronJob Schedule</h3>
           <div class="form-group">
             <label for="verifyConJobName">Cronjob Name:</label>
             <input type="text" class="form-control" id="verifyConJobName" placeholder="Type in the name of a CronJob to find its current Schedule">
@@ -32,23 +29,26 @@
           </div>
           <button type="submit" class="button button-outline" id="GetSchedule">Get Schedule</button>
       </div>
+    </P>
 
-      <form id="cronForum">
-        <fieldset>
-        <div class="form-group">
-          <label for="cronJobName">Cronjob Name:</label>
-          <input type="text" class="form-control" id="cronjobName">
-        </div>
-          <label for="cronJobSchedule">New Cron Job Schedule:</label>
-          <input type="text" class="form-control" id="cronJobSchedule" placeholder="Use * * * * format">
-        </div>
-        <div style="color:#43916B" id="successMessage" hidden="true"> 
-          <p>Successfully Updated Cronjob Schedule</p>
-        </div>
-        <div style="color:#CF4B2F" id="errorMessage"></div>
-      </fieldset>
-        <button type="submit" class="button button-outline">Submit</button>
-      </form>
+        <h3>Update CronJob Schedule</h3>
+        <form id="cronForum">
+          <fieldset>
+          <div class="form-group">
+            <label for="cronJobName">Cronjob Name:</label>
+            <input type="text" class="form-control" id="cronJobName">
+          </div>
+          <div>
+            <label for="cronJobSchedule">New Cron Job Schedule:</label>
+            <input type="text" class="form-control" id="cronJobSchedule" placeholder="Use * * * * format">
+          </div>
+          <div style="color:#43916B" id="successMessage" hidden="true"> 
+            <p>Successfully Updated Cronjob Schedule</p>
+          </div>
+          <div style="color:#CF4B2F" id="errorMessage"></div>
+          </fieldset>
+            <button type="submit" class="button button-outline">Submit</button>
+        </form>
     </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="/update.js"></script>
