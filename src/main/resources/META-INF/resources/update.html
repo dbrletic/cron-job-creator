@@ -17,11 +17,26 @@
     <!-- Use any element to open the sidenav -->
     <span onclick="openNav()"><h3>Menu</h3></span>
     <div class="container" id="main">
-      <h2>Type in the name of a Cronjob to update the Schedule</h2>
+      <h2>Fill in the forum to update the Schedule and Check Schedule</h2>
+
+
+      <div class="contrainer" id="checkCronJobSchedule">
+          <h4>Verify Current CronJob Schedule</h4>
+          <div class="form-group">
+            <label for="verifyConJobName">Cronjob Name:</label>
+            <input type="text" class="form-control" id="verifyConJobName" placeholder="Type in the name of a CronJob to find its current Schedule">
+          </div>
+          <div class="form-group">
+            <label for="verifyCronJobSchedule">Current CronJob Schedule</label>
+            <input type="text" class="form-control" id="verifyCronJobSchedule" >
+          </div>
+          <button type="submit" class="button button-outline" id="GetSchedule">Get Schedule</button>
+      </div>
+
       <form id="cronForum">
         <fieldset>
         <div class="form-group">
-          <label for="releaseBranch">Cronjob Name:</label>
+          <label for="cronJobName">Cronjob Name:</label>
           <input type="text" class="form-control" id="cronjobName">
         </div>
           <label for="cronJobSchedule">New Cron Job Schedule:</label>

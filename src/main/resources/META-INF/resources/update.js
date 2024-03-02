@@ -33,6 +33,30 @@ const serialize_form = form => JSON.stringify(
     });
   });
   
+  function fetchData() {
+    var xhr = new XMLHttpRequest();
+
+    cronjobName = document.getElementById('verifyConJobName').value;
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            var response = xhr.responseText;
+            document.getElementById('verifyCronJobSchedule').value = response; // Set the response in the "verifyCronJobSchedule" field
+        } else {
+            console.error('Request failed with status: ' + xhr.status);
+        }
+    };
+
+    xhr.onerror = function() {
+        console.error('Request failed');
+    };
+
+    xhr.open('GET', '/{tester-pipeline}/verify/${cronjobName}', true);
+    xhr.send();
+}
+
+  // Add event listener to the "GetSchedule" button to trigger the AJAX call
+  document.getElementById('GetSchedule').addEventListener('click', fetchData);
+  
   /* Set the width of the side navigation to 250px */
   function openNav() {
     document.getElementById("mySidenav").style.width = "250px";

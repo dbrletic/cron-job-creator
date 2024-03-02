@@ -139,7 +139,7 @@ public class OpenshiftResource {
     @Path("/{namespace}/update")
     public Response updateCronJobSchedule(CronJobUpdate data, @RestPath String namespace) throws IOException, ParseException{
         
-        System.out.println("Namepace: " + namespace  +" Cronjob: " + data.cronJobName);
+        System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.cronJobName);
 
         //Checking to see if the given CronJob is in the system
         if (openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(data.cronJobName) == null)
@@ -155,10 +155,10 @@ public class OpenshiftResource {
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
-    @Path("/{namespace}/{cronJobName}")
+    @Path("/{namespace}/verify/{cronJobName}")
     public String getCronJobSchedule(@RestPath String namespace, @RestPath String cronJobName) throws IOException, ParseException{
         
-        System.out.println("Namepace: " + namespace  +" Cronjob: " + cronJobName);
+        System.out.println("Verify Schedule for Namepace: " + namespace  +" Cronjob: " + cronJobName);
 
         //Checking to see if the given CronJob is in the system
         if (openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(cronJobName) == null)
@@ -170,9 +170,6 @@ public class OpenshiftResource {
        
     
     }
-
-
-
 
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
