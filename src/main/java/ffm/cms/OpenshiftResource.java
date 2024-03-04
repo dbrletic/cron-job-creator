@@ -66,9 +66,6 @@ public class OpenshiftResource {
         //Getting all the TriggerBindings
         List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();
         
-        //Getting all the past Pipeline Runes
-        List<PipelineRun> pipelineRunList = tknClient.v1().pipelineRuns().inNamespace(namespace).list().getItems();
-
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
 
@@ -106,11 +103,7 @@ public class OpenshiftResource {
 
         //Getting all the TriggerBindings
         List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();
-        
-        //Getting all the past Pipeline Runes
-        List<PipelineRun> pipelineRunList = tknClient.v1().pipelineRuns().inNamespace(namespace).list().getItems();
-
-    
+            
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
 
