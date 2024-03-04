@@ -13,7 +13,7 @@ const serialize_form = form => JSON.stringify(
     console.log(jsonData);
     $.ajax({
       type: 'POST',
-      url: '/ffe-cronjob/update',
+      url: '/openshift/tester-pipelines/update',
       data: jsonData,
       contentType: 'application/json',
       xhrFields:{
