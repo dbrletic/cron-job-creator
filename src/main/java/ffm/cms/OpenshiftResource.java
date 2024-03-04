@@ -155,11 +155,11 @@ public class OpenshiftResource {
 
         
         //Checking to see if the given CronJob is in the system
-        if (openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(cronJobName) == null)
+        if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(cronJobName) == null)
             return cronJobName + " not found";
         
 
-        return openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(cronJobName)
+        return openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(cronJobName)
                               .get().getSpec().getSchedule();
        
     
