@@ -20,7 +20,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 import io.fabric8.tekton.client.*;
-import io.fabric8.tekton.pipeline.v1.PipelineRun;
 import io.fabric8.tekton.triggers.v1alpha1.Param;
 import io.fabric8.tekton.triggers.v1alpha1.TriggerBinding;
 
@@ -135,7 +134,7 @@ public class OpenshiftResource {
         System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.cronJobName);
 
         //Checking to see if the given CronJob is in the system
-        if (openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(data.cronJobName) == null)
+        if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.cronJobName) == null)
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Cronjob not found").build();
 
         openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(data.cronJobName).edit(
@@ -185,7 +184,4 @@ public class OpenshiftResource {
         return bindingParamsToBranch;
     }
 
-    private void findStatusOfLastPipelineRun( List<PipelineRun> pipelineRunList, String pipleLineName){
-        
-    }
 }

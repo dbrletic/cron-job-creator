@@ -36,7 +36,7 @@ const serialize_form = form => JSON.stringify(
   function fetchData() {
     var xhr = new XMLHttpRequest();
     var cronjobName = document.getElementById('verifyConJobName').value;
-    var url = "/openshift/tester-pipeline/verify/" + cronjobName;
+    var url = "/openshift/tester-pipelines/verify/" + cronjobName;
     xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
             var response = xhr.responseText;
