@@ -139,9 +139,11 @@ public class OpenshiftResource {
             if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()) == null)
                 return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Cronjob not found").build();
 
-            openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
-                cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
-            );
+           
+           
+            io.fabric8.kubernetes.api.model.batch.v1beta1.CronJob cronJob1 = openshiftClient.batch().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
+                    cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
+                );
         } catch (KubernetesClientException e) {
             System.out.println("Reason: " + e.getMessage());
             e.printStackTrace();
