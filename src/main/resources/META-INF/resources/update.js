@@ -6,7 +6,7 @@ const serialize_form = form => JSON.stringify(
   $('#cronForum').on('submit', function(event) {
     event.preventDefault();
     const data = {
-      cronjobName: document.getElementById('cronJobName').value,
+      cronJobName: document.getElementById('cronJobName').value,
       cronJobSchedule: document.getElementById('cronJobSchedule').value
     };
     const jsonData = JSON.stringify(data);
