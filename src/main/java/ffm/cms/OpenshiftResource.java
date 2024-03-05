@@ -131,14 +131,14 @@ public class OpenshiftResource {
     @Path("/{namespace}/update")
     public Response updateCronJobSchedule(CronJobUpdate data, @RestPath String namespace) throws IOException, ParseException{
         
-        System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.cronJobName);
+        System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.getCronJobName());
 
         //Checking to see if the given CronJob is in the system
-        if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.cronJobName) == null)
+        if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()) == null)
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Cronjob not found").build();
 
-        openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(data.cronJobName).edit(
-            cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.cronJobSchedule).endSpec().build()
+        openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
+            cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
         );
         
         return Response.ok().build();
