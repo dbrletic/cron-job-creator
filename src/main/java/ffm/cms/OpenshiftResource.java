@@ -153,11 +153,14 @@ public class OpenshiftResource {
         System.out.println("Verify Schedule for Namepace: " + namespace  +" Cronjob: " + cronJobName);
 
         
-        //Checking to see if the given CronJob is in the system
-        if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(cronJobName) == null)
+        //Checking to see if the given CronJob is in the system. Catching it nicely since the client will just throw a NullPointerException
+        try{
+            openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(cronJobName);
+        }
+        catch (NullPointerException e){
             return cronJobName + " not found";
-        
-
+        }
+       
         return openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(cronJobName)
                               .get().getSpec().getSchedule();
        
