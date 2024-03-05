@@ -132,7 +132,7 @@ public class OpenshiftResource {
     @Path("/{namespace}/update")
     public Response updateCronJobSchedule(CronJobUpdate data, @RestPath String namespace) throws IOException, ParseException{
         
-        System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.getCronJobName());
+        System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.getCronJobName() + " with schedule " + data.getCronJobSchedule());
 
         //Checking to see if the given CronJob is in the system
         try {
@@ -143,7 +143,10 @@ public class OpenshiftResource {
                 cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
             );
         } catch (KubernetesClientException e) {
+            System.out.println("Reason: " + e.getMessage());
+            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()).build();
+
         }
     
         return Response.ok().build();
