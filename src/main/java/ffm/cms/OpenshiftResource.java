@@ -5,6 +5,7 @@ import ffm.cms.model.CronJobUpdate;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.api.model.batch.v1beta1.CronJobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -134,13 +135,17 @@ public class OpenshiftResource {
         System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.getCronJobName());
 
         //Checking to see if the given CronJob is in the system
-        if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()) == null)
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Cronjob not found").build();
+        try {
+            if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()) == null)
+                return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Cronjob not found").build();
 
-        openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
-            cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
-        );
-        
+            openshiftClient.batch().v1beta1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
+                cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
+            );
+        } catch (KubernetesClientException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()).build();
+        }
+    
         return Response.ok().build();
     
     }
