@@ -3,7 +3,7 @@ package ffm.cms;
 import ffm.cms.model.CronJobData;
 import ffm.cms.model.CronJobUpdate;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
-import io.fabric8.kubernetes.api.model.batch.v1beta1.CronJobBuilder;
+import io.fabric8.kubernetes.api.model.batch.v1.CronJobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -139,11 +139,12 @@ public class OpenshiftResource {
             if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()) == null)
                 return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Cronjob not found").build();
 
-           
-           
-            io.fabric8.kubernetes.api.model.batch.v1beta1.CronJob cronJob1 = openshiftClient.batch().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
+    
+            
+                CronJob  updateCronJob = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
                     cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
                 );
+                
         } catch (KubernetesClientException e) {
             System.out.println("Reason: " + e.getMessage());
             e.printStackTrace();
