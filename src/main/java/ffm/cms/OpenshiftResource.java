@@ -4,12 +4,15 @@ import ffm.cms.model.CronJobData;
 import ffm.cms.model.CronJobUpdate;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJobBuilder;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import io.smallrye.common.annotation.Blocking;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -47,6 +50,20 @@ public class OpenshiftResource {
         public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
     }
 
+    /* @PostConstruct
+    private void init(){
+
+        KubernetesClient kubernetesClient = new KubernetesClientBuilder().withConfig(
+                new ConfigBuilder()
+                .withMasterUrl("cluster_url")
+                .withUsername("my_username")
+                .withPassword("my_password")
+                .build())
+            .build();
+            openshiftClient = kubernetesClient.adapt(OpenShiftClient.class);
+        //Verifyig log in
+        
+    }*/
 
     @GET()
     @Path("/{namespace}/cronjobs")
@@ -134,17 +151,17 @@ public class OpenshiftResource {
         
         System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.getCronJobName() + " with schedule " + data.getCronJobSchedule());
 
+        //Need to create a openshift client with log in credentails
+
         //Checking to see if the given CronJob is in the system
         try {
             if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()) == null)
                 return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Cronjob not found").build();
 
-    
-            
                 CronJob  updateCronJob = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
                     cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
                 );
-                
+
         } catch (KubernetesClientException e) {
             System.out.println("Reason: " + e.getMessage());
             e.printStackTrace();
