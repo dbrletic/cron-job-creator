@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: gatling-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
+  name: gatling-URL-CLEAN_RELEASE_BRANCH-cj-tt
   namespace: tester-pipelines
 spec:
   params:

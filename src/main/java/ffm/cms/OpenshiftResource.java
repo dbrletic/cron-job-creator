@@ -136,6 +136,13 @@ public class OpenshiftResource {
             currentJob.humanReadableMsg = CronExpressionDescriptor.getDescription(currentJob.schedule);
             String bindingName = currentJob.name + "-binding";
             currentJob.branch = bindingParamsToBranch.get(bindingName);
+            //Had to change newer cronjobs to end in cj instead of cronjob. Should clean up 
+            if(currentJob.branch == "" || currentJob.branch == null){
+                //Changing the name back to the old style
+                bindingName = currentJob.name.replaceAll("cj", "cronjob") + "-binding";
+                System.out.println("Looking for: " + bindingName);
+                currentJob.branch = bindingParamsToBranch.get(bindingName); 
+            }
             //Only using Cronjob that start with Gatling
             if(currentJob.name.startsWith("gatling"))
                 cronJobs.add(currentJob);

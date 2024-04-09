@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob
+  name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj
   namespace: tester-pipelines
 spec:
   namespaceSelector: {}
@@ -10,7 +10,7 @@ spec:
   triggers:
     - bindings:
         - kind: TriggerBinding
-          ref: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-binding
+          ref: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-binding
       name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-trigger
       template:
-        ref: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cronjob-tt
+        ref: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-tt
