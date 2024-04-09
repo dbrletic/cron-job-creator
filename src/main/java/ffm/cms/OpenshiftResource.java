@@ -137,7 +137,7 @@ public class OpenshiftResource {
             String bindingName = currentJob.name + "-binding";
             currentJob.branch = bindingParamsToBranch.get(bindingName);
             //Had to change newer cronjobs to end in cj instead of cronjob. Should clean up 
-            if(currentJob.branch == "" || currentJob.branch == null){
+            if(currentJob.branch == "" || currentJob.branch == null || currentJob.branch.isBlank() || currentJob.branch.isEmpty()){
                 //Changing the name back to the old style
                 bindingName = currentJob.name.replaceAll("cj", "cronjob") + "-binding";
                 System.out.println("Looking for: " + bindingName);
