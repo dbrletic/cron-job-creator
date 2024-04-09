@@ -94,10 +94,16 @@ public class OpenshiftResource {
             CronJobData currentJob = new CronJobData();
             currentJob.name = job.getMetadata().getName();
             currentJob.schedule = job.getSpec().getSchedule();
-            System.out.println("Verify - " + currentJob.name + ": " + currentJob.schedule);
             currentJob.humanReadableMsg = CronExpressionDescriptor.getDescription(currentJob.schedule);
             String bindingName = currentJob.name + "-binding";
             currentJob.branch = bindingParamsToBranch.get(bindingName);
+            //Had to change newer cronjobs to end in cj instead of cronjob. Should clean up 
+            if(currentJob.branch == "" || currentJob.branch == null || currentJob.branch.isBlank() || currentJob.branch.isEmpty()){
+                //Changing the name back to the old style
+                bindingName = currentJob.name.replaceAll("cj", "cronjob") + "-binding";
+                System.out.println("Looking for: " + bindingName);
+                currentJob.branch = bindingParamsToBranch.get(bindingName); 
+            }
             cronJobs.add(currentJob);
         }
         return Templates.cronJobData(cronJobs);
@@ -136,7 +142,6 @@ public class OpenshiftResource {
             String bindingName = currentJob.name + "-binding";
             currentJob.branch = bindingParamsToBranch.get(bindingName);
             System.out.println("Verify - " + currentJob.name + ": " + currentJob.branch);
-           
             //Had to change newer cronjobs to end in cj instead of cronjob. Should clean up 
             if(currentJob.branch == "" || currentJob.branch == null || currentJob.branch.isBlank() || currentJob.branch.isEmpty()){
                 //Changing the name back to the old style
