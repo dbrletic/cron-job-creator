@@ -138,10 +138,10 @@ public class CronResource {
         cleanReleaseBranch = cleanReleaseBranch.replace(".", "-");
 
         try{
-            newFilesLocation.add(cronjobHandler.processGatlingCronjob(data.getCronJobSchedule(), data.getUrl(), cleanReleaseBranch));
-            newFilesLocation.add(cronjobHandler.processGatlingEventListener(data.getUrl(), cleanReleaseBranch));
-            newFilesLocation.add(cronjobHandler.processGatlingTriggerBinding(data.getUrl(), data.getReleaseBranch(), data.getGatlingTestEmailList(), cleanReleaseBranch));
-            newFilesLocation.add(cronjobHandler.processGatlingTriggerTemplate(data.getUrl(), cleanReleaseBranch));
+            newFilesLocation.add(cronjobHandler.processGatlingCronjob(data.getCronJobSchedule(), data.getUrl(), cleanReleaseBranch, data.getType()));
+            newFilesLocation.add(cronjobHandler.processGatlingEventListener(data.getUrl(), cleanReleaseBranch, data.getType()));
+            newFilesLocation.add(cronjobHandler.processGatlingTriggerBinding(data.getUrl(), data.getReleaseBranch(), data.getType(), data.getGatlingTestEmailList(), cleanReleaseBranch));
+            newFilesLocation.add(cronjobHandler.processGatlingTriggerTemplate(data.getUrl(), cleanReleaseBranch, data.getType()));
         } catch (IOException e){
             System.out.println(e.getMessage());
             System.out.println(e.getStackTrace());

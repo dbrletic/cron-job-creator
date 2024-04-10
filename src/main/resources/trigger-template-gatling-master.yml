@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: gatling-URL-CLEAN_RELEASE_BRANCH-cj-tt
+  name: gatling-TYPE-URL-CLEAN_RELEASE_BRANCH-cj-tt
   namespace: tester-pipelines
 spec:
   params:
@@ -9,21 +9,23 @@ spec:
       name: releaseBranch
     - description: The test url
       name: url
+    - description: The type of test to run
+      name: type
     - description: The Email list for results
       name: gatlingTestEmailList
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        generateName: gatling-URL-CLEAN_RELEASE_BRANCH-confjob-tt-
+        generateName: gatling-TYPE-URL-CLEAN_RELEASE_BRANCH-confjob-tt-
       spec:
         params:
           - name: releaseBranch
             value: $(tt.params.releaseBranch)
           - name: url
             value: $(tt.params.url)
-          - name: browser
-            value: $(tt.params.browser)
+          - name: type
+            value: $(tt.params.type)
           - name: gatlingTestEmailList
             value: $(tt.params.seleniumTestEmailList)
         pipelineRef:

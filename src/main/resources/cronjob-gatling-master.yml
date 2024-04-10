@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: gatling-URL-CLEAN_RELEASE_BRANCH-cronjob
+  name: gatling-TYPE-URL-CLEAN_RELEASE_BRANCH-cj
   namespace: tester-pipelines
 spec:
   schedule: "SCHEDULE" # HUMAN_READALBE
@@ -12,7 +12,7 @@ spec:
           containers:
           - name: gatling-URL-CLEAN_RELEASE_BRANCH-cj-trigger
             image: {{ .Values.baseImageRegistry }}/ffe-curl:0.0.1
-            args: ["curl", "-X", "POST", "--data", "{}", "el-gatling-URL-CLEAN_RELEASE_BRANCH-cronjob.tester-pipelines.svc.cluster.local:8080"]
+            args: ["curl", "-X", "POST", "--data", "{}", "el-gatling-URL-CLEAN_RELEASE_BRANCH-cj.tester-pipelines.svc.cluster.local:8080"]
             envFrom:
               - configMapRef:
                   name: cms-ffm-selnium-cronjob-env-ops

@@ -138,7 +138,7 @@ public class ProcessCronJob{
         return outputFile.toFile().getPath();
     }
 
-    public String processGatlingCronjob(String schedule, String url, String cleanReleaseBranch) throws IOException, ParseException {
+    public String processGatlingCronjob(String schedule, String url, String cleanReleaseBranch, String type) throws IOException, ParseException {
 
         InputStream inputStream = getClass().getResourceAsStream("/cronjob-gatling-master.yml");
       
@@ -159,13 +159,13 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
 
         // Write out the output file for the new cronjob file
-        Path outputFile = Paths.get("cj-gatling-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("cj-gatling-" +  type +"-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-    public String processGatlingEventListener(String url, String cleanReleaseBranch) throws IOException {
+    public String processGatlingEventListener(String url, String cleanReleaseBranch, String type) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/eventlistener-gatling-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -180,13 +180,13 @@ public class ProcessCronJob{
         
 
         // Write out the output file for the new eventlistener file
-        Path outputFile = Paths.get("el-gatling-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("el-gatling-" + type +"-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-    public String processGatlingTriggerTemplate(String url, String cleanReleaseBranch) throws IOException {
+    public String processGatlingTriggerTemplate(String url, String cleanReleaseBranch, String type) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-template-gatling-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -200,13 +200,13 @@ public class ProcessCronJob{
         outputContent = outputContent.replaceAll("CLEAN_RELEASE_BRANCH", cleanReleaseBranch);
         
         // Write out the output file the new trigger template 
-        Path outputFile = Paths.get("tt-gatling-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("tt-gatling-" + type +"-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
     }
 
-    public String processGatlingTriggerBinding(String url, String releaseBranch, String gatlingTestEmailList, String cleanReleaseBranch) throws IOException {
+    public String processGatlingTriggerBinding(String url, String releaseBranch, String type, String gatlingTestEmailList, String cleanReleaseBranch) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-binding-gatling-master.yml");
       
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -228,7 +228,7 @@ public class ProcessCronJob{
         
 
         // Write out the output file for the new trigger binding
-        Path outputFile = Paths.get("tb-gatling-" + url + "-" + cleanReleaseBranch + ".yaml");
+        Path outputFile = Paths.get("tb-gatling-" + type +"-" + url + "-" + cleanReleaseBranch + ".yaml");
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();

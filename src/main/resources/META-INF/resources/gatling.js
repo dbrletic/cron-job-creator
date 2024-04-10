@@ -8,6 +8,7 @@ const serialize_form = form => JSON.stringify(
     const data = {
       releaseBranch: document.getElementById('releaseBranch').value,
       url: document.getElementById('url').value,
+      type: document.getElementById('type').value,
       gatlingTestEmailList: document.getElementById('gatlingTestEmailList').value,
       cronJobSchedule: document.getElementById('cronJobSchedule').value
     };

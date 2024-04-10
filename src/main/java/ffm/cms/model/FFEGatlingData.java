@@ -5,6 +5,7 @@ public class FFEGatlingData {
 
     private String releaseBranch;
     private String url;
+    private String type;
     private String gatlingTestEmailList;
     private String cronJobSchedule;
     
@@ -27,6 +28,9 @@ public class FFEGatlingData {
     public String getUrl(){
         return url;
     }
+    public String getType(){
+        return type;
+    }
     public void setCronJobSchedule(String cronJobSchedule) {
         this.cronJobSchedule = cronJobSchedule;
     }
@@ -39,11 +43,14 @@ public class FFEGatlingData {
     public void setGatlingTestEmailList(String gatlingTestEmailList) {
         this.gatlingTestEmailList = gatlingTestEmailList;
     }
+    public void setType(String type){
+        this.type = type;
+    }
 
     @Override
     public String toString() {
-        return "Data [releaseBranch=" + releaseBranch + ", userNameFFM=" + ", url=" + url
-                + ", gatlingTestEmailList=" + gatlingTestEmailList + ", cronJobSchedule=" + cronJobSchedule + "]";
+        return "Data [releaseBranch=" + releaseBranch + ", userNameFFM=" + ", url=" + url + ", type=" + type + 
+            ", gatlingTestEmailList=" + gatlingTestEmailList + ", cronJobSchedule=" + cronJobSchedule + "]";
     }
 
     
