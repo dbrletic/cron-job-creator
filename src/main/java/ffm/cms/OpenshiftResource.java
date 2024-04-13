@@ -40,8 +40,10 @@ import java.util.Map;
 @Path("/openshift")
 public class OpenshiftResource {
 
-    @Inject
+    @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient;
+    //Creating a OpenShiftClient with logged in creditals. 
+    //private OpenShiftClient loggedInOpenShiftClient;
 
 
     @CheckedTemplate
@@ -53,6 +55,7 @@ public class OpenshiftResource {
     /* @PostConstruct
     private void init(){
 
+        System,
         KubernetesClient kubernetesClient = new KubernetesClientBuilder().withConfig(
                 new ConfigBuilder()
                 .withMasterUrl("cluster_url")
@@ -60,7 +63,7 @@ public class OpenshiftResource {
                 .withPassword("my_password")
                 .build())
             .build();
-            openshiftClient = kubernetesClient.adapt(OpenShiftClient.class);
+            loggedInOpenShiftClient = kubernetesClient.adapt(OpenShiftClient.class);
         //Verifyig log in
         
     }*/
@@ -163,6 +166,7 @@ public class OpenshiftResource {
     public Response updateCronJobSchedule(CronJobUpdate data, @RestPath String namespace) throws IOException, ParseException{
         
         System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.getCronJobName() + " with schedule " + data.getCronJobSchedule());
+        System.out.println("Current User: " + openshiftClient.currentUser());
 
         //Need to create a openshift client with log in credentails
 
@@ -192,7 +196,7 @@ public class OpenshiftResource {
     public String getCronJobSchedule(@RestPath String namespace, @RestPath String cronJobName){
         
         System.out.println("Verify Schedule for Namepace: " + namespace  +" Cronjob: " + cronJobName);
-
+        System.out.println("Current User: " + openshiftClient.currentUser());
         
         //Checking to see if the given CronJob is in the system. Catching it nicely since the client will just throw a NullPointerException
         try{
