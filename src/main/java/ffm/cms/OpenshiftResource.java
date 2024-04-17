@@ -89,7 +89,10 @@ public class OpenshiftResource {
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
 
-        //So there is no duplicate code
+        //Listing the current OpenShift user
+        System.out.println("Current User: " + openshiftClient.currentUser());
+
+        //So there is no duplicate code between Selenium and Gatling
         bindingParamsToBranch = bindParamsToBranch(tbList);
         
         //Filling out the values for the linked template
@@ -111,6 +114,7 @@ public class OpenshiftResource {
             int typeIndexNameEnd = currentJob.name.indexOf("-");
             currentJob.type=currentJob.name.substring(0, typeIndexNameEnd);
             System.out.println("Job name: " + currentJob.name + " Job Type: " + currentJob.type);
+
             cronJobs.add(currentJob);
         }
         return Templates.cronJobData(cronJobs);
@@ -139,6 +143,9 @@ public class OpenshiftResource {
 
         //So there is no duplicate code
         bindingParamsToBranch = bindParamsToBranch(tbList);
+
+        //Listing the current OpenShift user
+        System.out.println("Current User: " + openshiftClient.currentUser());
 
         //Filling out the values for the linked template.
         for(CronJob job : cronJobList){
