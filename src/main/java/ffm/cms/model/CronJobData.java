@@ -7,4 +7,5 @@ public class CronJobData {
     public String cluster;
     public String humanReadableMsg;
     public String branch;
+    public String type;
 }

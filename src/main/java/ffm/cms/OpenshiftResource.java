@@ -107,6 +107,10 @@ public class OpenshiftResource {
                 System.out.println("Looking for: " + bindingName);
                 currentJob.branch = bindingParamsToBranch.get(bindingName); 
             }
+            //Setting the type
+            int typeIndexNameEnd = currentJob.name.indexOf("-");
+            currentJob.type=currentJob.name.substring(0, typeIndexNameEnd);
+            System.out.println("Job name: " + currentJob.name + " Job Type: " + currentJob.type);
             cronJobs.add(currentJob);
         }
         return Templates.cronJobData(cronJobs);
