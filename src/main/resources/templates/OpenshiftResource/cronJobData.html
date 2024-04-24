@@ -20,7 +20,7 @@
 <span onclick="openNav()"><h3>Menu</h3></span>
 <div class="container" id="main">
     <h2>Current List of FFE Selenium CronJobs</h2>
-    {#for cronJob in cronJobs}
+   
     <h3>Rvregression</h3>
     <table>
         <thead>
@@ -31,6 +31,7 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#for cronJob in cronJobs}
         {#if cronJob.type == "rvregression"}
         <tbody>
             <tr>
@@ -41,6 +42,7 @@
             </tr>
         </tbody>
         {/if}
+        {/for}
     </table>
     <h3>Rvsmoke</h3>
     <table>
@@ -52,6 +54,7 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#for cronJob in cronJobs}
         {#if cronJob.type == "rvsmoke"}
         <tbody>
             <tr>
@@ -62,6 +65,7 @@
             </tr>
         </tbody>
         {/if}
+        {/for}
     </table>
     <h3>Serffregression</h3>
     <table>
@@ -73,6 +77,7 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#for cronJob in cronJobs}
         {#if cronJob.type == "serffregression"}
         <tbody>
             <tr>
@@ -83,6 +88,7 @@
             </tr>
         </tbody>
         {/if}
+        {/for}
     </table>
     <h3>Serffsmoke</h3>
     <table>
@@ -94,6 +100,7 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#for cronJob in cronJobs}
         {#if cronJob.type == "serffsmoke"}
         <tbody>
             <tr>
@@ -104,6 +111,7 @@
             </tr>
         </tbody>
         {/if}
+        {/for}
     </table>
     <h3>Subregression</h3>
     <table>
@@ -115,6 +123,7 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#for cronJob in cronJobs}
         {#if cronJob.type == "subregression"}
         <tbody>
             <tr>
@@ -125,6 +134,7 @@
             </tr>
         </tbody>
         {/if}
+        {/for}
     </table>
     <h3>Subsmoketest</h3>
     <table>
@@ -136,6 +146,7 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#for cronJob in cronJobs}
         {#if cronJob.type == "subsmoketest"}
         <tbody>
             <tr>
@@ -146,6 +157,7 @@
             </tr>
         </tbody>
         {/if}
+        {/for}
     </table>
     <h3>Veregression</h3>
     <table>
@@ -157,6 +169,7 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#for cronJob in cronJobs}
         {#if cronJob.type == "veregression"}
         <tbody>
             <tr>
@@ -167,6 +180,7 @@
             </tr>
         </tbody>
         {/if}
+        {/for}
     </table>
     <h3>Vesmoke</h3>
     <table>
@@ -178,6 +192,7 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#for cronJob in cronJobs}
         {#if cronJob.type == "vesmoke"}
         <tbody>
             <tr>
@@ -188,8 +203,8 @@
             </tr>
         </tbody>
         {/if}
+        {/for}
     </table>
-    {/for}
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/index.js"></script>
