@@ -20,6 +20,8 @@
 <span onclick="openNav()"><h3>Menu</h3></span>
 <div class="container" id="main">
     <h2>Current List of FFE Selenium CronJobs</h2>
+    {#for cronJob in cronJobs}
+    <h3>Rvregression</h3>
     <table>
         <thead>
             <tr>
@@ -29,17 +31,165 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        {#if cronJob.type == "rvregression"}
         <tbody>
-        {#for cronJob in cronJobs}
             <tr>
                 <td>{cronJob.name}</td>
                 <td>{cronJob.branch}</td>
                 <td>{cronJob.schedule}</td>
                 <td>{cronJob.humanReadableMsg}</td>
             </tr>
-        {/for}
         </tbody>
+        {/if}
     </table>
+    <h3>Rvsmoke</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Schedule</th>
+                <th>Schedule Description</th>
+            </tr>
+        </thead>
+        {#if cronJob.type == "rvsmoke"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.branch}</td>
+                <td>{cronJob.schedule}</td>
+                <td>{cronJob.humanReadableMsg}</td>
+            </tr>
+        </tbody>
+        {/if}
+    </table>
+    <h3>Serffregression</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Schedule</th>
+                <th>Schedule Description</th>
+            </tr>
+        </thead>
+        {#if cronJob.type == "serffregression"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.branch}</td>
+                <td>{cronJob.schedule}</td>
+                <td>{cronJob.humanReadableMsg}</td>
+            </tr>
+        </tbody>
+        {/if}
+    </table>
+    <h3>Serffsmoke</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Schedule</th>
+                <th>Schedule Description</th>
+            </tr>
+        </thead>
+        {#if cronJob.type == "serffsmoke"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.branch}</td>
+                <td>{cronJob.schedule}</td>
+                <td>{cronJob.humanReadableMsg}</td>
+            </tr>
+        </tbody>
+        {/if}
+    </table>
+    <h3>Subregression</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Schedule</th>
+                <th>Schedule Description</th>
+            </tr>
+        </thead>
+        {#if cronJob.type == "subregression"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.branch}</td>
+                <td>{cronJob.schedule}</td>
+                <td>{cronJob.humanReadableMsg}</td>
+            </tr>
+        </tbody>
+        {/if}
+    </table>
+    <h3>Subsmoketest</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Schedule</th>
+                <th>Schedule Description</th>
+            </tr>
+        </thead>
+        {#if cronJob.type == "subsmoketest"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.branch}</td>
+                <td>{cronJob.schedule}</td>
+                <td>{cronJob.humanReadableMsg}</td>
+            </tr>
+        </tbody>
+        {/if}
+    </table>
+    <h3>Veregression</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Schedule</th>
+                <th>Schedule Description</th>
+            </tr>
+        </thead>
+        {#if cronJob.type == "veregression"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.branch}</td>
+                <td>{cronJob.schedule}</td>
+                <td>{cronJob.humanReadableMsg}</td>
+            </tr>
+        </tbody>
+        {/if}
+    </table>
+    <h3>Vesmoke</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Schedule</th>
+                <th>Schedule Description</th>
+            </tr>
+        </thead>
+        {#if cronJob.type == "vesmoke"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.branch}</td>
+                <td>{cronJob.schedule}</td>
+                <td>{cronJob.humanReadableMsg}</td>
+            </tr>
+        </tbody>
+        {/if}
+    </table>
+    {/for}
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/index.js"></script>
