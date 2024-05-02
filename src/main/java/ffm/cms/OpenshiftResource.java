@@ -173,6 +173,7 @@ public class OpenshiftResource {
         return Templates.gatlingCronJobData(cronJobs);
     }
 
+    /* Removing for now
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Blocking
@@ -181,7 +182,7 @@ public class OpenshiftResource {
         
         
         return Response.ok().build();
-    }
+    }  */
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
