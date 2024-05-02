@@ -221,16 +221,21 @@ public class OpenshiftResource {
         System.out.println(list.toString());
 
         List <PipelineRun> pipleRunList = list.getItems();
+        int counter = 0;
         for(PipelineRun pipleLineRun: pipleRunList){
             String name = pipleLineRun.getMetadata().getName();
             //Two different type called Param in this file
-            List<io.fabric8.tekton.pipeline.v1beta1.Param> pipelineRunParam = pipleLineRun.getSpec().getParams();
-            System.out.println("Listing Params for " + name);
-            System.out.println(pipelineRunParam);
+            System.out.println("PipelineRun Name: " + name);
+           
             //String releaseBranch = pipleLineRun.getSpec().getParams().
             List<Condition> pipelineCondition =  pipleLineRun.getStatus().getConditions();
-            System.out.println("Listing Condition for " + name);
-            System.out.println(pipelineCondition);
+            int reasonIndex = pipelineCondition.indexOf("reason");
+            int msgIndex = pipelineCondition.indexOf("msgIndex");
+            System.out.println("Index Result: " + reasonIndex + " " + msgIndex);
+            System.out.println("Pipeline Condition: + " + pipelineCondition.get(reasonIndex) + " " + pipelineCondition.get(msgIndex));
+            counter++;
+            if(counter == 50)
+                break;
         }
         return  Templates.cronJobDashboard();
     }
