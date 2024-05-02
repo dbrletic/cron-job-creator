@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>FFE Gatling CronJob Schedule</title>
+    <title>FFE Selenium CronJob Dashboard</title>
 </head>
 <body>
 
@@ -13,33 +13,10 @@
     <a href="/openshift/tester-pipelines/dashboard">FFE Selenum Dashboard</a>
     <a href="/gatling.html">Create Gatling Cronjob Files</a>
     <a href="/">Create FFE CronJob Files</a>
-  </div>git 
+  </div>
 
 <!-- Use any element to open the sidenav -->
 <span onclick="openNav()"><h3>Menu</h3></span>
-<div class="container" id="main">
-    <h2>Current List of FFE Gatling CronJobs</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Branch</th>
-                <th>Schedule</th>
-                <th>Schedule Description</th>
-            </tr>
-        </thead>
-        <tbody>
-        {#for cronJob in cronJobs}
-            <tr>
-                <td>{cronJob.name}</td>
-                <td>{cronJob.branch}</td>
-                <td>{cronJob.schedule}</td>
-                <td>{cronJob.humanReadableMsg}</td>
-            </tr>
-        {/for}
-        </tbody>
-    </table>
-</div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/index.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">

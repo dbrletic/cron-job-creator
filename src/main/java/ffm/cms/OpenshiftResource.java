@@ -2,6 +2,7 @@ package ffm.cms;
 
 import ffm.cms.model.CronJobData;
 import ffm.cms.model.CronJobUpdate;
+import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJobBuilder;
 import io.fabric8.kubernetes.client.ConfigBuilder;
@@ -24,10 +25,15 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 import io.fabric8.tekton.client.*;
-import io.fabric8.tekton.triggers.v1alpha1.Param;
-import io.fabric8.tekton.triggers.v1alpha1.TriggerBinding;
+import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
+import io.fabric8.tekton.pipeline.v1beta1.PipelineRunList;
+import io.fabric8.tekton.triggers.v1beta1.Param;
+import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.resteasy.reactive.MultipartForm;
 import org.jboss.resteasy.reactive.RestPath;
+import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -45,11 +51,15 @@ public class OpenshiftResource {
     //Creating a OpenShiftClient with logged in creditals. 
     //private OpenShiftClient loggedInOpenShiftClient;
 
+    @ConfigProperty(name = "upload.directory")
+    String UPLOAD_DIR;
+
 
     @CheckedTemplate
     public static class Templates {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
+        public static native TemplateInstance cronJobDashboard();
     }
 
     /* @PostConstruct
@@ -84,7 +94,7 @@ public class OpenshiftResource {
         List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
 
         //Getting all the TriggerBindings
-        List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();
+        List<TriggerBinding> tbList =  tknClient.v1beta1().triggerBindings().inNamespace(namespace).list().getItems();
         
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
@@ -136,7 +146,7 @@ public class OpenshiftResource {
         List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
 
         //Getting all the TriggerBindings
-        List<TriggerBinding> tbList =  tknClient.v1alpha1().triggerBindings().inNamespace(namespace).list().getItems();
+        List<TriggerBinding> tbList =  tknClient.v1beta1().triggerBindings().inNamespace(namespace).list().getItems();
             
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
@@ -171,34 +181,13 @@ public class OpenshiftResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Blocking
     @Path("/{namespace}/update")
-    public Response updateCronJobSchedule(CronJobUpdate data, @RestPath String namespace) throws IOException, ParseException{
+    public Response updateCronJobSchedule(@RestPath MultipartFormDataInput input, @RestPath String namespace) throws IOException, ParseException{
         
-        System.out.println("Updating Namepace: " + namespace  +" Cronjob: " + data.getCronJobName() + " with schedule " + data.getCronJobSchedule());
-        System.out.println("Current User: " + openshiftClient.currentUser());
-
-        //Need to create a openshift client with log in credentails
-
-        //Checking to see if the given CronJob is in the system
-        try {
-            if (openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()) == null)
-                return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Cronjob not found").build();
-
-                CronJob  updateCronJob = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(data.getCronJobName()).edit(
-                    cj -> new CronJobBuilder(cj).editSpec().withSchedule(data.getCronJobSchedule()).endSpec().build()
-                );
-
-        } catch (KubernetesClientException e) {
-            System.out.println("Reason: " + e.getMessage());
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()).build();
-
-        }
-    
+        
         return Response.ok().build();
-    
     }
 
     @GET
@@ -222,6 +211,36 @@ public class OpenshiftResource {
        
     
     }
+
+    @GET
+    @Path("/{namespace}/dashboard")
+    @Produces(MediaType.TEXT_HTML)
+    @Blocking //Due to the OpenShiftClient need to make this blocking
+    public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
+        System.out.println("Getting all pipeline runs");
+
+        //Have to use TektonClient for anything related to pipelines
+        TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
+
+        PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
+        System.out.println("Listing Pipelines:");
+        System.out.println(list.toString());
+
+        List <PipelineRun> pipleRunList = list.getItems();
+        for(PipelineRun pipleLineRun: pipleRunList){
+            String name = pipleLineRun.getMetadata().getName();
+            //Two different type called Param in this file
+            List<io.fabric8.tekton.pipeline.v1beta1.Param> pipelineRunParam = pipleLineRun.getSpec().getParams();
+            System.out.println("Listing Params for " + name);
+            System.out.println(pipelineRunParam);
+            //String releaseBranch = pipleLineRun.getSpec().getParams().
+            List<Condition> pipelineCondition =  pipleLineRun.getStatus().getConditions();
+            System.out.println("Listing Condition for " + name);
+            System.out.println(pipelineCondition);
+        }
+        return  Templates.cronJobDashboard();
+    }
+
 
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
