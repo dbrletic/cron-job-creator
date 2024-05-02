@@ -19,8 +19,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 import io.fabric8.tekton.client.*;
-import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
-import io.fabric8.tekton.pipeline.v1beta1.PipelineRunList;
+import io.fabric8.tekton.pipeline.v1.PipelineRun;
+import io.fabric8.tekton.pipeline.v1.PipelineRunList;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 
@@ -216,9 +216,8 @@ public class OpenshiftResource {
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
 
-        PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
-        System.out.println("Listing Pipelines:");
-        System.out.println(list.toString());
+        PipelineRunList list = tknClient.v1().pipelineRuns().inNamespace(namespace).list();
+
 
         List <PipelineRun> pipleRunList = list.getItems();
         int counter = 0;
@@ -229,10 +228,9 @@ public class OpenshiftResource {
            
             //String releaseBranch = pipleLineRun.getSpec().getParams().
             List<Condition> pipelineCondition =  pipleLineRun.getStatus().getConditions();
-            int reasonIndex = pipelineCondition.indexOf("reason");
-            int msgIndex = pipelineCondition.indexOf("msgIndex");
-            System.out.println("Index Result: " + reasonIndex + " " + msgIndex);
-            System.out.println("Pipeline Condition: + " + pipelineCondition.get(reasonIndex) + " " + pipelineCondition.get(msgIndex));
+            System.out.println("Condition:");
+            System.out.println(pipelineCondition);
+            System.out.println("Pipeline Condition: + " + pipelineCondition.get(0) + " " + pipelineCondition.get(2));
             counter++;
             if(counter == 50)
                 break;
