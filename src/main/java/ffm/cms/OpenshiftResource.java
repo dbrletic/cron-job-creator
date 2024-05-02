@@ -223,14 +223,12 @@ public class OpenshiftResource {
         int counter = 0;
         for(PipelineRun pipleLineRun: pipleRunList){
             String name = pipleLineRun.getMetadata().getName();
-            //Two different type called Param in this file
             System.out.println("PipelineRun Name: " + name);
-           
             //String releaseBranch = pipleLineRun.getSpec().getParams().
-            List<Condition> pipelineCondition =  pipleLineRun.getStatus().getConditions();
-            System.out.println("Condition:");
-            System.out.println(pipelineCondition);
-            System.out.println("Pipeline Condition: + " + pipelineCondition.get(0) + " " + pipelineCondition.get(2));
+            List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
+            //There should only be one
+            Condition pipelineCondition = pipelineConditions.get(0);
+            System.out.println("Pipeline Condition: + " + pipelineCondition.getStatus() + " " + pipelineCondition.getMessage());
             counter++;
             if(counter == 50)
                 break;
