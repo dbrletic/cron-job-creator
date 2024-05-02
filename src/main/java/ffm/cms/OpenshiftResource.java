@@ -228,6 +228,7 @@ public class OpenshiftResource {
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
             //There should only be one
             Condition pipelineCondition = pipelineConditions.get(0);
+            System.out.println("Condition: " + pipelineCondition);
             System.out.println("Pipeline Condition: + " + pipelineCondition.getStatus() + " " + pipelineCondition.getMessage());
             counter++;
             if(counter == 50)
