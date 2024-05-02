@@ -19,8 +19,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 import io.fabric8.tekton.client.*;
-import io.fabric8.tekton.pipeline.v1.PipelineRun;
-import io.fabric8.tekton.pipeline.v1.PipelineRunList;
+import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
+import io.fabric8.tekton.pipeline.v1beta1.PipelineRunList;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 
@@ -216,7 +216,7 @@ public class OpenshiftResource {
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
 
-        PipelineRunList list = tknClient.v1().pipelineRuns().inNamespace(namespace).list();
+        PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
 
 
         List <PipelineRun> pipleRunList = list.getItems();
