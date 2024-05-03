@@ -17,7 +17,7 @@ spec:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        generateName: gatling-TYPE-URL-CLEAN_RELEASE_BRANCH-confjob-tt-
+        generateName: gatling-TYPE-URL-CLEAN_RELEASE_BRANCH-cronjob-tt-
       spec:
         params:
           - name: releaseBranch
