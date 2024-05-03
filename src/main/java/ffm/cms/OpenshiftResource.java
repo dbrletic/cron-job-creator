@@ -222,7 +222,7 @@ public class OpenshiftResource {
             CronJobDashboardData data = new CronJobDashboardData(); 
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
             System.out.println(pipleLineRun.getMetadata().getName() + " : " + removeStart);
-            if(removeStart != -1)
+            if(removeStart != -1) //Manually run pipelines will have not have -tt-**** on the end
                 data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             else
                 data.name = pipleLineRun.getMetadata().getName();
@@ -231,16 +231,17 @@ public class OpenshiftResource {
         
             //There should only be one pipeline conditions. No idea why it was made as a list
             Condition pipelineCondition = pipelineConditions.get(0);
+            
             int typeIndexNameEnd = data.name.indexOf("-");
             data.msg = pipelineCondition.getMessage();
             data.result = pipelineCondition.getReason();
             data.type = data.name.substring(0,typeIndexNameEnd);
             data.lastTransitionTime = pipelineCondition.getLastTransitionTime();
             System.out.println(pipelineCondition);
-            dashboardData.add(data);
-            /*limitCounter++;
-            if(limitCounter == 50) //Only getting the last 50 pipeline runs
-                break; */
+            
+            if(removeStart != -1) //Only adding in pipeline run data that were created from cronjobs. 
+                dashboardData.add(data);
+            
         }
         return  Templates.cronJobDashboard(dashboardData);
     }
