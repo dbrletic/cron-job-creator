@@ -222,7 +222,7 @@ public class OpenshiftResource {
             CronJobDashboardData data = new CronJobDashboardData(); 
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
             System.out.println(pipleLineRun.getMetadata().getName() + " : " + removeStart);
-            if(removeStart != 0)
+            if(removeStart != -1)
                 data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             else
                 data.name = pipleLineRun.getMetadata().getName();
