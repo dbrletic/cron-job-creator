@@ -17,6 +17,181 @@
 
 <!-- Use any element to open the sidenav -->
 <span onclick="openNav()"><h3>Menu</h3></span>
+<div class="container" id="main">
+    <h2>Current List of FFE Selenium Pipeline Runs</h2>
+   
+    <h3>Rvregression</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.type == "rvregression"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
+    <h3>Rvsmoke</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.type == "rvsmoke"}
+        <tbody>
+             <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
+    <h3>Serffregression</h3>
+    <table>
+        <thead>
+             <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.type == "serffregression"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
+    <h3>Serffsmoke</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.type == "serffsmoke"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
+    <h3>Subregression</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.type == "subregression"}
+        <tbody>
+            <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
+    <h3>Subsmoketest</h3>
+    <table>
+        <thead>
+             <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.type == "subsmoketest"}
+        <tbody>
+             <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
+    <h3>Veregression</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.type == "veregression"}
+        <tbody>
+             <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
+    <h3>Vesmoke</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.type == "vesmoke"}
+        <tbody>
+             <tr>
+                <td>{cronJob.name}</td>
+                <td>{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
+</div>
+
+
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/index.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
