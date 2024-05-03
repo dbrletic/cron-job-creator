@@ -8,4 +8,8 @@ public class CronJobDashboardData {
     public String type;
     public String msg;
     public String result;
+
+    public String toString(){
+        return "[name: " + name + " result: " + result + " type: " + type + " msg: " + "]";
+    }
 }

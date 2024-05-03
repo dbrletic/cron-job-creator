@@ -1,5 +1,6 @@
 package ffm.cms;
 
+import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
@@ -52,7 +53,7 @@ public class OpenshiftResource {
     public static class Templates {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
-        public static native TemplateInstance cronJobDashboard();
+        public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs);
     }
 
     /* @PostConstruct
@@ -158,12 +159,12 @@ public class OpenshiftResource {
             currentJob.humanReadableMsg = CronExpressionDescriptor.getDescription(currentJob.schedule);
             String bindingName = currentJob.name + "-binding";
             currentJob.branch = bindingParamsToBranch.get(bindingName);
-            System.out.println("Verify - " + currentJob.name + ": " + currentJob.branch);
+            //System.out.println("Verify - " + currentJob.name + ": " + currentJob.branch);
             //Had to change newer cronjobs to end in cj instead of cronjob. Should clean up 
             if(currentJob.branch == "" || currentJob.branch == null || currentJob.branch.isBlank() || currentJob.branch.isEmpty()){
                 //Changing the name back to the old style
                 bindingName = currentJob.name.replaceAll("cj", "cronjob") + "-binding";
-                System.out.println("Looking for: " + bindingName);
+                //System.out.println("Looking for: " + bindingName);
                 currentJob.branch = bindingParamsToBranch.get(bindingName); 
             }
             //Only using Cronjob that start with Gatling
@@ -211,6 +212,7 @@ public class OpenshiftResource {
     @Produces(MediaType.TEXT_HTML)
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
+        List<CronJobDashboardData> dashboardData = new ArrayList<>();
         System.out.println("Getting all pipeline runs");
 
         //Have to use TektonClient for anything related to pipelines
@@ -218,23 +220,28 @@ public class OpenshiftResource {
 
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
 
-
+        //Getting all the pipelineRuns
         List <PipelineRun> pipleRunList = list.getItems();
-        int counter = 0;
+        int limitCounter = 0;
+
         for(PipelineRun pipleLineRun: pipleRunList){
-            String name = pipleLineRun.getMetadata().getName();
-            System.out.println("PipelineRun Name: " + name);
-            //String releaseBranch = pipleLineRun.getSpec().getParams().
+            CronJobDashboardData data = new CronJobDashboardData(); 
+            data.name= pipleLineRun.getMetadata().getName();
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
-            //There should only be one
+
+            //There should only be one pipeline conditions. No idea why it was made as a list
             Condition pipelineCondition = pipelineConditions.get(0);
-            System.out.println("Condition: " + pipelineCondition);
-            System.out.println("Pipeline Condition: + " + pipelineCondition.getStatus() + " " + pipelineCondition.getMessage());
-            counter++;
-            if(counter == 50)
+            int typeIndexNameEnd = data.name.indexOf("-");
+            data.msg = pipelineCondition.getMessage();
+            data.result = pipelineCondition.getReason();
+            data.type = data.name.substring(0,typeIndexNameEnd);
+            System.out.println(data.toString());
+            dashboardData.add(data);
+            limitCounter++;
+            if(limitCounter == 50) //Only getting the last 50 pipeline runs
                 break;
         }
-        return  Templates.cronJobDashboard();
+        return  Templates.cronJobDashboard(dashboardData);
     }
 
 
