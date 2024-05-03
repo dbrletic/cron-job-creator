@@ -221,7 +221,10 @@ public class OpenshiftResource {
         for(PipelineRun pipleLineRun: pipleRunList){
             CronJobDashboardData data = new CronJobDashboardData(); 
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
-            data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
+            if(removeStart != 0)
+                data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
+            else
+                data.name = pipleLineRun.getMetadata().getName();
 
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
         
