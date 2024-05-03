@@ -231,13 +231,13 @@ public class OpenshiftResource {
         
             //There should only be one pipeline conditions. No idea why it was made as a list
             Condition pipelineCondition = pipelineConditions.get(0);
-            
+
             int typeIndexNameEnd = data.name.indexOf("-");
             data.msg = pipelineCondition.getMessage();
             data.result = pipelineCondition.getReason();
             data.type = data.name.substring(0,typeIndexNameEnd);
             data.lastTransitionTime = pipelineCondition.getLastTransitionTime();
-            System.out.println(pipelineCondition);
+            data.color = getColorStatus(data.result);
             
             if(removeStart != -1) //Only adding in pipeline run data that were created from cronjobs. 
                 dashboardData.add(data);
@@ -265,6 +265,25 @@ public class OpenshiftResource {
             }
          }
         return bindingParamsToBranch;
+    }
+
+    /**
+     * Sets the color to use as the background of the Results cell
+     * @param result The result status of the pipeline run
+     * @return The color to use 
+     */
+    private String getColorStatus(String result){
+
+        switch (result) {
+            case "Succeeded":
+                return "green";
+            case "Running":
+                return "yellow";
+            case "Failed":
+                return "red";
+            default:
+                return "white";
+        }
     }
 
 }
