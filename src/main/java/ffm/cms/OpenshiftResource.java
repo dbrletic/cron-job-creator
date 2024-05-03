@@ -5,6 +5,7 @@ import ffm.cms.model.CronJobData;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -184,11 +185,11 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
+        
         System.out.println("Getting all pipeline runs on OpenShift: " + openshiftClient.getOpenshiftUrl());
 
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
-
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
 
         //Getting all the pipelineRuns
