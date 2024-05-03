@@ -221,7 +221,7 @@ public class OpenshiftResource {
 
         for(PipelineRun pipleLineRun: pipleRunList){
             CronJobDashboardData data = new CronJobDashboardData(); 
-            data.name= pipleLineRun.getMetadata().getName();
+            data.name= pipleLineRun.getMetadata().getName().replaceAll("-tt-\\*{4}$", "");
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
         
             //There should only be one pipeline conditions. No idea why it was made as a list
