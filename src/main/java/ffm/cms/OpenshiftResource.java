@@ -26,6 +26,9 @@ import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestPath;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,22 +53,6 @@ public class OpenshiftResource {
         public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs);
     }
-
-    /* @PostConstruct
-    private void init(){
-
-        System,
-        KubernetesClient kubernetesClient = new KubernetesClientBuilder().withConfig(
-                new ConfigBuilder()
-                .withMasterUrl("cluster_url")
-                .withUsername("my_username")
-                .withPassword("my_password")
-                .build())
-            .build();
-            loggedInOpenShiftClient = kubernetesClient.adapt(OpenShiftClient.class);
-        //Verifyig log in
-        
-    }*/
 
     @GET()
     @Path("/{namespace}/cronjobs")
@@ -169,17 +156,6 @@ public class OpenshiftResource {
         return Templates.gatlingCronJobData(cronJobs);
     }
 
-    /* Removing for now
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Blocking
-    @Path("/{namespace}/update")
-    public Response updateCronJobSchedule(@RestPath MultipartFormDataInput input, @RestPath String namespace) throws IOException, ParseException{
-        
-        
-        return Response.ok().build();
-    }  */
-
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/{namespace}/verify/{cronJobName}")
@@ -236,7 +212,7 @@ public class OpenshiftResource {
             data.msg = pipelineCondition.getMessage();
             data.result = pipelineCondition.getReason();
             data.type = data.name.substring(0,typeIndexNameEnd);
-            data.lastTransitionTime = pipelineCondition.getLastTransitionTime();
+            data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
             data.color = getColorStatus(data.result);
             
             if(removeStart != -1) //Only adding in pipeline run data that were created from cronjobs. 
@@ -284,6 +260,24 @@ public class OpenshiftResource {
             default:
                 return "white";
         }
+    }
+
+    /**
+     * Creates a easer to read date from the last Transaction time 
+     * @param date The date to be converted
+     * @return A easer to read date
+     */
+    private String createReadableData(String date){
+
+        // Parse the string to an Instant object
+        Instant instant = Instant.parse(date);
+
+        // Create a DateTimeFormatter with the desired format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss z dd-MM-yyyy").withZone(ZoneId.systemDefault());
+
+        // Format the Instant to a readable string
+        return formatter.format(instant);
+
     }
 
 }
