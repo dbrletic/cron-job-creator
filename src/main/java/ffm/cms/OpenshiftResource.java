@@ -25,6 +25,8 @@ import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestPath;
+
+import java.net.URL;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -44,8 +46,9 @@ public class OpenshiftResource {
     //private OpenShiftClient loggedInOpenShiftClient;
 
     @ConfigProperty(name = "upload.directory")
-    String UPLOAD_DIR;
+    private String UPLOAD_DIR;
 
+    private URL OPENSHIFT_URL_BASE = openshiftClient.getMasterUrl();
 
     @CheckedTemplate
     public static class Templates {
@@ -184,7 +187,7 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
-        System.out.println("Getting all pipeline runs");
+        System.out.println("Getting all pipeline runs on OpenShift: " + openshiftClient.getOpenshiftUrl());
 
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
