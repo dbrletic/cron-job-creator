@@ -203,10 +203,14 @@ public class OpenshiftResource {
             else
                 data.name = pipleLineRun.getMetadata().getName();
 
+            //Removing tailing cronjob from name to make it cleaner    
+            data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
+            data.name = data.name.replaceAll("-cronjob","");
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
         
             //There should only be one pipeline conditions. No idea why it was made as a list
             Condition pipelineCondition = pipelineConditions.get(0);
+
 
             int typeIndexNameEnd = data.name.indexOf("-");
             data.msg = pipelineCondition.getMessage();
@@ -215,7 +219,7 @@ public class OpenshiftResource {
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
             data.color = getColorStatus(data.result);
             
-            if(removeStart != -1) //Only adding in pipeline run data that were created from cronjobs. 
+            if(removeStart != -1) //Only adding in pipeline run data that were created from cronjobs. Manually runs dont have the -cronjob-tt-**** on the end
                 dashboardData.add(data);
             
         }
