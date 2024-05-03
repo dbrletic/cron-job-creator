@@ -273,7 +273,7 @@ public class OpenshiftResource {
         Instant instant = Instant.parse(date);
 
         // Create a DateTimeFormatter with the desired format
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss z dd-MM-yyyy").withZone(ZoneId.systemDefault());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm z MM-dd-yyyy").withZone(ZoneId.systemDefault());
 
         // Format the Instant to a readable string
         return formatter.format(instant);
