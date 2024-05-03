@@ -230,7 +230,8 @@ public class OpenshiftResource {
             data.msg = pipelineCondition.getMessage();
             data.result = pipelineCondition.getReason();
             data.type = data.name.substring(0,typeIndexNameEnd);
-            System.out.println(data.toString());
+            
+            System.out.println(pipelineCondition);
             dashboardData.add(data);
             limitCounter++;
             if(limitCounter == 50) //Only getting the last 50 pipeline runs
