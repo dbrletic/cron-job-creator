@@ -26,7 +26,6 @@ import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestPath;
 
-import java.net.URL;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -47,8 +46,6 @@ public class OpenshiftResource {
 
     @ConfigProperty(name = "upload.directory")
     private String UPLOAD_DIR;
-
-    private URL OPENSHIFT_URL_BASE = openshiftClient.getMasterUrl();
 
     @CheckedTemplate
     public static class Templates {
