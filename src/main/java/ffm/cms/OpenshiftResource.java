@@ -276,11 +276,11 @@ public class OpenshiftResource {
 
         switch (result) {
             case "Succeeded":
-                return "green";
+                return "#69ff33"; // Green
             case "Running":
-                return "yellow";
+                return "#f6ff7a"; // Yellow
             case "Failed":
-                return "red";
+                return "#ff4763"; // Red
             default:
                 return "white";
         }
