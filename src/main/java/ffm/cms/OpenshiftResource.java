@@ -186,7 +186,8 @@ public class OpenshiftResource {
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         
-        System.out.println("Getting all pipeline runs on OpenShift: " + openshiftClient.getOpenshiftUrl());
+        System.out.println("Getting all pipeline runs on OpenShift: ");
+        System.out.println(openshiftClient);
 
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
