@@ -211,33 +211,19 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/index.js"></script>
 <script>
-export default {
-  data() {
-    return {
-      cronJob: {
-        result: 'Succeeded'
-      }
-    }
-  },
-  methods: {
-    getStatusColor(status) {
+  function getStatusColor(status) {
       switch (status) {
         case 'Succeeded':
-          return 'green'
+          return 'green';
         case 'Running':
-          return 'yellow'
+          return 'yellow';
         case 'Failed':
-          return 'red'
+          return 'red';
         default:
-          return 'white'
+          return 'white';
       }
     }
-  }
-}
 </script>
-
-
-
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
