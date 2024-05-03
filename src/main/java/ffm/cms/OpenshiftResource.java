@@ -223,7 +223,7 @@ public class OpenshiftResource {
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name= pipleLineRun.getMetadata().getName();
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
-
+        
             //There should only be one pipeline conditions. No idea why it was made as a list
             Condition pipelineCondition = pipelineConditions.get(0);
             int typeIndexNameEnd = data.name.indexOf("-");
@@ -233,9 +233,9 @@ public class OpenshiftResource {
             
             System.out.println(pipelineCondition);
             dashboardData.add(data);
-            limitCounter++;
+            /*limitCounter++;
             if(limitCounter == 50) //Only getting the last 50 pipeline runs
-                break;
+                break; */
         }
         return  Templates.cronJobDashboard(dashboardData);
     }
