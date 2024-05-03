@@ -35,7 +35,7 @@
         <tbody>
             <tr>
                 <td>{cronJob.name}</td>
-                <td :style="{ backgroundColor: getStatusColor(cronJob.result) }">{cronJob.result}</td>
+                <td style="{ backgroundColor: getStatusColor(cronJob.result) }">{cronJob.result}</td>
                 <td >{cronJob.msg}</td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
