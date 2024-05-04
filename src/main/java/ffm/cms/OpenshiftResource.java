@@ -45,11 +45,12 @@ public class OpenshiftResource {
 
     @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient;
-    //Creating a OpenShiftClient with logged in creditals. 
-    //private OpenShiftClient loggedInOpenShiftClient;
 
     @ConfigProperty(name = "upload.directory")
     private String UPLOAD_DIR;
+
+    @ConfigProperty(name = "current.host")
+    private String OC_HOST_URL;
 
     @CheckedTemplate
     public static class Templates {
@@ -188,9 +189,7 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
-        String openshiftConsoleURL = openshiftClient.routes().inNamespace("openshift-console").withName("console-custom").get().getSpec().getHost();
-
-        System.out.println(openshiftConsoleURL);
+        
         System.out.println("Getting all pipeline runs on OpenShift: ");
 
         //Have to use TektonClient for anything related to pipelines
@@ -247,7 +246,7 @@ public class OpenshiftResource {
             Condition pipelineCondition = pipelineConditions.get(0);
 
             //Creating link to piplerun logs
-            data.runLink = "https://" + openshiftConsoleURL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
+            data.runLink = OC_HOST_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
             
             int typeIndexNameEnd = data.name.indexOf("-");
