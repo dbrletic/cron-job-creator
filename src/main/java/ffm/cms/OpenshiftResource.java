@@ -3,6 +3,7 @@ package ffm.cms;
 import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;
 import io.fabric8.knative.internal.pkg.apis.Condition;
+import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -18,8 +19,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 import io.fabric8.tekton.client.*;
+import io.fabric8.tekton.pipeline.v1beta1.TaskRunList;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRunList;
+import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 
@@ -34,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 @Path("/openshift")
@@ -189,16 +193,40 @@ public class OpenshiftResource {
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         
         System.out.println("Getting all pipeline runs on OpenShift: ");
-        System.out.println(openshiftClient);
 
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
+        TaskRunList taskRunList = tknClient.v1beta1().taskRuns().inNamespace(namespace).list();
 
+        System.out.println("Listing TaskRuns");
+        List <TaskRun> taskRuns = taskRunList.getItems();
+        /**
+         * Get all the TaskRuns
+         * Get the UUID of the PipelineRun 
+         * Check if the UUID Of the  PipelineRUn is the owner, if so get the podName
+         * get the logs using the podname
+        */ 
+
+        
+       
         //Getting all the pipelineRuns
         List <PipelineRun> pipleRunList = list.getItems();
-
+        System.out.println("Listing PipelineRuns");
         for(PipelineRun pipleLineRun: pipleRunList){
+            String runPod = "";
+            String runUUID = pipleLineRun.getMetadata().getUid();
+
+            for(TaskRun taskRun : taskRuns){
+                if(taskRun.getOwnerReferenceFor(runUUID).isPresent()){
+                    runPod = taskRun.getStatus().getPodName();                 
+                }
+            }
+
+            System.out.println(pipleLineRun.getMetadata().getName() + "run on pod " + runPod);
+            
+            String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).withPrettyOutput().getLog();
+
             CronJobDashboardData data = new CronJobDashboardData(); 
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
             System.out.println(pipleLineRun.getMetadata().getName() + " : " + removeStart);
@@ -227,6 +255,7 @@ public class OpenshiftResource {
             
             if(removeStart != -1) //Only adding in pipeline run data that were created from cronjobs. Manually runs dont have the -cronjob-tt-**** on the end
                 dashboardData.add(data);
+            System.out.println("-----------------");
             
         }
         return  Templates.cronJobDashboard(dashboardData);
