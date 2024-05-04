@@ -222,7 +222,8 @@ public class OpenshiftResource {
 
             System.out.println(pipleLineRun.getMetadata().getName() + "run on pod " + runPod);
             
-            String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).withPrettyOutput().getLog();
+            String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
+            System.out.println("Got logs, size is: " + runLogs.length());
 
             CronJobDashboardData data = new CronJobDashboardData(); 
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
