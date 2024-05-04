@@ -233,12 +233,12 @@ public class OpenshiftResource {
                 data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
                 String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
                 System.out.println("Got logs, size is: " + runLogs.length());
+                int resultStart = runLogs.indexOf("[INFO] Results:");
+                int resultEnd = runLogs.indexOf("Skipped: ") + 2; //Getting the numbers of items skipped
+                System.out.println("Msg: " + runLogs.substring(resultStart, resultEnd));
             }
             else
                 data.name = pipleLineRun.getMetadata().getName();
-
-
-
 
 
             //Removing tailing cronjob from name to make it cleaner    
