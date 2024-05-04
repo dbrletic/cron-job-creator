@@ -48,9 +48,6 @@ public class OpenshiftResource {
     //Creating a OpenShiftClient with logged in creditals. 
     //private OpenShiftClient loggedInOpenShiftClient;
 
-    @ConfigProperty(name = "current.host")
-    private String CURRENT_HOST;
-
     @ConfigProperty(name = "upload.directory")
     private String UPLOAD_DIR;
 
@@ -244,7 +241,7 @@ public class OpenshiftResource {
             Condition pipelineCondition = pipelineConditions.get(0);
 
             //Creating link to piplerun logs
-            data.runLink = CURRENT_HOST + "k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
+            data.runLink = openshiftClient.getOpenshiftUrl() + "k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
             int typeIndexNameEnd = data.name.indexOf("-");
             data.msg = pipelineCondition.getMessage();
