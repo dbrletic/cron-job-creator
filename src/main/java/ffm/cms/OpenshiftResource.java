@@ -45,7 +45,7 @@ public class OpenshiftResource {
     //private OpenShiftClient loggedInOpenShiftClient;
 
     @ConfigProperty(name = "current.host")
-    String CURRENT_HOST;
+    private String CURRENT_HOST;
 
     @ConfigProperty(name = "upload.directory")
     private String UPLOAD_DIR;
