@@ -188,7 +188,8 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
-        String openshiftConsoleURL = openshiftClient.routes().withName("openshift-console").get().getSpec().getPath();
+        String openshiftConsoleURL = openshiftClient.routes().inNamespace("openshift-console").withName("console-custom").get().getSpec().getHost();
+
         System.out.println(openshiftConsoleURL);
         System.out.println("Getting all pipeline runs on OpenShift: ");
 
@@ -246,7 +247,7 @@ public class OpenshiftResource {
             Condition pipelineCondition = pipelineConditions.get(0);
 
             //Creating link to piplerun logs
-            data.runLink = openshiftConsoleURL + "k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
+            data.runLink = "https://" + openshiftConsoleURL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
             
             int typeIndexNameEnd = data.name.indexOf("-");
