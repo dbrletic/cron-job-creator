@@ -235,6 +235,7 @@ public class OpenshiftResource {
                 System.out.println("Got logs, size is: " + runLogs.length());
                 int resultStart = runLogs.indexOf("[INFO] Results:");
                 int resultEnd = runLogs.indexOf("Skipped: ") + 2; //Getting the numbers of items skipped
+                System.out.println("resultStart: " + resultStart + " Result End: " + resultEnd);
                 System.out.println("Msg: " + runLogs.substring(resultStart, resultEnd));
             }
             else
