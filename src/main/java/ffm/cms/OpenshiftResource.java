@@ -5,7 +5,6 @@ import ffm.cms.model.CronJobData;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -44,6 +43,9 @@ public class OpenshiftResource {
     private OpenShiftClient openshiftClient;
     //Creating a OpenShiftClient with logged in creditals. 
     //private OpenShiftClient loggedInOpenShiftClient;
+
+    @ConfigProperty(name = "current.host")
+    String CURRENT_HOST;
 
     @ConfigProperty(name = "upload.directory")
     private String UPLOAD_DIR;
@@ -213,6 +215,8 @@ public class OpenshiftResource {
             //There should only be one pipeline conditions. No idea why it was made as a list
             Condition pipelineCondition = pipelineConditions.get(0);
 
+            //Creating link to piplerun logs
+            data.runLink = CURRENT_HOST + "k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
             int typeIndexNameEnd = data.name.indexOf("-");
             data.msg = pipelineCondition.getMessage();

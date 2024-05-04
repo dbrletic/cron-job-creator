@@ -10,6 +10,7 @@ public class CronJobDashboardData {
     public String result;
     public String lastTransitionTime;
     public String color;
+    public String runLink;
 
     public String toString(){
         return "[name: " + name + " result: " + result + " type: " + type + " msg: " + msg +  " LastTransitionTime: "+ lastTransitionTime +"]";
