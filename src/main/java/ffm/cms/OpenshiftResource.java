@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ApplicationScoped
 @Path("/openshift")
@@ -233,10 +235,13 @@ public class OpenshiftResource {
                 data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
                 String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
                 System.out.println("Got logs, size is: " + runLogs.length());
-                int resultStart = runLogs.indexOf("[INFO] Results:");
-                int resultEnd = runLogs.indexOf("[INFO] BUILD SUCCESS");
-                if(resultStart != -1 && resultEnd != -1)
+                Pattern pattern = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
+                Matcher matcher = pattern.matcher(runLogs);
+                if(matcher.find()){
+                    int resultStart = matcher.start();
+                    int resultEnd = matcher.end();
                     System.out.println("Msg: " + runLogs.substring(resultStart, resultEnd));
+                }            
             }
             else
                 data.name = pipleLineRun.getMetadata().getName();
