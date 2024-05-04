@@ -234,9 +234,7 @@ public class OpenshiftResource {
                 String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
                 System.out.println("Got logs, size is: " + runLogs.length());
                 int resultStart = runLogs.indexOf("[INFO] Results:");
-                int resultEnd = runLogs.indexOf("[INFO] Finished at:") - 19; //Removing the [INFO] Finished at:
-                System.out.println("resultStart: " + resultStart + " Result End: " + resultEnd);
-                System.out.println("Msg: " + runLogs.substring(resultStart, resultEnd));
+                System.out.println("Msg: " + runLogs.substring(resultStart, resultStart + 40));
             }
             else
                 data.name = pipleLineRun.getMetadata().getName();
