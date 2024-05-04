@@ -182,7 +182,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "veregression"}
+        {#if cronJob.type == "rvregression"}
         <tbody>
              <tr>
                 <td>{cronJob.name}</td>
@@ -207,7 +207,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "vesmoke"}
+        {#if cronJob.type == "rvsmoke"}
         <tbody>
              <tr>
                 <td>{cronJob.name}</td>
