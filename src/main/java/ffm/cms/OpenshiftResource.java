@@ -208,7 +208,7 @@ public class OpenshiftResource {
             String runPod = "";
             String runUUID = pipleLineRun.getMetadata().getUid();
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
-
+            System.out.println("Checking pipeline: " + pipleLineRun.getMetadata().getName());
             if(removeStart == -1) //Manually run pipelines will have not have -tt-**** on the end so we can skip them. 
                 break;
 
