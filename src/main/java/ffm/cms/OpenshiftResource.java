@@ -3,10 +3,8 @@ package ffm.cms;
 import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;
 import io.fabric8.knative.internal.pkg.apis.Condition;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -38,7 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -191,7 +188,8 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
-        
+        String openshiftConsoleURL = openshiftClient.routes().withName("openshift-console").get().getSpec().getPath();
+        System.out.println(openshiftConsoleURL);
         System.out.println("Getting all pipeline runs on OpenShift: ");
 
         //Have to use TektonClient for anything related to pipelines
@@ -248,8 +246,9 @@ public class OpenshiftResource {
             Condition pipelineCondition = pipelineConditions.get(0);
 
             //Creating link to piplerun logs
-            data.runLink = openshiftClient.getOpenshiftUrl() + "k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
+            data.runLink = openshiftConsoleURL + "k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
+            
             int typeIndexNameEnd = data.name.indexOf("-");
             data.result = pipelineCondition.getReason();
             data.type = data.name.substring(0,typeIndexNameEnd);
