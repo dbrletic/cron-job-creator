@@ -6,6 +6,7 @@ import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -198,12 +199,9 @@ public class OpenshiftResource {
 
         System.out.println("Listing TaskRuns");
         List <TaskRun> taskRuns = taskRunList.getItems();
-        /**
-         * Get all the TaskRuns
-         * Get the UUID of the PipelineRun 
-         * Check if the UUID Of the  PipelineRUn is the owner, if so get the podName
-         * get the logs using the podname
-        */ 
+        
+        
+        
 
         
        
@@ -214,6 +212,12 @@ public class OpenshiftResource {
             String runPod = "";
             String runUUID = pipleLineRun.getMetadata().getUid();
 
+            /**
+            * Get all the TaskRuns
+            * Get the UUID of the PipelineRun 
+            * Check if the UUID Of the  PipelineRun is the same of the current taskRun, if so get the podName of that TaskRun
+            * Get the logs using the podname while using the specific step you want as the container
+            */ 
             for(TaskRun taskRun : taskRuns){
                 if(taskRun.getOwnerReferenceFor(runUUID).isPresent()){
                     runPod = taskRun.getStatus().getPodName();                 
@@ -222,16 +226,20 @@ public class OpenshiftResource {
 
             System.out.println(pipleLineRun.getMetadata().getName() + "run on pod " + runPod);
             
-            String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
-            System.out.println("Got logs, size is: " + runLogs.length());
-
+          
             CronJobDashboardData data = new CronJobDashboardData(); 
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
-            System.out.println(pipleLineRun.getMetadata().getName() + " : " + removeStart);
-            if(removeStart != -1) //Manually run pipelines will have not have -tt-**** on the end
+            if(removeStart != -1){ //Manually run pipelines will have not have -tt-**** on the end
                 data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
+                String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
+                System.out.println("Got logs, size is: " + runLogs.length());
+            }
             else
                 data.name = pipleLineRun.getMetadata().getName();
+
+
+
+
 
             //Removing tailing cronjob from name to make it cleaner    
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
