@@ -199,20 +199,18 @@ public class OpenshiftResource {
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
         TaskRunList taskRunList = tknClient.v1beta1().taskRuns().inNamespace(namespace).list();
 
-        System.out.println("Listing TaskRuns");
         List <TaskRun> taskRuns = taskRunList.getItems();
         
-        
-        
-
-        
-       
         //Getting all the pipelineRuns
         List <PipelineRun> pipleRunList = list.getItems();
         System.out.println("Listing PipelineRuns");
         for(PipelineRun pipleLineRun: pipleRunList){
             String runPod = "";
             String runUUID = pipleLineRun.getMetadata().getUid();
+            int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
+
+            if(removeStart == -1) //Manually run pipelines will have not have -tt-**** on the end so we can skip them. 
+                break;
 
             /**
             * Get all the TaskRuns
@@ -225,28 +223,22 @@ public class OpenshiftResource {
                     runPod = taskRun.getStatus().getPodName();                 
                 }
             }
-
             System.out.println(pipleLineRun.getMetadata().getName() + "run on pod " + runPod);
-            
-          
+             
             CronJobDashboardData data = new CronJobDashboardData(); 
-            int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
-            if(removeStart != -1){ //Manually run pipelines will have not have -tt-**** on the end
-                data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
-                String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
-                System.out.println("Got logs, size is: " + runLogs.length());
-                Pattern pattern = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
-                Matcher matcher = pattern.matcher(runLogs);
-                if(matcher.find()){
-                    int resultStart = matcher.start();
-                    int resultEnd = matcher.end();
-                    System.out.println("Msg: " + runLogs.substring(resultStart, resultEnd));
-                }            
-            }
-            else
-                data.name = pipleLineRun.getMetadata().getName();
-
-
+            data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
+            String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
+            
+            //Pulling the Selenium Test run data out of the logs. 
+            Pattern pattern = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
+            Matcher matcher = pattern.matcher(runLogs);
+            if(matcher.find()){
+                int resultStart = matcher.start();
+                int resultEnd = matcher.end();
+                System.out.println("Msg: " + runLogs.substring(resultStart, resultEnd));
+                data.msg =  runLogs.substring(resultStart, resultEnd);
+            }            
+       
             //Removing tailing cronjob from name to make it cleaner    
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
             data.name = data.name.replaceAll("-cronjob","");
@@ -259,14 +251,12 @@ public class OpenshiftResource {
             data.runLink = openshiftClient.getOpenshiftUrl() + "k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
             int typeIndexNameEnd = data.name.indexOf("-");
-            data.msg = pipelineCondition.getMessage();
             data.result = pipelineCondition.getReason();
             data.type = data.name.substring(0,typeIndexNameEnd);
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
             data.color = getColorStatus(data.result);
             
-            if(removeStart != -1) //Only adding in pipeline run data that were created from cronjobs. Manually runs dont have the -cronjob-tt-**** on the end
-                dashboardData.add(data);
+            dashboardData.add(data);
             System.out.println("-----------------");
             
         }
