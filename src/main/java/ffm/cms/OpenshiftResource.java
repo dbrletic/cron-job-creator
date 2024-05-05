@@ -149,12 +149,11 @@ public class OpenshiftResource {
             currentJob.humanReadableMsg = CronExpressionDescriptor.getDescription(currentJob.schedule);
             String bindingName = currentJob.name + "-binding";
             currentJob.branch = bindingParamsToBranch.get(bindingName);
-            //System.out.println("Verify - " + currentJob.name + ": " + currentJob.branch);
+
             //Had to change newer cronjobs to end in cj instead of cronjob. Should clean up 
             if(currentJob.branch == "" || currentJob.branch == null || currentJob.branch.isBlank() || currentJob.branch.isEmpty()){
                 //Changing the name back to the old style
                 bindingName = currentJob.name.replaceAll("cj", "cronjob") + "-binding";
-                //System.out.println("Looking for: " + bindingName);
                 currentJob.branch = bindingParamsToBranch.get(bindingName); 
             }
             //Only using Cronjob that start with Gatling
@@ -191,7 +190,7 @@ public class OpenshiftResource {
     @Produces(MediaType.TEXT_HTML)
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
-        Instant start = Instant.now();
+        Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         
         System.out.println("Getting all pipeline runs and data on OpenShift: ");
@@ -201,6 +200,7 @@ public class OpenshiftResource {
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
         TaskRunList taskRunList = tknClient.v1beta1().taskRuns().inNamespace(namespace).list();
 
+        //Getting all the TaskRuns
         List <TaskRun> taskRuns = taskRunList.getItems();
         
         //Getting all the pipelineRuns
@@ -217,6 +217,7 @@ public class OpenshiftResource {
             * Get the UUID of the PipelineRun 
             * Check if the UUID Of the  PipelineRun is the same of the current taskRun, if so get the podName of that TaskRun
             * Get the logs using the podname while using the specific step you want as the container
+            * Wish there was a more straight forward way to do this
             */ 
             for(TaskRun taskRun : taskRuns){
                 if(taskRun.getOwnerReferenceFor(pipelineRunUUID).isPresent()){
@@ -239,7 +240,7 @@ public class OpenshiftResource {
                 data.msg =  runLogs.substring(resultStart, resultEnd);
             }
             else
-                data.msg = CRITICAL_FAILURE;            
+                data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests           
        
             //Removing tailing cronjob from name to make it cleaner    
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
