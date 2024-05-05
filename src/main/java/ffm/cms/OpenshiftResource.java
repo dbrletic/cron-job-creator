@@ -29,6 +29,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestPath;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -51,6 +52,8 @@ public class OpenshiftResource {
 
     @ConfigProperty(name = "current.host")
     private String OC_HOST_URL;
+
+    final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run";
 
     @CheckedTemplate
     public static class Templates {
@@ -188,9 +191,10 @@ public class OpenshiftResource {
     @Produces(MediaType.TEXT_HTML)
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
+        Instant start = Instant.now();
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         
-        System.out.println("Getting all pipeline runs on OpenShift: ");
+        System.out.println("Getting all pipeline runs and data on OpenShift: ");
 
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
@@ -201,12 +205,10 @@ public class OpenshiftResource {
         
         //Getting all the pipelineRuns
         List <PipelineRun> pipleRunList = list.getItems();
-        System.out.println("Listing PipelineRuns");
         for(PipelineRun pipleLineRun: pipleRunList){
             String runPod = "";
-            String runUUID = pipleLineRun.getMetadata().getUid();
+            String pipelineRunUUID = pipleLineRun.getMetadata().getUid();
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
-            System.out.println("Checking pipeline: " + pipleLineRun.getMetadata().getName());
             if(removeStart == -1) //Manually run pipelines will have not have -tt-**** on the end so we can skip them. 
                 break;
 
@@ -217,7 +219,7 @@ public class OpenshiftResource {
             * Get the logs using the podname while using the specific step you want as the container
             */ 
             for(TaskRun taskRun : taskRuns){
-                if(taskRun.getOwnerReferenceFor(runUUID).isPresent()){
+                if(taskRun.getOwnerReferenceFor(pipelineRunUUID).isPresent()){
                     runPod = taskRun.getStatus().getPodName();                 
                 }
             }
@@ -235,7 +237,9 @@ public class OpenshiftResource {
                 int resultEnd = matcher.end();
                 System.out.println("Msg: " + runLogs.substring(resultStart, resultEnd));
                 data.msg =  runLogs.substring(resultStart, resultEnd);
-            }            
+            }
+            else
+                data.msg = CRITICAL_FAILURE;            
        
             //Removing tailing cronjob from name to make it cleaner    
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
@@ -255,10 +259,13 @@ public class OpenshiftResource {
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
             data.color = getColorStatus(data.result);
             
+            
             dashboardData.add(data);
             System.out.println("-----------------");
             
         }
+        long elapsedMs = Duration.between(start, Instant.now()).toSeconds();
+        System.out.printf("getCronJobDashBoard took %d seconds to complete", elapsedMs);
         return  Templates.cronJobDashboard(dashboardData);
     }
 
