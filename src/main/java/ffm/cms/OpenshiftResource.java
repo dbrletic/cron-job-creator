@@ -257,7 +257,8 @@ public class OpenshiftResource {
                 
             //Getting the time it took to run the pipeline
             if(matcherTimeStart.find()){
-                data.runTime = runLogs.substring(matcherTimeStart.start(), matcherTimeStart.end() + 9);
+                data.runTime = runLogs.substring(matcherTimeStart.end(), matcherTimeStart.end() + 11).replace("[", "");
+
                 System.out.println("Run took: " + data.runTime);
             }
             else
