@@ -59,6 +59,7 @@ public class OpenshiftResource {
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
     private Pattern patternTimeStart = Pattern.compile("Total time:");
+    private Pattern patternEnv = Pattern.compile("test\\d+");
     //private Pattern patternBuildFailedEnd = Pattern.compile("[INFO] \\d+ error");
 
     @CheckedTemplate
@@ -245,6 +246,7 @@ public class OpenshiftResource {
             Matcher matcherTestRun = patternTestRun.matcher(runLogs);
             Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
             Matcher matcherTimeStart = patternTimeStart.matcher(runLogs);
+            Matcher matcherEnv = patternEnv.matcher(data.name);
 
             if(matcherTestRun.find()){
                 data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
@@ -262,7 +264,12 @@ public class OpenshiftResource {
                 System.out.println("Run took: " + data.runTime);
             }
             else
-                data.runTime="";   
+                data.runTime=""; 
+                
+            //Getting the Enviroment the code was run on
+            if(matcherEnv.find()){
+                data.type = data.name.substring(matcherEnv.start(), matcherEnv.end());
+            }
        
             //Removing tailing cronjob from name to make it cleaner    
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
@@ -276,9 +283,12 @@ public class OpenshiftResource {
             data.runLink = OC_CONSOLE_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
             
-            int typeIndexNameEnd = data.name.indexOf("-");
+            //int typeIndexNameEnd = data.name.indexOf("-");
+            //data.type = data.name.substring(0,typeIndexNameEnd);
             data.result = pipelineCondition.getReason();
-            data.type = data.name.substring(0,typeIndexNameEnd);
+
+
+            
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
             data.color = getColorStatus(data.result);
             if(data.result.equals("Running"))

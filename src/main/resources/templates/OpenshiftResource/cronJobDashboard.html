@@ -20,7 +20,7 @@
 <div class="container" id="main">
     <h2>Current List of FFE Selenium Pipeline Runs</h2>
    
-    <h3>Rvregression</h3>
+    <h3>Test 1</h3>
     <table>
         <thead>
             <tr>
@@ -33,7 +33,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "rvregression"}
+        {#if cronJob.type == "test1"}
         <tbody>
             <tr>
                 <td>{cronJob.name}</td>
@@ -47,7 +47,7 @@
         {/if}
         {/for}
     </table>
-    <h3>Rvsmoke</h3>
+    <h3>Test 2</h3>
     <table>
         <thead>
             <tr>
@@ -60,7 +60,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "rvsmoke"}
+        {#if cronJob.type == "test2"}
         <tbody>
              <tr>
                 <td>{cronJob.name}</td>
@@ -74,10 +74,10 @@
         {/if}
         {/for}
     </table>
-    <h3>Serffregression</h3>
+    <h3>Test 3</h3>
     <table>
         <thead>
-             <tr>
+            <tr>
                 <th>Name</th>
                 <th>Result</th>
                 <th>Test Results</th>
@@ -87,7 +87,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "serffregression"}
+        {#if cronJob.type == "test3"}
         <tbody>
             <tr>
                 <td>{cronJob.name}</td>
@@ -101,7 +101,7 @@
         {/if}
         {/for}
     </table>
-    <h3>Serffsmoke</h3>
+    <h3>Test4</h3>
     <table>
         <thead>
             <tr>
@@ -114,117 +114,9 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "serffsmoke"}
+        {#if cronJob.type == "test4"}
         <tbody>
             <tr>
-                <td>{cronJob.name}</td>
-                <td bgcolor="{cronJob.color}">{cronJob.result}</td>
-                <td>{cronJob.msg}</td>
-                <td>{cronJob.runTime}</td>
-                <td><A href="{cronJob.runLink}">Link to Logs</A></td>
-                <td>{cronJob.lastTransitionTime}</td>
-            </tr>
-        </tbody>
-        {/if}
-        {/for}
-    </table>
-    <h3>Subregression</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Result</th>
-                <th>Test Results</th>
-                <th>Run Time</th>
-                <th>Link</th>
-                <th>Last Upate Time</th>
-            </tr>
-        </thead>
-        {#for cronJob in cronJobs}
-        {#if cronJob.type == "subregression"}
-        <tbody>
-            <tr>
-                <td>{cronJob.name}</td>
-                <td bgcolor="{cronJob.color}">{cronJob.result}</td>
-                <td>{cronJob.msg}</td>
-                <td>{cronJob.runTime}</td>
-                <td><A href="{cronJob.runLink}">Link to Logs</A></td>
-                <td>{cronJob.lastTransitionTime}</td>
-            </tr>
-        </tbody>
-        {/if}
-        {/for}
-    </table>
-    <h3>Subsmoketest</h3>
-    <table>
-        <thead>
-             <tr>
-                <th>Name</th>
-                <th>Result</th>
-                <th>Test Results</th>
-                <th>Run Time</th>
-                <th>Link</th>
-                <th>Last Upate Time</th>
-            </tr>
-        </thead>
-        {#for cronJob in cronJobs}
-        {#if cronJob.type == "subsmoketest"}
-        <tbody>
-             <tr>
-                <td>{cronJob.name}</td>
-                <td bgcolor="{cronJob.color}">{cronJob.result}</td>
-                <td>{cronJob.msg}</td>
-                <td>{cronJob.runTime}</td>
-                <td><A href="{cronJob.runLink}">Link to Logs</A></td>
-                <td>{cronJob.lastTransitionTime}</td>
-            </tr>
-        </tbody>
-        {/if}
-        {/for}
-    </table>
-    <h3>Veregression</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Result</th>
-                <th>Test Results</th>
-                <th>Run Time</th>
-                <th>Link</th>
-                <th>Last Upate Time</th>
-            </tr>
-        </thead>
-        {#for cronJob in cronJobs}
-        {#if cronJob.type == "rvregression"}
-        <tbody>
-             <tr>
-                <td>{cronJob.name}</td>
-                <td bgcolor="{cronJob.color}">{cronJob.result}</td>
-                <td>{cronJob.msg}</td>
-                <td>{cronJob.runTime}</td>
-                <td><A href="{cronJob.runLink}">Link to Logs</A></td>
-                <td>{cronJob.lastTransitionTime}</td>
-            </tr>
-        </tbody>
-        {/if}
-        {/for}
-    </table>
-    <h3>Vesmoke</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Result</th>
-                <th>Test Results</th>
-                <th>Run Time</th>
-                <th>Link</th>
-                <th>Last Upate Time</th>
-            </tr>
-        </thead>
-        {#for cronJob in cronJobs}
-        {#if cronJob.type == "rvsmoke"}
-        <tbody>
-             <tr>
                 <td>{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
@@ -237,8 +129,6 @@
         {/for}
     </table>
 </div>
-
-
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/index.js"></script>
