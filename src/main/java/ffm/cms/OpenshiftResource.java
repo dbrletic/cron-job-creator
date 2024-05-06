@@ -269,7 +269,9 @@ public class OpenshiftResource {
             data.type = data.name.substring(0,typeIndexNameEnd);
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
             data.color = getColorStatus(data.result);
-            
+            if(data.result.equals("Running"))
+                data.msg = "";
+
             
             dashboardData.add(data);
             System.out.println("-----------------");
