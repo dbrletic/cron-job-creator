@@ -51,7 +51,7 @@ public class OpenshiftResource {
     private String UPLOAD_DIR;
 
     @ConfigProperty(name = "current.host")
-    private String OC_HOST_URL;
+    private String OC_CONSOLE_URL;
 
     final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run";
     final private String BUILD_FAILURE = "Compliation error. Check logs for errors";
@@ -261,7 +261,7 @@ public class OpenshiftResource {
             Condition pipelineCondition = pipelineConditions.get(0);
 
             //Creating link to piplerun logs
-            data.runLink = OC_HOST_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
+            data.runLink = OC_CONSOLE_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
             
             int typeIndexNameEnd = data.name.indexOf("-");
