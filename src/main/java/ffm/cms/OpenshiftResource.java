@@ -50,14 +50,15 @@ public class OpenshiftResource {
     @ConfigProperty(name = "upload.directory")
     private String UPLOAD_DIR;
 
-    @ConfigProperty(name = "oc.host.url", defaultValue = "http://localhost:8080/")
+    @ConfigProperty(name = "current.host")
     private String OC_HOST_URL;
 
     final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run";
+    final private String BUILD_FAILURE = "Compliation error. Check logs for errors";
 
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
-    private Pattern patternBuildFailedEnd = Pattern.compile("[INFO] \\d+ error");
+    //private Pattern patternBuildFailedEnd = Pattern.compile("[INFO] \\d+ error");
 
     @CheckedTemplate
     public static class Templates {
@@ -241,12 +242,12 @@ public class OpenshiftResource {
             //Pulling the Selenium Test run data out of the logs. 
             Matcher matcherTestRun = patternTestRun.matcher(runLogs);
             Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
-            Matcher matcherBuildFailedEnd = patternBuildFailedEnd.matcher(runLogs);
+            //Matcher matcherBuildFailedEnd = patternBuildFailedEnd.matcher(runLogs);
             if(matcherTestRun.find()){
                 data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
             }
             else if(matcherBuildFailed.find()){
-                data.msg = runLogs.substring(matcherBuildFailed.start(), matcherBuildFailedEnd.end()); //Playing out and fast that this pattern will be found
+                data.msg = BUILD_FAILURE;
             }
             else
                 data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests           
