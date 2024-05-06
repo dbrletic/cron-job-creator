@@ -50,10 +50,14 @@ public class OpenshiftResource {
     @ConfigProperty(name = "upload.directory")
     private String UPLOAD_DIR;
 
-    @ConfigProperty(name = "current.host")
+    @ConfigProperty(name = "oc.host.url", defaultValue = "http://localhost:8080/")
     private String OC_HOST_URL;
 
     final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run";
+
+    private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
+    private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
+    private Pattern patternBuildFailedEnd = Pattern.compile("[INFO] \\d+ error");
 
     @CheckedTemplate
     public static class Templates {
@@ -193,7 +197,7 @@ public class OpenshiftResource {
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         
-        System.out.println("Getting all pipeline runs and data on OpenShift: ");
+        System.out.println("Getting all pipeline runs and data on OpenShift for namespace: " + namespace);
 
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
@@ -216,7 +220,7 @@ public class OpenshiftResource {
             * Get all the TaskRuns
             * Get the UUID of the PipelineRun 
             * Check if the UUID Of the  PipelineRun is the same of the current taskRun, if so get the podName of that TaskRun
-            * Get the logs using the podname while using the specific step you want as the container
+            * Get the logs using the podname while using the specific pipeline step you want as the container
             * Wish there was a more straight forward way to do this
             */ 
             for(TaskRun taskRun : taskRuns){
@@ -228,16 +232,21 @@ public class OpenshiftResource {
              
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
+            //Grabbing the logs from the pod
+            Instant logGrabStart = Instant.now();
             String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
+            long elapsedLogMs = Duration.between(logGrabStart, Instant.now()).toMillis();
+            System.out.println(pipleLineRun.getMetadata().getName() + " logs took " + elapsedLogMs + "ms");
             
             //Pulling the Selenium Test run data out of the logs. 
-            Pattern pattern = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
-            Matcher matcher = pattern.matcher(runLogs);
-            if(matcher.find()){
-                int resultStart = matcher.start();
-                int resultEnd = matcher.end();
-                System.out.println("Msg: " + runLogs.substring(resultStart, resultEnd));
-                data.msg =  runLogs.substring(resultStart, resultEnd);
+            Matcher matcherTestRun = patternTestRun.matcher(runLogs);
+            Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
+            Matcher matcherBuildFailedEnd = patternBuildFailedEnd.matcher(runLogs);
+            if(matcherTestRun.find()){
+                data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
+            }
+            else if(matcherBuildFailed.find()){
+                data.msg = runLogs.substring(matcherBuildFailed.start(), matcherBuildFailedEnd.end()); //Playing out and fast that this pattern will be found
             }
             else
                 data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests           
