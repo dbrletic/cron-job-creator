@@ -58,8 +58,7 @@ public class OpenshiftResource {
 
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
-    private Pattern patternTimeStart = Pattern.compile("[INFO] Total time:");
-    private Pattern patternTimeFinish = Pattern.compile("[INFO] Finished at:");
+    private Pattern patternTimeStart = Pattern.compile("Total time:");
     //private Pattern patternBuildFailedEnd = Pattern.compile("[INFO] \\d+ error");
 
     @CheckedTemplate
@@ -227,6 +226,7 @@ public class OpenshiftResource {
             * Wish there was a more straight forward way to do this
             */ 
             for(TaskRun taskRun : taskRuns){
+
                 if(taskRun.getOwnerReferenceFor(pipelineRunUUID).isPresent()){
                     runPod = taskRun.getStatus().getPodName();                 
                 }
@@ -245,9 +245,7 @@ public class OpenshiftResource {
             Matcher matcherTestRun = patternTestRun.matcher(runLogs);
             Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
             Matcher matcherTimeStart = patternTimeStart.matcher(runLogs);
-            Matcher matcherTimeEnd = patternTimeFinish.matcher(runLogs);
 
-            //Matcher matcherBuildFailedEnd = patternBuildFailedEnd.matcher(runLogs);
             if(matcherTestRun.find()){
                 data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
             }
@@ -259,7 +257,7 @@ public class OpenshiftResource {
                 
             //Getting the time it took to run the pipeline
             if(matcherTimeStart.find()){
-                data.runTime = runLogs.substring(matcherTimeStart.start(), matcherTimeEnd.start()).replace("[INFO] ", "");
+                data.runTime = runLogs.substring(matcherTimeStart.start(), matcherTimeStart.end() + 9);
                 System.out.println("Run took: " + data.runTime);
             }
             else
@@ -352,5 +350,4 @@ public class OpenshiftResource {
         return formatter.format(instant);
 
     }
-
 }
