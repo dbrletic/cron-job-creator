@@ -58,6 +58,8 @@ public class OpenshiftResource {
 
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
+    private Pattern patternTimeStart = Pattern.compile("[INFO] Total time:");
+    private Pattern patternTimeFinish = Pattern.compile("[INFO] Finished at:");
     //private Pattern patternBuildFailedEnd = Pattern.compile("[INFO] \\d+ error");
 
     @CheckedTemplate
@@ -242,6 +244,9 @@ public class OpenshiftResource {
             //Pulling the Selenium Test run data out of the logs. 
             Matcher matcherTestRun = patternTestRun.matcher(runLogs);
             Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
+            Matcher matcherTimeStart = patternTimeStart.matcher(runLogs);
+            Matcher matcherTimeEnd = patternTimeFinish.matcher(runLogs);
+
             //Matcher matcherBuildFailedEnd = patternBuildFailedEnd.matcher(runLogs);
             if(matcherTestRun.find()){
                 data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
@@ -250,7 +255,15 @@ public class OpenshiftResource {
                 data.msg = BUILD_FAILURE;
             }
             else
-                data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests           
+                data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests        
+                
+            //Getting the time it took to run the pipeline
+            if(matcherTimeStart.find()){
+                data.runTime = runLogs.substring(matcherTimeStart.start(), matcherTimeEnd.start()).replace("[INFO] ", "");
+                System.out.println("Run took: " + data.runTime);
+            }
+            else
+                data.runTime="";   
        
             //Removing tailing cronjob from name to make it cleaner    
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
