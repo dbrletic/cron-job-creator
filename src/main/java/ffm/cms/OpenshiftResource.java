@@ -34,6 +34,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +62,8 @@ public class OpenshiftResource {
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
     private Pattern patternTimeStart = Pattern.compile("Total time:");
     private Pattern patternEnv = Pattern.compile("test\\d+");
-    //private Pattern patternBuildFailedEnd = Pattern.compile("[INFO] \\d+ error");
+
+    Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
 
     @CheckedTemplate
     public static class Templates {
@@ -260,7 +263,6 @@ public class OpenshiftResource {
             //Getting the time it took to run the pipeline
             if(matcherTimeStart.find()){
                 data.runTime = runLogs.substring(matcherTimeStart.end(), matcherTimeStart.end() + 11).replace("[", "");
-
                 System.out.println("Run took: " + data.runTime);
             }
             else
@@ -282,23 +284,18 @@ public class OpenshiftResource {
             //Creating link to piplerun logs
             data.runLink = OC_CONSOLE_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
-            
-            //int typeIndexNameEnd = data.name.indexOf("-");
-            //data.type = data.name.substring(0,typeIndexNameEnd);
             data.result = pipelineCondition.getReason();
-
-
-            
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
             data.color = getColorStatus(data.result);
             if(data.result.equals("Running"))
                 data.msg = "";
 
-            
             dashboardData.add(data);
             System.out.println("-----------------");
             
         }
+       
+        Collections.sort(dashboardData, nameSorter);
         long elapsedMs = Duration.between(start, Instant.now()).toSeconds();
         System.out.printf("getCronJobDashBoard took %d seconds to complete", elapsedMs);
         return  Templates.cronJobDashboard(dashboardData);
