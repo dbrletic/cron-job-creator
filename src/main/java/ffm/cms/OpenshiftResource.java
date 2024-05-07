@@ -204,8 +204,6 @@ public class OpenshiftResource {
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         
-        System.out.println("Getting all pipeline runs and data on OpenShift for namespace: " + namespace);
-
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
@@ -216,6 +214,9 @@ public class OpenshiftResource {
         
         //Getting all the pipelineRuns
         List <PipelineRun> pipleRunList = list.getItems();
+        System.out.println("Getting " + pipleRunList.size() + " pipeline runs and data on OpenShift for namespace: " + namespace);
+
+        
         for(PipelineRun pipleLineRun: pipleRunList){
             String runPod = "";
             String pipelineRunUUID = pipleLineRun.getMetadata().getUid();
@@ -236,8 +237,7 @@ public class OpenshiftResource {
                     runPod = taskRun.getStatus().getPodName();                 
                 }
             }
-            System.out.println(pipleLineRun.getMetadata().getName() + "run on pod " + runPod);
-             
+
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             //Grabbing the logs from the pod
@@ -264,7 +264,6 @@ public class OpenshiftResource {
             //Getting the time it took to run the pipeline
             if(matcherTimeStart.find()){
                 data.runTime = runLogs.substring(matcherTimeStart.end(), matcherTimeStart.end() + 11).replace("[", "");
-                System.out.println("Run took: " + data.runTime);
             }
             else
                 data.runTime=""; 
@@ -288,6 +287,8 @@ public class OpenshiftResource {
             data.result = pipelineCondition.getReason();
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
             data.color = getColorStatus(data.result);
+
+            //Running would incorrectly be considered CRITICAL, fixing that. 
             if(data.result.equals("Running"))
                 data.msg = "";
 
@@ -297,7 +298,7 @@ public class OpenshiftResource {
         }
        
         Collections.sort(dashboardData, nameSorter);
-        long elapsedMs = Duration.between(start, Instant.now()).toSeconds();
+        long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d seconds to complete", elapsedMs);
         return  Templates.cronJobDashboard(dashboardData);
     }
