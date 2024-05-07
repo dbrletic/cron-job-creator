@@ -203,7 +203,7 @@ public class OpenshiftResource {
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
-        
+        HashMap<String, String> pipelineRunToPod;
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
@@ -215,29 +215,16 @@ public class OpenshiftResource {
         //Getting all the pipelineRuns
         List <PipelineRun> pipleRunList = list.getItems();
         System.out.println("Getting " + pipleRunList.size() + " pipeline runs and data on OpenShift for namespace: " + namespace);
-
-        
+        //Mapping the pod a given TaskRun was exeucted on 
+        pipelineRunToPod = mapPodToRun(taskRuns);
+    
         for(PipelineRun pipleLineRun: pipleRunList){
             String runPod = "";
-            String pipelineRunUUID = pipleLineRun.getMetadata().getUid();
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
             if(removeStart == -1) //Manually run pipelines will have not have -tt-**** on the end so we can skip them. 
                 break;
 
-            /**
-            * Get all the TaskRuns
-            * Get the UUID of the Current PipelineRun in for loop
-            * Check if the UUID Of the PipelineRun is the same of the current taskRun, if so get the podName of that TaskRun
-            * Get the logs using the podname while using the specific pipeline step you want as the container
-            * Wish there was a more straight forward way to do this
-            */ 
-            for(TaskRun taskRun : taskRuns){
-
-                if(taskRun.getOwnerReferenceFor(pipelineRunUUID).isPresent()){
-                    runPod = taskRun.getStatus().getPodName();                 
-                }
-            }
-
+            runPod = pipelineRunToPod.get(pipleLineRun.getMetadata().getName());
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             //Grabbing the logs from the pod
@@ -299,7 +286,7 @@ public class OpenshiftResource {
        
         Collections.sort(dashboardData, nameSorter);
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
-        System.out.printf("getCronJobDashBoard took %d seconds to complete", elapsedMs);
+        System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         return  Templates.cronJobDashboard(dashboardData);
     }
 
@@ -359,5 +346,20 @@ public class OpenshiftResource {
         // Format the Instant to a readable string
         return formatter.format(instant);
 
+    }
+
+    /**
+     * Maps the Pod that ran the pipeline run to the Name of the Pipeline Run in order to get the logs of the pod
+     * @param taskRuns A array of all the TaskRuns 
+     * @return A Hashmap that is maps the pod that a given PipelineRun was executed on 
+     */
+    private HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
+        HashMap<String, String> podToRunTask = new HashMap<String, String>();
+        for(TaskRun taskRun : taskRuns){
+            String key = taskRun.getMetadata().getLabels().get("tekton.dev/pipelineRun");
+            String value = taskRun.getStatus().getPodName();    
+            podToRunTask.put(key, value);
+        }
+        return podToRunTask;
     }
 }
