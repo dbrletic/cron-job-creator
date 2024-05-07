@@ -57,6 +57,7 @@ public class OpenshiftResource {
 
     final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run";
     final private String BUILD_FAILURE = "Compliation error. Check logs for errors";
+    final private String STEP_CONTAINER = "step-build-and-run-selenium-tests";
 
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
@@ -224,8 +225,8 @@ public class OpenshiftResource {
 
             /**
             * Get all the TaskRuns
-            * Get the UUID of the PipelineRun 
-            * Check if the UUID Of the  PipelineRun is the same of the current taskRun, if so get the podName of that TaskRun
+            * Get the UUID of the Current PipelineRun in for loop
+            * Check if the UUID Of the PipelineRun is the same of the current taskRun, if so get the podName of that TaskRun
             * Get the logs using the podname while using the specific pipeline step you want as the container
             * Wish there was a more straight forward way to do this
             */ 
@@ -241,7 +242,7 @@ public class OpenshiftResource {
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             //Grabbing the logs from the pod
             Instant logGrabStart = Instant.now();
-            String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer("step-build-and-run-selenium-tests").getLog(true);
+            String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_CONTAINER).getLog(true);
             long elapsedLogMs = Duration.between(logGrabStart, Instant.now()).toMillis();
             System.out.println(pipleLineRun.getMetadata().getName() + " logs took " + elapsedLogMs + "ms");
             
