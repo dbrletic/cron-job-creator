@@ -33,7 +33,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "test1"}
+        {#if cronJob.env == "test1"}
         <tbody>
             <tr>
                 <td>{cronJob.name}</td>
@@ -60,7 +60,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "test2"}
+        {#if cronJob.env == "test2"}
         <tbody>
              <tr>
                 <td>{cronJob.name}</td>
@@ -87,7 +87,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "test3"}
+        {#if cronJob.env == "test3"}
         <tbody>
             <tr>
                 <td>{cronJob.name}</td>
@@ -114,7 +114,7 @@
             </tr>
         </thead>
         {#for cronJob in cronJobs}
-        {#if cronJob.type == "test4"}
+        {#if cronJob.env == "test4"}
         <tbody>
             <tr>
                 <td>{cronJob.name}</td>

@@ -24,7 +24,7 @@ import io.fabric8.tekton.pipeline.v1beta1.PipelineRunList;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
-
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestPath;
 
@@ -58,6 +58,11 @@ public class OpenshiftResource {
     final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run";
     final private String BUILD_FAILURE = "Compliation error. Check logs for errors";
     final private String STEP_CONTAINER = "step-build-and-run-selenium-tests";
+    final private String STEP_ZIP_FILES = "step-reduce-image-sizes-from-selenium-tests";
+    final private String RAN_BUT_FAILED = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0";
+    final private String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
+    final private String PASSED = "Passed";
+    final private String FAILED = "Failed";
 
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
@@ -257,9 +262,13 @@ public class OpenshiftResource {
                 
             //Getting the Enviroment the code was run on
             if(matcherEnv.find()){
-                data.type = data.name.substring(matcherEnv.start(), matcherEnv.end());
+                data.env = data.name.substring(matcherEnv.start(), matcherEnv.end());
             }
        
+             //Setting the type of Pipeline that was run
+             int typeIndexNameEnd = pipleLineRun.getMetadata().getName().indexOf("-");
+             data.type = pipleLineRun.getMetadata().getName().substring(0, typeIndexNameEnd);
+
             //Removing tailing cronjob from name to make it cleaner    
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
             data.name = data.name.replaceAll("-cronjob","");
@@ -278,6 +287,12 @@ public class OpenshiftResource {
             //Running would incorrectly be considered CRITICAL, fixing that. 
             if(data.result.equals("Running"))
                 data.msg = "";
+
+            //Updating message if some test ran but hitting a exception    
+            if(data.msg.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
+                data.msg= findPassedFailedFromZipLogs(namespace, runPod);
+                data.color = "#d0f9e4"; //Didn't pass but didn't totally fail
+            }
 
             dashboardData.add(data);
             System.out.println("-----------------");
@@ -362,4 +377,22 @@ public class OpenshiftResource {
         }
         return podToRunTask;
     }
+
+
+     /**
+      * What is basically happening here is that the mvn test ran but hit a exception of some point after running a bunch of test.  Instead of of show many test actually ran before the exception it just bails to 0 across the board
+      * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs
+      * @param namespace
+      * @param runPod
+      * @return
+      */
+    private String findPassedFailedFromZipLogs(String namespace, String runPod){
+        String newMsg = "";
+        String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);
+        int passedCount = StringUtils.countMatches(zipLogs, PASSED);
+        int failedCount = StringUtils.countMatches(zipLogs, FAILED);
+        newMsg = String.format(RUN_BUT_FAILED_MSG, passedCount + failedCount, passedCount, failedCount);
+        return newMsg;
+    }
+
 }
