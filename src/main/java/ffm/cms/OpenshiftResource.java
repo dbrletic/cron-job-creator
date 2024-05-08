@@ -282,17 +282,20 @@ public class OpenshiftResource {
 
             data.result = pipelineCondition.getReason();
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
-            data.color = getColorStatus(data.result);
+           
+            //Setting the color and in some cases the msg
+            //data.color = getColorStatus(data.result);
 
+            getColorStatus(data);
             //Running would incorrectly be considered CRITICAL, fixing that. 
-            if(data.result.equals("Running"))
+            /* if(data.result.equals("Running"))
                 data.msg = "";
 
             //Updating message if some test ran but hitting a exception    
             if(data.msg.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
                 data.msg= findPassedFailedFromZipLogs(namespace, runPod);
-                data.color = "#d0f9e4"; //Didn't pass but didn't totally fail
-            }
+                data.color = "#f7b435"; //Didn't pass but didn't totally fail
+            }*/
 
             dashboardData.add(data);
             System.out.println("-----------------");
@@ -345,6 +348,19 @@ public class OpenshiftResource {
         }
     }
 
+    private void getColorStatus(CronJobDashboardData data){
+
+        /**
+         * Red - job failed, no results
+           Orange - job did not complete, partial results
+           Yellow - job completed, some tests failed
+           Green - all tests passed
+           Gray - Running
+         * 
+         */
+
+    }
+
     /**
      * Creates a easer to read date from the last Transaction time 
      * @param date The date to be converted
@@ -387,12 +403,10 @@ public class OpenshiftResource {
       * @return
       */
     private String findPassedFailedFromZipLogs(String namespace, String runPod){
-        String newMsg = "";
         String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);
         int passedCount = StringUtils.countMatches(zipLogs, PASSED);
         int failedCount = StringUtils.countMatches(zipLogs, FAILED);
-        newMsg = String.format(RUN_BUT_FAILED_MSG, passedCount + failedCount, passedCount, failedCount);
-        return newMsg;
+        return String.format(RUN_BUT_FAILED_MSG, passedCount + failedCount, passedCount, failedCount);
     }
 
 }
