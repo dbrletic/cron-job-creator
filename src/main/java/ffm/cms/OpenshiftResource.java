@@ -28,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestPath;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
@@ -216,6 +218,7 @@ public class OpenshiftResource {
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
+        int counter = 0;
         HashMap<String, String> pipelineRunToPod;
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
@@ -241,10 +244,7 @@ public class OpenshiftResource {
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             //Grabbing the logs from the pod
-            Instant logGrabStart = Instant.now();
             String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_CONTAINER).getLog(true);
-            long elapsedLogMs = Duration.between(logGrabStart, Instant.now()).toMillis();
-            System.out.println(pipleLineRun.getMetadata().getName() + " logs took " + elapsedLogMs + "ms");
             
             //Pulling the Selenium Test run data out of the logs. 
             Matcher matcherTestRun = patternTestRun.matcher(runLogs);
@@ -305,13 +305,15 @@ public class OpenshiftResource {
                 data.color = "#f7b435"; //Didn't pass but didn't totally fail
             }*/
 
+            counter++;
             dashboardData.add(data);
-            System.out.println("-----------------");     
+            //System.out.println("-----------------");     
         }
        
         Collections.sort(dashboardData, nameSorter); //Sorting everything but name of the cronjob
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
+        System.out.println(" Rendering Dashboard with " + counter + " Selenium Test Run Results.");
         return  Templates.cronJobDashboard(dashboardData);
     }
 
@@ -376,7 +378,7 @@ public class OpenshiftResource {
 
         Matcher matcherTestRun = patternTestRun.matcher(runLogs);
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
-        if(matcherTestRun.find()){
+        if(matcherTestRun.find() && !data.result.equals("Failed")){
             data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
             if(data.msg.contains("Failures: 0")){
                 data.color = GREEN;

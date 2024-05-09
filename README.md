@@ -60,5 +60,5 @@ Easily start your RESTful Web Services
 After logging in with the oc cli and being in the right namespace run:
 
 ```shell script
-./mvnw install -Dquarkus.kubernetes.deploy=true
+./mvnw clean install -Dquarkus.kubernetes.deploy=true
 ```
