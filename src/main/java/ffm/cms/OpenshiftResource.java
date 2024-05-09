@@ -64,6 +64,14 @@ public class OpenshiftResource {
     final private String PASSED = "Passed";
     final private String FAILED = "Failed";
 
+    final private String GREEN = "#69ff33"; //Green
+    final private String YELLOW = "#EBF58A"; //Yellow
+    final private String RED = "#ff4763"; //Red
+    final private String GRAY = "#ECF0F1"; //Gray
+    final private String ORANGE = "#F0C476"; //Orange
+
+
+
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
     private Pattern patternTimeStart = Pattern.compile("Total time:");
@@ -244,49 +252,49 @@ public class OpenshiftResource {
             Matcher matcherTimeStart = patternTimeStart.matcher(runLogs);
             Matcher matcherEnv = patternEnv.matcher(data.name);
 
-            if(matcherTestRun.find()){
+            /*if(matcherTestRun.find()){
                 data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
             }
             else if(matcherBuildFailed.find()){
                 data.msg = BUILD_FAILURE;
             }
             else
-                data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests        
+                data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests        */
                 
-            //Getting the time it took to run the pipeline
+           //Getting the time it took to run the pipeline
             if(matcherTimeStart.find()){
                 data.runTime = runLogs.substring(matcherTimeStart.end(), matcherTimeStart.end() + 11).replace("[", "");
             }
             else
-                data.runTime=""; 
+                data.runTime=""; //Generally this is the case if the test is running
                 
             //Getting the Enviroment the code was run on
             if(matcherEnv.find()){
                 data.env = data.name.substring(matcherEnv.start(), matcherEnv.end());
             }
        
-             //Setting the type of Pipeline that was run
-             int typeIndexNameEnd = pipleLineRun.getMetadata().getName().indexOf("-");
-             data.type = pipleLineRun.getMetadata().getName().substring(0, typeIndexNameEnd);
+             //Setting the type of Pipeline that was run. It always the text before the first -
+            int typeIndexNameEnd = pipleLineRun.getMetadata().getName().indexOf("-");
+            data.type = pipleLineRun.getMetadata().getName().substring(0, typeIndexNameEnd);
 
             //Removing tailing cronjob from name to make it cleaner    
-            data.name = data.name.replaceAll("-confjob",""); //Had a typo in the file generator 
+            data.name = data.name.replaceAll("-confjob",""); //Had a typo in a eailer build of the file generator. Files could still be around
             data.name = data.name.replaceAll("-cronjob","");
-            List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
-        
-            //There should only be one pipeline conditions. No idea why it was made as a list
-            Condition pipelineCondition = pipelineConditions.get(0);
 
             //Creating link to piplerun logs
             data.runLink = OC_CONSOLE_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
 
+            List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
+            //There should only be one pipeline conditions. No idea why it was made as a list
+            Condition pipelineCondition = pipelineConditions.get(0);
             data.result = pipelineCondition.getReason();
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
            
             //Setting the color and in some cases the msg
             //data.color = getColorStatus(data.result);
 
-            getColorStatus(data);
+            //Setting the color and message
+            data = getColorStatusAndMsg(data, runLogs, namespace, runPod);
             //Running would incorrectly be considered CRITICAL, fixing that. 
             /* if(data.result.equals("Running"))
                 data.msg = "";
@@ -298,11 +306,10 @@ public class OpenshiftResource {
             }*/
 
             dashboardData.add(data);
-            System.out.println("-----------------");
-            
+            System.out.println("-----------------");     
         }
        
-        Collections.sort(dashboardData, nameSorter);
+        Collections.sort(dashboardData, nameSorter); //Sorting everything but name of the cronjob
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         return  Templates.cronJobDashboard(dashboardData);
@@ -348,7 +355,15 @@ public class OpenshiftResource {
         }
     }
 
-    private void getColorStatus(CronJobDashboardData data){
+    /**
+     * Figure out what to color the Pipeline Run and what message to display
+     * @param data
+     * @param runLogs
+     * @param namespace
+     * @param runPod
+     * @return
+     */
+    private CronJobDashboardData getColorStatusAndMsg(CronJobDashboardData data, String runLogs, String namespace, String runPod){
 
         /**
          * Red - job failed, no results
@@ -359,6 +374,37 @@ public class OpenshiftResource {
          * 
          */
 
+        Matcher matcherTestRun = patternTestRun.matcher(runLogs);
+        Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
+        if(matcherTestRun.find()){
+            data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
+            if(data.msg.contains("Failures: 0")){
+                data.color = GREEN;
+            }
+            else
+                data.color = YELLOW; 
+
+        }
+        else if(matcherBuildFailed.find()){
+            data.msg = BUILD_FAILURE;
+            data.color = RED; 
+        }
+        else if(data.result.equals("Running")){
+            data.msg = "";
+            data.color =GRAY;
+
+        }else{
+            data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests  
+            data.color = RED; 
+        }
+
+        //Updating message if some test ran but hit a exception causing them to stop   
+        if(data.msg.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
+            data.msg= findPassedFailedFromZipLogs(namespace, runPod);
+            data.color = ORANGE; //Orange Didn't pass but didn't totally fail so 
+        }
+
+        return data;
     }
 
     /**
@@ -396,13 +442,14 @@ public class OpenshiftResource {
 
 
      /**
-      * What is basically happening here is that the mvn test ran but hit a exception of some point after running a bunch of test.  Instead of of show many test actually ran before the exception it just bails to 0 across the board
+      * What is basically happening here is that the mvn test ran but hit a exception at some point after running a bunch of test.  Instead of show any  test actually ran before the exception mvn just bails out and shows 0 across the board
       * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs
       * @param namespace
       * @param runPod
       * @return
       */
     private String findPassedFailedFromZipLogs(String namespace, String runPod){
+        //Abusing the fact that zip displays the files its zipping
         String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);
         int passedCount = StringUtils.countMatches(zipLogs, PASSED);
         int failedCount = StringUtils.countMatches(zipLogs, FAILED);
