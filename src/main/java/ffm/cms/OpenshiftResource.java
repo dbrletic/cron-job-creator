@@ -60,6 +60,7 @@ public class OpenshiftResource {
     final private String STEP_ZIP_FILES = "step-reduce-image-sizes-from-selenium-tests";
     final private String RAN_BUT_FAILED = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0";
     final private String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
+    final private String TEST_RUN = "Test run - Run: %d, Passed: %d, Failures: %d";
     final private String PASSED = "Passed";
     final private String FAILED = "Failed";
   
@@ -356,11 +357,12 @@ public class OpenshiftResource {
            Gray - Running
          * 
          */
-
+        String doubleCheck="";
         Matcher matcherTestRun = patternTestRun.matcher(runLogs);
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
         if(matcherTestRun.find() && !data.result.equals("Failed")){
-            data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
+            doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());
+            data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
             if(data.msg.contains("Failures: 0")){
                 data.color = GREEN;
             }
@@ -382,8 +384,8 @@ public class OpenshiftResource {
         }
 
         //Updating message if some test ran but hit a exception causing them to stop   
-        if(data.msg.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
-            data.msg= findPassedFailedFromZipLogs(namespace, runPod);
+        if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
+            data.msg= findPassedFailedFromZipLogs(namespace, runPod,true);
             data.color = ORANGE; //Orange Didn't pass but didn't totally fail so 
         }
 
@@ -427,16 +429,20 @@ public class OpenshiftResource {
      /**
       * What is basically happening here is that the mvn test ran but hit a exception at some point after running a bunch of test.  Instead of show any  test actually ran before the exception mvn just bails out and shows 0 across the board
       * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs
+      * Turns out this is more useful then the straight Selenium Result
       * @param namespace
       * @param runPod
       * @return
       */
-    private String findPassedFailedFromZipLogs(String namespace, String runPod){
+    private String findPassedFailedFromZipLogs(String namespace, String runPod, boolean exceptionFound){
         //Abusing the fact that zip displays the files its zipping
         String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);
         int passedCount = StringUtils.countMatches(zipLogs, PASSED);
         int failedCount = StringUtils.countMatches(zipLogs, FAILED);
-        return String.format(RUN_BUT_FAILED_MSG, passedCount + failedCount, passedCount, failedCount);
-    }
+        if(exceptionFound)
+            return String.format(RUN_BUT_FAILED_MSG, passedCount + failedCount, passedCount, failedCount);
+        else
+            return String.format(TEST_RUN, passedCount + failedCount, passedCount, failedCount);
+    }   
 
 }
