@@ -341,8 +341,8 @@ public class OpenshiftResource {
    
     /**
      * Figure out what to color the Pipeline Run and what message to display
-     * @param data
-     * @param runLogs
+     * @param data 
+     * @param runLogs 
      * @param namespace
      * @param runPod
      * @return
@@ -426,14 +426,15 @@ public class OpenshiftResource {
     }
 
 
-     /**
-      * What is basically happening here is that the mvn test ran but hit a exception at some point after running a bunch of test.  Instead of show any  test actually ran before the exception mvn just bails out and shows 0 across the board
-      * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs
-      * Turns out this is more useful then the straight Selenium Result
-      * @param namespace
-      * @param runPod
-      * @return
-      */
+    /**
+     * What is basically happening here is that the mvn test ran but hit a exception at some point after running a bunch of test.  Instead of show any  test actually ran before the exception mvn just bails out and shows 0 across the board
+     * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs
+     * Turns out this result string is more useful then the straight Selenium Test Result because it does not show how many test passed
+     * @param namespace
+     * @param runPod
+     * @param exceptionFound
+     * @return
+     */
     private String findPassedFailedFromZipLogs(String namespace, String runPod, boolean exceptionFound){
         //Abusing the fact that zip displays the files its zipping
         String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);

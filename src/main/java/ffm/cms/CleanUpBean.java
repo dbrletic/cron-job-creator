@@ -6,10 +6,11 @@ import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 
 
-@ApplicationScoped
+
 /**
  * Cleans up the left over zip and txt files so there are not any name conflicts. 
  */
+@ApplicationScoped
 public class CleanUpBean {
     
     @Scheduled(every="30s")     
