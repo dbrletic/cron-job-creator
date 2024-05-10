@@ -218,7 +218,7 @@ public class OpenshiftResource {
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
-        int counter = 0;
+        int cronjobCounter = 0; //Count how many CronJob pipelines were displayeds
         HashMap<String, String> pipelineRunToPod;
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
@@ -251,15 +251,6 @@ public class OpenshiftResource {
             Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
             Matcher matcherTimeStart = patternTimeStart.matcher(runLogs);
             Matcher matcherEnv = patternEnv.matcher(data.name);
-
-            /*if(matcherTestRun.find()){
-                data.msg =  runLogs.substring(matcherTestRun.start(),  matcherTestRun.end());
-            }
-            else if(matcherBuildFailed.find()){
-                data.msg = BUILD_FAILURE;
-            }
-            else
-                data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests        */
                 
            //Getting the time it took to run the pipeline
             if(matcherTimeStart.find()){
@@ -290,30 +281,17 @@ public class OpenshiftResource {
             data.result = pipelineCondition.getReason();
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
            
-            //Setting the color and in some cases the msg
-            //data.color = getColorStatus(data.result);
-
             //Setting the color and message
             data = getColorStatusAndMsg(data, runLogs, namespace, runPod);
-            //Running would incorrectly be considered CRITICAL, fixing that. 
-            /* if(data.result.equals("Running"))
-                data.msg = "";
-
-            //Updating message if some test ran but hitting a exception    
-            if(data.msg.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
-                data.msg= findPassedFailedFromZipLogs(namespace, runPod);
-                data.color = "#f7b435"; //Didn't pass but didn't totally fail
-            }*/
-
-            counter++;
+           
+            cronjobCounter++;
             dashboardData.add(data);
-            //System.out.println("-----------------");     
         }
        
         Collections.sort(dashboardData, nameSorter); //Sorting everything but name of the cronjob
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
-        System.out.println(" Rendering Dashboard with " + counter + " Selenium Test Run Results.");
+        System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
         return  Templates.cronJobDashboard(dashboardData);
     }
 
