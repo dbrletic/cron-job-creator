@@ -28,8 +28,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestPath;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
@@ -65,6 +68,8 @@ public class OpenshiftResource {
     final private String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
     final private String PASSED = "Passed";
     final private String FAILED = "Failed";
+    final private String PROJECT_PATH = Paths.get("").toAbsolutePath().getParent().toString();
+    final private String RESOURCE_FOLDER = "META-INF" + File.separator + "resources" + File.separator + "logs" + File.separator;
 
     final private String GREEN = "#69ff33"; //Green
     final private String YELLOW = "#EBF58A"; //Yellow
@@ -247,8 +252,6 @@ public class OpenshiftResource {
             String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_CONTAINER).getLog(true);
             
             //Pulling the Selenium Test run data out of the logs. 
-            Matcher matcherTestRun = patternTestRun.matcher(runLogs);
-            Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
             Matcher matcherTimeStart = patternTimeStart.matcher(runLogs);
             Matcher matcherEnv = patternEnv.matcher(data.name);
                 
@@ -272,8 +275,10 @@ public class OpenshiftResource {
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in a eailer build of the file generator. Files could still be around
             data.name = data.name.replaceAll("-cronjob","");
 
-            //Creating link to piplerun logs
-            data.runLink = OC_CONSOLE_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
+            
+            //data.runLink = OC_CONSOLE_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
+            //Creating link to piplerun logs and hosting the files
+            data.runLink = createFileAndUrlLink(runLogs, runPod, data.name);
 
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
             //There should only be one pipeline conditions. No idea why it was made as a list
@@ -283,6 +288,8 @@ public class OpenshiftResource {
            
             //Setting the color and message
             data = getColorStatusAndMsg(data, runLogs, namespace, runPod);
+
+
            
             cronjobCounter++;
             dashboardData.add(data);
@@ -294,7 +301,6 @@ public class OpenshiftResource {
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
         return  Templates.cronJobDashboard(dashboardData);
     }
-
 
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
@@ -316,6 +322,21 @@ public class OpenshiftResource {
         return bindingParamsToBranch;
     }
 
+    private String createFileAndUrlLink(String runLogs, String runPod, String pipleRunName){
+        String urlLink="";
+        String fileName = PROJECT_PATH + RESOURCE_FOLDER + pipleRunName + "-" + runPod + ".txt";
+        
+        try {
+            System.out.println("Writing file to: " + fileName);
+            if(!Files.exists(Paths.get(fileName)))
+                Files.write(Paths.get(fileName), runLogs.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            System.err.println("Error writing file: " + e.getMessage());
+        }
+        urlLink="/logs/" + pipleRunName + "-" + runPod + ".txt";
+        return urlLink;
+
+    }
     /**
      * Sets the color to use as the background of the Results cell
      * @param result The result status of the pipeline run
