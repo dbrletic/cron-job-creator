@@ -15,7 +15,9 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 import io.fabric8.tekton.client.*;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunList;
@@ -25,12 +27,10 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestPath;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -53,24 +53,16 @@ public class OpenshiftResource {
 
     @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient;
-
-    @ConfigProperty(name = "upload.directory")
-    private String UPLOAD_DIR;
-
-    @ConfigProperty(name = "current.host")
-    private String OC_CONSOLE_URL;
-
-    final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run";
-    final private String BUILD_FAILURE = "Compliation error. Check logs for errors";
+    
+    final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
+    final private String BUILD_FAILURE = "Compliation error. Check logs for errors.";
     final private String STEP_CONTAINER = "step-build-and-run-selenium-tests";
     final private String STEP_ZIP_FILES = "step-reduce-image-sizes-from-selenium-tests";
     final private String RAN_BUT_FAILED = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0";
     final private String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
     final private String PASSED = "Passed";
     final private String FAILED = "Failed";
-    final private String PROJECT_PATH = Paths.get("").toAbsolutePath().getParent().toString();
-    final private String RESOURCE_FOLDER = "META-INF" + File.separator + "resources" + File.separator + "logs" + File.separator;
-
+  
     final private String GREEN = "#69ff33"; //Green
     final private String YELLOW = "#EBF58A"; //Yellow
     final private String RED = "#ff4763"; //Red
@@ -84,6 +76,7 @@ public class OpenshiftResource {
     private Pattern patternTimeStart = Pattern.compile("Total time:");
     private Pattern patternEnv = Pattern.compile("test\\d+");
 
+    //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
 
     @CheckedTemplate
@@ -276,9 +269,8 @@ public class OpenshiftResource {
             data.name = data.name.replaceAll("-cronjob","");
 
             
-            //data.runLink = OC_CONSOLE_URL + "/k8s/ns/" + namespace + "/tekton.dev~v1beta1~PipelineRun/" + pipleLineRun.getMetadata().getName() + "/logs";
             //Creating link to piplerun logs and hosting the files
-            data.runLink = createFileAndUrlLink(runLogs, runPod, data.name);
+            data.runLink = "/openshift/tester-pipelines/download/"+ data.name + "--" + runPod;
 
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
             //There should only be one pipeline conditions. No idea why it was made as a list
@@ -287,20 +279,44 @@ public class OpenshiftResource {
             data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
            
             //Setting the color and message
-            data = getColorStatusAndMsg(data, runLogs, namespace, runPod);
-
-
-           
+            data = getColorStatusAndMsg(data, runLogs, namespace, runPod); 
             cronjobCounter++;
             dashboardData.add(data);
         }
        
-        Collections.sort(dashboardData, nameSorter); //Sorting everything but name of the cronjob
+        Collections.sort(dashboardData, nameSorter); //Sorting everything by  name of the cronjob
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
+        
         return  Templates.cronJobDashboard(dashboardData);
     }
+
+    
+    @GET
+    @Path("/{namespace}/download/{testNameWithPodName}")
+    public Response downloadLogsFromPod(@RestPath String namespace, @RestPath String testNameWithPodName){
+        String[] testNamePodName = testNameWithPodName.split("--");
+        String testName = testNamePodName[0];
+        String podName = testNamePodName[1];
+        String projectDir = System.getProperty("user.dir");
+
+        File fileLocationAndFolder = new File(projectDir + File.separator + testName + "-logs.txt");
+        //Getting the runLogs for that Seleniun Build Step of of that test
+        String runLogs = openshiftClient.pods().inNamespace(namespace).withName(podName).inContainer(STEP_CONTAINER).getLog(true);
+        java.nio.file.Path fileLocation = Paths.get(projectDir, testName + "-logs.txt");
+        
+        try {
+            Files.write(fileLocation, runLogs.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return Response.ok(fileLocationAndFolder, MediaType.APPLICATION_OCTET_STREAM)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"+ " + testName +"-logs.txt\"")
+                        .build();       
+    }  
+
 
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
@@ -321,41 +337,7 @@ public class OpenshiftResource {
          }
         return bindingParamsToBranch;
     }
-
-    private String createFileAndUrlLink(String runLogs, String runPod, String pipleRunName){
-        String urlLink="";
-        String fileName = PROJECT_PATH + RESOURCE_FOLDER + pipleRunName + "-" + runPod + ".txt";
-        
-        try {
-            System.out.println("Writing file to: " + fileName);
-            if(!Files.exists(Paths.get(fileName)))
-                Files.write(Paths.get(fileName), runLogs.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            System.err.println("Error writing file: " + e.getMessage());
-        }
-        urlLink="/logs/" + pipleRunName + "-" + runPod + ".txt";
-        return urlLink;
-
-    }
-    /**
-     * Sets the color to use as the background of the Results cell
-     * @param result The result status of the pipeline run
-     * @return The color to use 
-     */
-    private String getColorStatus(String result){
-
-        switch (result) {
-            case "Succeeded":
-                return "#69ff33"; // Green
-            case "Running":
-                return "#f6ff7a"; // Yellow
-            case "Failed":
-                return "#ff4763"; // Red
-            default:
-                return "white";
-        }
-    }
-
+   
     /**
      * Figure out what to color the Pipeline Run and what message to display
      * @param data
