@@ -53,7 +53,7 @@ const serialize_form = form => JSON.stringify(
 
     xhr.open('GET', url, true);
     xhr.send();
-}
+  }
 
   // Add event listener to the "GetSchedule" button to trigger the AJAX call
   document.getElementById('GetSchedule').addEventListener('click', fetchData);
@@ -67,4 +67,58 @@ const serialize_form = form => JSON.stringify(
   function closeNav() {
     document.getElementById("mySidenav").style.width = "0";
   }
+
+  function addPair() {
+    const container = document.getElementById('pairContainer');
+    const pairDiv = document.createElement('div');
+    pairDiv.innerHTML = `
+        <input type="text" name="keys" placeholder="Enter the name of the cronjob" required>
+        <input type="text" name="values" placeholder="Enter schedule in * * * * * format" required>
+    `;
+    container.appendChild(pairDiv);
+}
+
+async function submitPairs() {
+    const keys = document.querySelectorAll('input[name="keys"]');
+    const values = document.querySelectorAll('input[name="values"]');
+    const pairs = {};
+    const userName =  document.getElementById('userName').value;
+    const description =  document.getElementById('description').value;
+
+    for (let i = 0; i < keys.length; i++) {
+        pairs[keys[i].value] = values[i].value;
+    }
+
+    const data = {
+      userName,
+      description,
+      pairs
+    };
+    
+
+    const response = await fetch('/openshift/tester-pipelines/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+    console.log(response);
+    if(response.status == 200) {
+      $("#successMessage").show();     
+      const container = document.getElementById('pairContainer');
+      pairContainer.innerHTML = '';
+      userName.textContent='';
+      description.textContent='';
+
+    }
+    else{
+      const errorContainer = document.getElementById('errorMessage');
+      const container = document.getElementById('pairContainer');
+      errorContainer.textContent = "Error: " + response.statusText;
+      pairContainer.innerHTML = '';
+    }
+
+    // Handle response
+}
   

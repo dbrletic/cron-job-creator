@@ -2,6 +2,7 @@ package ffm.cms;
 
 import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;
+import ffm.cms.model.UpdateCronJobSchedule;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
@@ -13,6 +14,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -28,7 +30,6 @@ import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.reactive.RestPath;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,6 +54,9 @@ public class OpenshiftResource {
 
     @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient;
+
+    @Inject
+    private JGitBean gitBeanClient;
     
     final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
     final private String BUILD_FAILURE = "Compliation error. Check logs for errors.";
@@ -271,7 +275,7 @@ public class OpenshiftResource {
 
             
             //Creating link to piplerun logs and hosting the files
-            data.runLink = "/openshift/tester-pipelines/download/"+ data.name + "--" + runPod;
+            data.runLink = "/openshift/tester-pipelines/download/"+ data.name + "--" + runPod; //The -- is how I seperate the dash in the cronjob name and the pod name
 
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
             //There should only be one pipeline conditions. No idea why it was made as a list
@@ -293,6 +297,31 @@ public class OpenshiftResource {
         return  Templates.cronJobDashboard(dashboardData);
     }
 
+    @POST
+    @Path("/{namespace}/update")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response makesChangesAndCommit(@RestPath String namespace, UpdateCronJobSchedule update) {
+        Map<String,String> cronJobsToUpdate = update.getPairs();
+
+        for(Map.Entry<String, String> entry : cronJobsToUpdate.entrySet()){
+            System.out.println("Cronjob: " + entry.getKey() + " New Schedule: " + entry.getValue()); 
+        }
+        System.out.println(update.getUserName() + " is making MR with details: " + update.getDescription());
+       
+        try{
+            gitBeanClient.updateAndPushCronjobs(cronJobsToUpdate, update.getDescription(), update.getUserName());
+        }catch(Exception e){
+            System.out.println("Error: " + e.getStackTrace());
+            Response.serverError().status(400, e.getLocalizedMessage()).build();
+        }
+        
+        /**
+         * TODO Using this example:
+         * https://github.com/sdaschner/quarkus-playground/blob/file-upload/src/main/resources/templates/files.html
+         * Instead of a new Object that is String/ Files make it String String and add in Cronjob Name - New CronJob schedule. 
+         */
+        return Response.ok().build();
+    }
     
     @GET
     @Path("/{namespace}/download/{testNameWithPodName}")
@@ -340,7 +369,7 @@ public class OpenshiftResource {
     }
    
     /**
-     * Figure out what to color the Pipeline Run and what message to display
+     * Figures out what to color the Pipeline Run and what message to display
      * @param data 
      * @param runLogs 
      * @param namespace
@@ -351,7 +380,7 @@ public class OpenshiftResource {
 
         /**
          * Red - job failed, no results
-           Orange - job did not complete, partial results
+           Orange - job did not complete due to exception, partial results
            Yellow - job completed, some tests failed
            Green - all tests passed
            Gray - Running
@@ -362,13 +391,19 @@ public class OpenshiftResource {
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());
-            data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
-            if(data.msg.contains("Failures: 0")){
+            
+            if(data.msg.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
+                data.msg= findPassedFailedFromZipLogs(namespace, runPod,true);
+                data.color = ORANGE; //Orange Didn't pass but didn't totally fail so 
+            }
+            else if(data.msg.contains("Failures: 0")){
+                data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = GREEN;
             }
-            else
+            else{
+                data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = YELLOW; 
-
+            }        
         }
         else if(matcherBuildFailed.find()){
             data.msg = BUILD_FAILURE;
@@ -383,11 +418,11 @@ public class OpenshiftResource {
             data.color = RED; 
         }
 
-        //Updating message if some test ran but hit a exception causing them to stop   
+        /*//Updating message if some test ran but hit a exception causing them to stop. Should move to the upper if statement   
         if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
             data.msg= findPassedFailedFromZipLogs(namespace, runPod,true);
             data.color = ORANGE; //Orange Didn't pass but didn't totally fail so 
-        }
+        }*/
 
         return data;
     }
@@ -427,9 +462,9 @@ public class OpenshiftResource {
 
 
     /**
-     * What is basically happening here is that the mvn test ran but hit a exception at some point after running a bunch of test.  Instead of show any  test actually ran before the exception mvn just bails out and shows 0 across the board
+     * What is basically happening here is that the mvn test ran but hit a exception at some point after running a bunch of test.  Instead of show any test that actually ran before the exception mvn just bails out and shows 0 across the board
      * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs
-     * Turns out this result string is more useful then the straight Selenium Test Result because it does not show how many test passed
+     * Turns out this result string is more useful then the straight Selenium Test Result because it does not show how many test passed only how many Ran, Failed, or where Skipped
      * @param namespace
      * @param runPod
      * @param exceptionFound
