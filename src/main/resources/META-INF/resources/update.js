@@ -88,8 +88,6 @@ async function submitPairs() {
     }
 
     const data = {
-      userName,
-      description,
       pairs
     };
   
@@ -106,8 +104,6 @@ async function submitPairs() {
         $("#successMessage").show();    
         const container = document.getElementById('pairContainer');
         container.innerHTML = '';
-        userName.textContent='';
-        description.textContent='';
         var link = document.createElement('a');
         let today = new Date().toISOString().slice(0, 10)
         link.href = window.URL.createObjectURL(response)
