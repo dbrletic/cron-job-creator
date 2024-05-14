@@ -16,7 +16,8 @@ import net.redhogs.cronparser.CronExpressionDescriptor;
 @ApplicationScoped
 public class ProcessCronJob{
 
-    
+    private static String CLEAN_GROUPS_URL_CLEAN_RELEASE_BRANCH = "CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH";
+
     public String processCronjob(String schedule, String groups, String url, String cleanReleaseBranch, String cleanGroup) throws IOException, ParseException {
 
         InputStream inputStream = getClass().getResourceAsStream("/cronjob-selenium-master.yml");
@@ -45,6 +46,33 @@ public class ProcessCronJob{
         Files.write(outputFile, outputContent.getBytes());
 
         return outputFile.toFile().getPath();
+    }
+
+    public String updateCronJOb(String allVars, String schedule) throws ParseException, IOException{
+
+        String cleanVars = allVars.replace("-cj","");
+
+        InputStream inputStream = getClass().getResourceAsStream("/cronjob-selenium-master.yml");
+      
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        String inputContent = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+        // Replace every instance of "CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH" with cleanGroup variable
+        String outputContent = inputContent.replaceAll(CLEAN_GROUPS_URL_CLEAN_RELEASE_BRANCH, cleanVars);
+
+        //Replace every instance of SCHEDULE with schedule variable
+        outputContent = outputContent.replaceAll("SCHEDULE", schedule);
+
+        //Replacing HUMAN_READABLE with a easy to understand description of the cronjob schedule 
+        outputContent = outputContent.replaceAll("HUMAN_READALBE", CronExpressionDescriptor.getDescription(schedule));
+
+        // Write out the output file for the new cronjob file
+         Path outputFile = Paths.get("cj-" + cleanVars +  ".yaml");
+         Files.write(outputFile, outputContent.getBytes());
+ 
+         return outputFile.toFile().getPath();
+
     }
 
     public String processEventListener(String groups, String url, String cleanReleaseBranch, String cleanGroup) throws IOException {

@@ -54,9 +54,6 @@ public class OpenshiftResource {
 
     @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient;
-
-    @Inject
-    private JGitBean gitBeanClient;
     
     final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
     final private String BUILD_FAILURE = "Compliation error. Check logs for errors.";
@@ -223,6 +220,7 @@ public class OpenshiftResource {
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         int cronjobCounter = 0; //Count how many CronJob pipelines were displayeds
         HashMap<String, String> pipelineRunToPod;
+
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
@@ -241,7 +239,7 @@ public class OpenshiftResource {
             String runPod = "";
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
             if(removeStart == -1) //Manually run pipelines will have not have -tt-**** on the end so we can skip them. 
-                break;
+                continue;
 
             runPod = pipelineRunToPod.get(pipleLineRun.getMetadata().getName());
             CronJobDashboardData data = new CronJobDashboardData(); 
@@ -297,32 +295,6 @@ public class OpenshiftResource {
         return  Templates.cronJobDashboard(dashboardData);
     }
 
-    @POST
-    @Path("/{namespace}/update")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response makesChangesAndCommit(@RestPath String namespace, UpdateCronJobSchedule update) {
-        Map<String,String> cronJobsToUpdate = update.getPairs();
-
-        for(Map.Entry<String, String> entry : cronJobsToUpdate.entrySet()){
-            System.out.println("Cronjob: " + entry.getKey() + " New Schedule: " + entry.getValue()); 
-        }
-        System.out.println(update.getUserName() + " is making MR with details: " + update.getDescription());
-       
-        try{
-            gitBeanClient.updateAndPushCronjobs(cronJobsToUpdate, update.getDescription(), update.getUserName());
-        }catch(Exception e){
-            System.out.println("Error: " + e.getStackTrace());
-            Response.serverError().status(400, e.getLocalizedMessage()).build();
-        }
-        
-        /**
-         * TODO Using this example:
-         * https://github.com/sdaschner/quarkus-playground/blob/file-upload/src/main/resources/templates/files.html
-         * Instead of a new Object that is String/ Files make it String String and add in Cronjob Name - New CronJob schedule. 
-         */
-        return Response.ok().build();
-    }
-    
     @GET
     @Path("/{namespace}/download/{testNameWithPodName}")
     public Response downloadLogsFromPod(@RestPath String namespace, @RestPath String testNameWithPodName){

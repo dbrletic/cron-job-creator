@@ -94,30 +94,72 @@ async function submitPairs() {
       description,
       pairs
     };
-    
-
-    const response = await fetch('/openshift/tester-pipelines/update', {
+  
+    $.ajax({
+      type: 'POST',
+      url: '/ffe-cronjob/update',
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      xhrFields:{
+        responseType: 'blob'
+      },
+      success: function(response) {
+        $('#errorMessage').empty();
+        $("#successMessage").show();    
+        const container = document.getElementById('pairContainer');
+        container.innerHTML = '';
+        userName.textContent='';
+        description.textContent='';
+        var link = document.createElement('a');
+        let today = new Date().toISOString().slice(0, 10)
+        link.href = window.URL.createObjectURL(response)
+        link.download = "cronjob-update-" + today + ".zip";
+        document.body.appendChild(link);
+        link.click();
+        $('#errorMessage').empty();
+        $("#successMessage").show();      
+      },
+      error: function(xhr, status, error) {
+        $("#successMessage").hide();
+        const errorContainer = document.getElementById('errorMessage');
+        const container = document.getElementById('pairContainer');
+        errorContainer.textContent = "Error: " + response.statusText;
+        container.innerHTML = '';     
+        console.log("Error: " + error);
+      }
+    });
+    /*
+    const response = await fetch('/ffe-cronjob/update', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        xhrFields:{
+          responseType: 'blob'
+        }
     });
     console.log(response);
     if(response.status == 200) {
       $("#successMessage").show();     
       const container = document.getElementById('pairContainer');
-      pairContainer.innerHTML = '';
+      container.innerHTML = '';
       userName.textContent='';
       description.textContent='';
+      var link = document.createElement('a');
+      let today = new Date().toISOString().slice(0, 10)
+      link.href = window.URL.createObjectURL(response)
+      link.download = "cronjob-update-" + today + ".zip";
+      document.body.appendChild(link);
+      link.click();
 
     }
     else{
       const errorContainer = document.getElementById('errorMessage');
       const container = document.getElementById('pairContainer');
       errorContainer.textContent = "Error: " + response.statusText;
-      pairContainer.innerHTML = '';
-    }
+      container.innerHTML = '';
+    }*/
 
     // Handle response
 }

@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import ffm.cms.model.FFEData;
 import ffm.cms.model.FFEGatlingData;
+import ffm.cms.model.UpdateCronJobSchedule;
 
 import org.apache.commons.io.FileUtils;
 
@@ -41,8 +44,6 @@ public class CronResource {
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
         String zipFileLocation = projectDir + File.separator + data.getGroups() + "-" + data.getUrl() + ".zip";
-        FileOutputStream fos;
-        ZipOutputStream zipOut;
 
         //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
         String cleanReleaseBranch = data.getReleaseBranch().replace("/", "-");
@@ -67,7 +68,98 @@ public class CronResource {
         }
 
         //Zipping up files
+        File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
+        
+        System.out.println("Add to response: " + zipFileLocation);
+        System.out.println("Zip is made: " + downloadZip.isFile());
+
+        return Response
+            .ok(FileUtils.readFileToByteArray(downloadZip))
+            .type("application/zip")
+            .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
+            .build();
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Blocking
+    @Path("gatling")
+    public Response createGatlingFiles(FFEGatlingData data) throws IOException, ParseException{
+        System.out.println("Starting up Gatling process for " + data.getUrl() + "-" + data.getReleaseBranch()) ;
+        System.out.println(data.toString());
+        List<String> newFilesLocation = new ArrayList<String>();
+        String projectDir = System.getProperty("user.dir");
+        String zipFileLocation = projectDir + File.separator + "gatling-" + data.getUrl() + ".zip";
+
+        //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
+        String cleanReleaseBranch = data.getReleaseBranch().replace("/", "-");
+        cleanReleaseBranch = cleanReleaseBranch.replace("\\", "-");
+
+         //Also have to remove any _ since that is not allowed in the name of a cronjob file
+        cleanReleaseBranch = cleanReleaseBranch.replace("_", "-");
+
+        //Also have to remove any . since that is not allowed in the meta name of a cronjob file
+        cleanReleaseBranch = cleanReleaseBranch.replace(".", "-");
+
+        try{
+            newFilesLocation.add(cronjobHandler.processGatlingCronjob(data.getCronJobSchedule(), data.getUrl(), cleanReleaseBranch, data.getType()));
+            newFilesLocation.add(cronjobHandler.processGatlingEventListener(data.getUrl(), cleanReleaseBranch, data.getType()));
+            newFilesLocation.add(cronjobHandler.processGatlingTriggerBinding(data.getUrl(), data.getReleaseBranch(), data.getType(), data.getGatlingTestEmailList(), cleanReleaseBranch));
+            newFilesLocation.add(cronjobHandler.processGatlingTriggerTemplate(data.getUrl(), cleanReleaseBranch, data.getType()));
+        } catch (IOException e){
+            System.out.println(e.getMessage());
+            System.out.println(e.getStackTrace());
+        }
+
+         //Zipping up files
+        File downloadZip = zipUpFiles(newFilesLocation, zipFileLocation);
        
+        System.out.println("Add to response: " + zipFileLocation);
+        System.out.println("Zip is made: " + downloadZip.isFile());
+
+        return Response
+            .ok(FileUtils.readFileToByteArray(downloadZip))
+            .type("application/zip")
+            .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
+            .build();
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Blocking
+    @Path("/update")
+    public Response updateCronJobs(UpdateCronJobSchedule update) throws IOException{
+        Map<String,String> cronJobsToUpdate = update.getPairs();
+        List<String> newFilesLocation = new ArrayList<String>();
+        String projectDir = System.getProperty("user.dir");
+        String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
+
+        for(Map.Entry<String, String> entry : cronJobsToUpdate.entrySet()){
+            System.out.println("Cronjob: " + entry.getKey() + " New Schedule: " + entry.getValue()); 
+            try{
+                newFilesLocation.add(cronjobHandler.updateCronJOb(entry.getKey(),  entry.getValue()));
+            } catch (IOException | ParseException e){
+                System.out.println(e.getMessage());
+                System.out.println(e.getStackTrace());
+            }
+            
+        }
+      
+        File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
+        System.out.println("Add to response: " + zipFileLocation);
+        System.out.println("Zip is made: " + downloadZip.isFile());
+
+        return Response
+            .ok(FileUtils.readFileToByteArray(downloadZip))
+            .type("application/zip")
+            .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
+            .build();
+    }
+
+
+    private File zipUpFiles(List<String> newFilesLocation, String zipFileLocation){
+        FileOutputStream fos;
+        ZipOutputStream zipOut;
         try {
             System.out.println("Creating zip file: " + zipFileLocation);
             fos = new FileOutputStream(zipFileLocation);
@@ -93,105 +185,24 @@ public class CronResource {
             fos.flush();
             fos.close();
 
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         // Remove the files in the zip from local file system
         System.out.println("Removing files that have been zipped");
         for(String scrFile: newFilesLocation){
             File fileToDelete = FileUtils.getFile(scrFile);
             FileUtils.deleteQuietly(fileToDelete);
         }
-        File downloadZip = new File(zipFileLocation);        
-        System.out.println("Add to response: " + zipFileLocation);
-        System.out.println("Zip is made: " + downloadZip.isFile());
-
-        return Response
-            .ok(FileUtils.readFileToByteArray(downloadZip))
-            .type("application/zip")
-            .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
-            .build();
+        return new File(zipFileLocation);        
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Blocking
-    @Path("gatling")
-    public Response createGatlingFiles(FFEGatlingData data) throws IOException, ParseException{
-        System.out.println("Starting up Gatling process for " + data.getUrl() + "-" + data.getReleaseBranch()) ;
-        System.out.println(data.toString());
-        List<String> newFilesLocation = new ArrayList<String>();
-        String projectDir = System.getProperty("user.dir");
-        String zipFileLocation = projectDir + File.separator + "gatling-" + data.getUrl() + ".zip";
-        FileOutputStream fos;
-        ZipOutputStream zipOut;
-
-        //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
-        String cleanReleaseBranch = data.getReleaseBranch().replace("/", "-");
-        cleanReleaseBranch = cleanReleaseBranch.replace("\\", "-");
-
-         //Also have to remove any _ since that is not allowed in the name of a cronjob file
-        cleanReleaseBranch = cleanReleaseBranch.replace("_", "-");
-
-        //Also have to remove any . since that is not allowed in the meta name of a cronjob file
-        cleanReleaseBranch = cleanReleaseBranch.replace(".", "-");
-
-        try{
-            newFilesLocation.add(cronjobHandler.processGatlingCronjob(data.getCronJobSchedule(), data.getUrl(), cleanReleaseBranch, data.getType()));
-            newFilesLocation.add(cronjobHandler.processGatlingEventListener(data.getUrl(), cleanReleaseBranch, data.getType()));
-            newFilesLocation.add(cronjobHandler.processGatlingTriggerBinding(data.getUrl(), data.getReleaseBranch(), data.getType(), data.getGatlingTestEmailList(), cleanReleaseBranch));
-            newFilesLocation.add(cronjobHandler.processGatlingTriggerTemplate(data.getUrl(), cleanReleaseBranch, data.getType()));
-        } catch (IOException e){
-            System.out.println(e.getMessage());
-            System.out.println(e.getStackTrace());
-        }
-
-        //Zipping up files
-        try {
-            System.out.println("Creating Gatling zip file: " + zipFileLocation);
-            fos = new FileOutputStream(zipFileLocation);
-            zipOut = new ZipOutputStream(fos);
-
-            for (String srcFile : newFilesLocation) {
-                System.out.println("Zipping file: " + srcFile);
-                File fileToZip = new File(srcFile);
-                FileInputStream fis = new FileInputStream(fileToZip);
-                ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
-                zipOut.putNextEntry(zipEntry);
-
-                byte[] bytes = new byte[1024];
-                int length;
-                while((length = fis.read(bytes)) >= 0) {
-                    zipOut.write(bytes, 0, length);
-                }
-                zipOut.closeEntry();
-                fis.close();
-            }
-            zipOut.flush();
-            zipOut.close();
-            fos.flush();
-            fos.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        
-        // Remove the files in the zip from local file system
-        System.out.println("Removing files that have been zipped");
-        for(String scrFile: newFilesLocation){
-            File fileToDelete = FileUtils.getFile(scrFile);
-            FileUtils.deleteQuietly(fileToDelete);
-        }
-        File downloadZip = new File(zipFileLocation);        
-        System.out.println("Add to response: " + zipFileLocation);
-        System.out.println("Zip is made: " + downloadZip.isFile());
-
-        return Response
-            .ok(FileUtils.readFileToByteArray(downloadZip))
-            .type("application/zip")
-            .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
-            .build();
+     private static String generateFiveCharUUID() {
+        UUID uuid = UUID.randomUUID();
+        String uuidString = uuid.toString().replace("-", "");
+        return uuidString.substring(0, 5);
     }
+
 
 }
