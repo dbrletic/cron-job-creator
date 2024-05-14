@@ -128,39 +128,5 @@ async function submitPairs() {
         console.log("Error: " + error);
       }
     });
-    /*
-    const response = await fetch('/ffe-cronjob/update', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-        xhrFields:{
-          responseType: 'blob'
-        }
-    });
-    console.log(response);
-    if(response.status == 200) {
-      $("#successMessage").show();     
-      const container = document.getElementById('pairContainer');
-      container.innerHTML = '';
-      userName.textContent='';
-      description.textContent='';
-      var link = document.createElement('a');
-      let today = new Date().toISOString().slice(0, 10)
-      link.href = window.URL.createObjectURL(response)
-      link.download = "cronjob-update-" + today + ".zip";
-      document.body.appendChild(link);
-      link.click();
-
-    }
-    else{
-      const errorContainer = document.getElementById('errorMessage');
-      const container = document.getElementById('pairContainer');
-      errorContainer.textContent = "Error: " + response.statusText;
-      container.innerHTML = '';
-    }*/
-
-    // Handle response
 }
   

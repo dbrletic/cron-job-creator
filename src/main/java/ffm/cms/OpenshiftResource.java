@@ -2,7 +2,6 @@ package ffm.cms;
 
 import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;
-import ffm.cms.model.UpdateCronJobSchedule;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
@@ -15,7 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -443,7 +441,7 @@ public class OpenshiftResource {
     /**
      * What is basically happening here is that the mvn test ran but hit a exception at some point after running a bunch of test.  Instead of show any test that actually ran before the exception mvn just bails out and shows 0 across the board
      * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs
-     * Turns out this result string is more useful then the straight Selenium Test Result because it does not show how many test passed only how many Ran, Failed, or where Skipped
+     * Turns out this result string is more useful then the straight Selenium Test Result because it does not show how many test passed only how many Ran, Failed, or Skipped
      * @param namespace
      * @param runPod
      * @param exceptionFound
