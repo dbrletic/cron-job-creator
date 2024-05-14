@@ -6,6 +6,7 @@ import ffm.cms.model.UpdateCronJobSchedule;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -96,7 +97,7 @@ public class OpenshiftResource {
     @Produces(MediaType.TEXT_HTML)
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCurrentCronJobs(@RestPath String namespace) throws ParseException, Exception{
-
+        Instant start = Instant.now();
         // Helpful openShiftClient / kubernetes cheatsheet
         //https://github.com/fabric8io/kubernetes-client/blob/main/doc/CHEATSHEET.md#cronjob
         
@@ -136,10 +137,12 @@ public class OpenshiftResource {
             //Setting the type
             int typeIndexNameEnd = currentJob.name.indexOf("-");
             currentJob.type=currentJob.name.substring(0, typeIndexNameEnd);
-            System.out.println("Job name: " + currentJob.name + " Job Type: " + currentJob.type);
+           // System.out.println("Job name: " + currentJob.name + " Job Type: " + currentJob.type);
 
             cronJobs.add(currentJob);
         }
+        long elapsedMs = Duration.between(start, Instant.now()).toMillis();
+        System.out.println("getCurrentCronJobs took " + elapsedMs + " milliseconds to complete");
         return Templates.cronJobData(cronJobs);
     }
 
@@ -241,14 +244,21 @@ public class OpenshiftResource {
             String runPod = "";
             int removeStart = pipleLineRun.getMetadata().getName().indexOf("-tt-");
             if(removeStart == -1) //Manually run pipelines will have not have -tt-**** on the end so we can skip them. 
-                break;
+                continue;
 
             runPod = pipelineRunToPod.get(pipleLineRun.getMetadata().getName());
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             //Grabbing the logs from the pod
-            String runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_CONTAINER).getLog(true);
-            
+            String runLogs = "";
+            try{ //If a test gets cancelled the pod instantly goes away and no logs. 
+                runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_CONTAINER).getLog(true);
+            } catch (KubernetesClientException e){
+                System.out.println("Could not get logs for pod: " + runPod + " for cronjob: "+ pipleLineRun.getMetadata().getName());
+                //Catching the Exception but still want to display it
+                runLogs="";
+            }
+             
             //Pulling the Selenium Test run data out of the logs. 
             Matcher matcherTimeStart = patternTimeStart.matcher(runLogs);
             Matcher matcherEnv = patternEnv.matcher(data.name);
@@ -386,17 +396,16 @@ public class OpenshiftResource {
            Gray - Running
          * 
          */
-        String doubleCheck="";
+        String doubleCheck;
         Matcher matcherTestRun = patternTestRun.matcher(runLogs);
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
         if(matcherTestRun.find() && !data.result.equals("Failed")){
-            doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());
-            
-            if(data.msg.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
+            doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
+            if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
                 data.msg= findPassedFailedFromZipLogs(namespace, runPod,true);
                 data.color = ORANGE; //Orange Didn't pass but didn't totally fail so 
             }
-            else if(data.msg.contains("Failures: 0")){
+            else if(doubleCheck.contains("Failures: 0")){
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = GREEN;
             }
@@ -412,17 +421,15 @@ public class OpenshiftResource {
         else if(data.result.equals("Running")){
             data.msg = "";
             data.color =GRAY;
-
+        }
+        else if(data.result.equals("Cancelled")){
+            data.msg = "";
+            data.color =GRAY;
+            data.runLink=""; //Can't get the logs for cancelled pod
         }else{
             data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests  
             data.color = RED; 
         }
-
-        /*//Updating message if some test ran but hit a exception causing them to stop. Should move to the upper if statement   
-        if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
-            data.msg= findPassedFailedFromZipLogs(namespace, runPod,true);
-            data.color = ORANGE; //Orange Didn't pass but didn't totally fail so 
-        }*/
 
         return data;
     }
