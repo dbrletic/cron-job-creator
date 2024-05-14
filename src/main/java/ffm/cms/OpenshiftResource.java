@@ -109,7 +109,7 @@ public class OpenshiftResource {
         List<CronJobData> cronJobs = new ArrayList<>();
 
         //Listing the current OpenShift user
-        System.out.println("Current User: " + openshiftClient.currentUser());
+        //System.out.println("Current User: " + openshiftClient.currentUser());
 
         //So there is no duplicate code between Selenium and Gatling
         bindingParamsToBranch = bindParamsToBranch(tbList);
@@ -126,7 +126,7 @@ public class OpenshiftResource {
             if(currentJob.branch == "" || currentJob.branch == null || currentJob.branch.isBlank() || currentJob.branch.isEmpty()){
                 //Changing the name back to the old style
                 bindingName = currentJob.name.replaceAll("cj", "cronjob") + "-binding";
-                System.out.println("Looking for: " + bindingName);
+                //System.out.println("Looking for: " + bindingName);
                 currentJob.branch = bindingParamsToBranch.get(bindingName); 
             }
             //Setting the type
@@ -166,7 +166,7 @@ public class OpenshiftResource {
         bindingParamsToBranch = bindParamsToBranch(tbList);
 
         //Listing the current OpenShift user
-        System.out.println("Current User: " + openshiftClient.currentUser());
+        //System.out.println("Current User: " + openshiftClient.currentUser());
 
         //Filling out the values for the linked template.
         for(CronJob job : cronJobList){
@@ -224,14 +224,17 @@ public class OpenshiftResource {
 
         //Have to use TektonClient for anything related to pipelines
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
+
+        //Getting all the pipeline and task runs
         PipelineRunList list = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).list();
         TaskRunList taskRunList = tknClient.v1beta1().taskRuns().inNamespace(namespace).list();
 
-        //Getting all the TaskRuns
+        //Getting all the TaskRuns from the TakeRunList
         List <TaskRun> taskRuns = taskRunList.getItems();
         
-        //Getting all the pipelineRuns
+        //Getting all the pipelineRuns from the PipeLineRunList
         List <PipelineRun> pipleRunList = list.getItems();
+
         System.out.println("Getting " + pipleRunList.size() + " pipeline runs and data on OpenShift for namespace: " + namespace);
         //Mapping the pod a given TaskRun was exeucted on 
         pipelineRunToPod = mapPodToRun(taskRuns);
@@ -245,9 +248,10 @@ public class OpenshiftResource {
             runPod = pipelineRunToPod.get(pipleLineRun.getMetadata().getName());
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
+            
             //Grabbing the logs from the pod
             String runLogs = "";
-            try{ //If a test gets cancelled the pod instantly goes away and no logs. 
+            try{ //If a test gets cancelled the pod instantly goes away and no logs causing a null pointer error. 
                 runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_CONTAINER).getLog(true);
             } catch (KubernetesClientException e){
                 System.out.println("Could not get logs for pod: " + runPod + " for cronjob: "+ pipleLineRun.getMetadata().getName());
@@ -259,7 +263,7 @@ public class OpenshiftResource {
             Matcher matcherTimeStart = patternTimeStart.matcher(runLogs);
             Matcher matcherEnv = patternEnv.matcher(data.name);
                 
-           //Getting the time it took to run the pipeline
+           //Getting the time it took to run the selenium test
             if(matcherTimeStart.find()){
                 data.runTime = runLogs.substring(matcherTimeStart.end(), matcherTimeStart.end() + 11).replace("[", "");
             }
@@ -281,7 +285,8 @@ public class OpenshiftResource {
 
             
             //Creating link to piplerun logs and hosting the files
-            data.runLink = "/openshift/tester-pipelines/download/"+ data.name + "--" + runPod; //The -- is how I seperate the dash in the cronjob name and the pod name
+            //The -- is how I seperate the dash in the cronjob name and the pod name. Will be used later to get run logs from a pod for a specific run
+            data.runLink = "/openshift/tester-pipelines/download/"+ data.name + "--" + runPod; 
 
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
             //There should only be one pipeline conditions. No idea why it was made as a list

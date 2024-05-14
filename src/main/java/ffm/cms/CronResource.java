@@ -155,7 +155,12 @@ public class CronResource {
             .build();
     }
 
-
+    /**
+     * Helper method that zips up a bunch of files, delete the zipped file, and returns the location of the newly created zip
+     * @param newFilesLocation Array of location of the files to be zipped
+     * @param zipFileLocation The final location of the zip file
+     * @return Return a File object of the newly created zip file
+     */
     private File zipUpFiles(List<String> newFilesLocation, String zipFileLocation){
         FileOutputStream fos;
         ZipOutputStream zipOut;
