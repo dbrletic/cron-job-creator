@@ -82,8 +82,6 @@ async function submitPairs() {
     const keys = document.querySelectorAll('input[name="keys"]');
     const values = document.querySelectorAll('input[name="values"]');
     const pairs = {};
-    const userName =  document.getElementById('userName').value;
-    const description =  document.getElementById('description').value;
 
     for (let i = 0; i < keys.length; i++) {
         pairs[keys[i].value] = values[i].value;
