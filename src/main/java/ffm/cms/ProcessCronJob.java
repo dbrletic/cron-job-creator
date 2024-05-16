@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 
+/**
+ * Handles creating new cronjob files (and associated pipeline files) to run kick off Selenium Test
+ * @author dbrletic
+ */
 @ApplicationScoped
 public class ProcessCronJob{
 

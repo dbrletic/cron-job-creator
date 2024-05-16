@@ -27,6 +27,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+/**
+ * Handles receiving request to create new cronjob files
+ * @author dbrletic
+ */
 @Path("/ffe-cronjob")
 @ApplicationScoped
 public class CronResource {

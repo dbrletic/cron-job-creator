@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Cleans up the left over zip and txt files so there are not any name conflicts. 
+ * @author dbrletic
  */
 @ApplicationScoped
 public class CleanUpBean {

@@ -47,6 +47,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Handles getting information from OpenShift like Cronjob Schedules, logs, etc
+ * @author dbrletic
+ */
 @ApplicationScoped
 @Path("/openshift")
 public class OpenshiftResource {
@@ -196,8 +200,7 @@ public class OpenshiftResource {
     public String getCronJobSchedule(@RestPath String namespace, @RestPath String cronJobName){
         
         System.out.println("Verify Schedule for Namepace: " + namespace  +" Cronjob: " + cronJobName);
-        System.out.println("Current User: " + openshiftClient.currentUser());
-        
+                
         //Checking to see if the given CronJob is in the system. Catching it nicely since the client will just throw a NullPointerException
         try{
             openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(cronJobName);
