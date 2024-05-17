@@ -419,6 +419,10 @@ public class OpenshiftResource {
      */
     private String createReadableData(String date){
 
+        //Just in case the cronjob has not run yet and the last Transaction time is null or empty/blank. 
+        if(date == null || date.isBlank())
+            return "";
+
         // Parse the string to an Instant object
         Instant instant = Instant.parse(date);
 
