@@ -1,5 +1,8 @@
 package ffm.cms.model;
 
+import io.quarkus.qute.TemplateData;
+
+@TemplateData
 public class CronJobData {
 
     public String name;
