@@ -8,10 +8,12 @@
 {#include menu.html}
 {/include}
 <!-- Use any element to open the sidenav -->
+<!-- https://www.w3schools.com/howto/howto_js_filter_lists.asp -->
 <span onclick="openNav()"><h3>Menu</h3></span>
 <div class="container" id="main">
     <h2>Current List of FFE Selenium Pipeline Runs</h2>
-   
+    <input type="text" id="cronJobFilter" onkeyup="filterCronJobs()" placeholder="Search for names..">
+    <ul id="cronJobData">
     <h3>Test 1</h3>
     <table>
         <thead>
@@ -27,14 +29,16 @@
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test1"}
         <tbody>
+            <li>
             <tr>
-                <td>{cronJob.name}</td>
+                <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
+            </li>
         </tbody>
         {/if}
         {/for}
@@ -54,14 +58,16 @@
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test2"}
         <tbody>
+            <li>
              <tr>
-                <td>{cronJob.name}</td>
+                <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
+            </li>
         </tbody>
         {/if}
         {/for}
@@ -81,14 +87,16 @@
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test3"}
         <tbody>
+            <li>
             <tr>
-                <td>{cronJob.name}</td>
+                <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
+            </li>
         </tbody>
         {/if}
         {/for}
@@ -108,18 +116,21 @@
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test4"}
         <tbody>
+            <li>
             <tr>
-                <td>{cronJob.name}</td>
+                <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
+            </li>
         </tbody>
         {/if}
         {/for}
     </table>
+    </ul>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

@@ -71,7 +71,7 @@ public class OpenshiftResource {
     final private String GREEN = "#69ff33"; //Green
     final private String YELLOW = "#EBF58A"; //Yellow
     final private String RED = "#ff4763"; //Red
-    final private String GRAY = "#ECF0F1"; //Gray
+    final private String GRAY = "##f6f6f6"; //Gray
     final private String ORANGE = "#F0C476"; //Orange
 
 
