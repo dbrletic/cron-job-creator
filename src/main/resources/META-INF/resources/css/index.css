@@ -48,7 +48,7 @@
     .sidenav a {font-size: 18px;}
   }
 
-  #cronJobFilter {
+  #searchInput {
     background-image: url('/css/searchicon.png'); /* Add a search icon to input */
     background-position: 10px 12px; /* Position the search icon */
     background-repeat: no-repeat; /* Do not repeat the icon image */
