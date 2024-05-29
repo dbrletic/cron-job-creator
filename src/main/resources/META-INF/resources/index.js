@@ -55,22 +55,26 @@ function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
 }
 
-function filterCronJobs() {
-  // Declare variables
-  var input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById('cronJobFilter');
-  filter = input.value.toUpperCase();
-  ul = document.getElementById("cronJobData");
-  li = ul.getElementsByTagName('li');
+function searchTable() {
+  const table = document.getElementById('test1');
+  const searchInput = document.getElementById('cronJobFilter');
+  const searchValue = searchInput.value.trim();
+  const rowIndex = 0; // Search in the Name column (index 0)
 
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i].getElementsByTagName("a")[0];
-    txtValue = a.textContent || a.innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
+  const rows = table.rows;
+  const searchRegex = new RegExp(searchValue, 'i'); // Create a case-insensitive regular expression
+
+  // Iterate over each row in the table
+  for (let i = 1; i < rows.length; i++) { // Skip the header row
+    const row = rows[i];
+    const cell = row.cells[rowIndex];
+    const cellText = cell.textContent.trim();
+
+    // Check if the cell in the specified row contains the search value
+    if (searchRegex.test(cellText)) {
+      row.style.display = ''; // Show the row
     } else {
-      li[i].style.display = "none";
+      row.style.display = 'none'; // Hide the row
     }
   }
 }
