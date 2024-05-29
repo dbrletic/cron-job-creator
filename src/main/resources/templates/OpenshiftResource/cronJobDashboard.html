@@ -12,7 +12,7 @@
 <span onclick="openNav()"><h3>Menu</h3></span>
 <div class="container" id="main">
     <h2>Current List of FFE Selenium Pipeline Runs</h2>
-    <input type="text" id="cronJobFilter" onclick="filterCronJobs()" placeholder="Search for names..">
+    <input type="text" id="cronJobFilter" onkeyup="searchTable()" placeholder="Search for names..">
     <h3>Test 1</h3>
     <table id="test1">
         <thead>
