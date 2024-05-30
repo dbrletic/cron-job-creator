@@ -71,7 +71,7 @@ public class OpenshiftResource {
     final private String GREEN = "#69ff33"; //Green
     final private String YELLOW = "#EBF58A"; //Yellow
     final private String RED = "#ff4763"; //Red
-    final private String GRAY = "##f6f6f6"; //Gray
+    final private String GRAY = "#f6f6f6"; //Gray
     final private String ORANGE = "#F0C476"; //Orange
 
 
@@ -398,12 +398,12 @@ public class OpenshiftResource {
         }
         else if(data.result.equals("Running")){
             data.msg = "";
-            data.color =GRAY;
+            data.color = GRAY;
         }
         else if(data.result.equals("Cancelled")){
             data.msg = "";
-            data.color =GRAY;
-            data.runLink=""; //Can't get the logs for cancelled pod
+            data.color = GRAY;
+            data.runLink = ""; //Can't get the logs for cancelled pod
         }else{
             data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests  
             data.color = RED; 
