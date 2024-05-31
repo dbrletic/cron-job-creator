@@ -58,21 +58,23 @@ public class OpenshiftResource {
     @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient;
     
-    final private String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
-    final private String BUILD_FAILURE = "Compliation error. Check logs for errors.";
-    final private String STEP_CONTAINER = "step-build-and-run-selenium-tests";
-    final private String STEP_ZIP_FILES = "step-reduce-image-sizes-from-selenium-tests";
-    final private String RAN_BUT_FAILED = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0";
-    final private String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
-    final private String TEST_RUN = "Test run - Run: %d, Passed: %d, Failures: %d";
-    final private String PASSED = "Passed";
-    final private String FAILED = "Failed";
+    final private static String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
+    final private static String BUILD_FAILURE = "Compliation error. Check logs for errors.";
+    final private static String STEP_CONTAINER = "step-build-and-run-selenium-tests";
+    final private static String STEP_ZIP_FILES = "step-reduce-image-sizes-from-selenium-tests";
+    final private static String RAN_BUT_FAILED = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0";
+    final private static String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
+    final private static String TEST_RUN = "Test run - Run: %d, Passed: %d, Failures: %d";
+    final private static String PASSED = "Passed";
+    final private static String FAILED = "Failed";
+    final private static String RUNNING = "Running";
+    final private static String CANCELLED = "Cancelled";
   
-    final private String GREEN = "#69ff33"; //Green
-    final private String YELLOW = "#EBF58A"; //Yellow
-    final private String RED = "#ff4763"; //Red
-    final private String GRAY = "#ECF0F1"; //Gray
-    final private String ORANGE = "#F0C476"; //Orange
+    final private static String GREEN = "#69ff33"; //Green
+    final private static String YELLOW = "#EBF58A"; //Yellow
+    final private static String RED = "#ff4763"; //Red
+    final private static String GRAY = "#f6f6f6"; //Gray
+    final private static String ORANGE = "#F0C476"; //Orange
 
 
 
@@ -113,7 +115,6 @@ public class OpenshiftResource {
         List<CronJobData> cronJobs = new ArrayList<>();
 
         //Listing the current OpenShift user
-        //System.out.println("Current User: " + openshiftClient.currentUser());
 
         //So there is no duplicate code between Selenium and Gatling
         bindingParamsToBranch = bindParamsToBranch(tbList);
@@ -289,7 +290,7 @@ public class OpenshiftResource {
             
             //Creating link to piplerun logs and hosting the files
             //The -- is how I seperate the dash in the cronjob name and the pod name. Will be used later to get run logs from a pod for a specific run
-            data.runLink = "/openshift/tester-pipelines/download/"+ data.name + "--" + runPod; 
+            data.runLink = "/openshift/" + namespace + "/download/"+ data.name + "--" + runPod; 
 
             List<Condition> pipelineConditions =  pipleLineRun.getStatus().getConditions();
             //There should only be one pipeline conditions. No idea why it was made as a list
@@ -335,11 +336,10 @@ public class OpenshiftResource {
                         .build();       
     }  
 
-
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
      * @param tbList
-     * @return
+     * @return A Map that binds a cronjob name to its Trigger Binding releaseBranch value
      */
     private Map<String,String> bindParamsToBranch(List<TriggerBinding> tbList){
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
@@ -381,7 +381,7 @@ public class OpenshiftResource {
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
                 data.msg= findPassedFailedFromZipLogs(namespace, runPod,true);
-                data.color = ORANGE; //Orange Didn't pass but didn't totally fail so 
+                data.color = ORANGE; //Orange Didn't pass but didn't totally fail
             }
             else if(doubleCheck.contains("Failures: 0")){
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
@@ -396,14 +396,14 @@ public class OpenshiftResource {
             data.msg = BUILD_FAILURE;
             data.color = RED; 
         }
-        else if(data.result.equals("Running")){
+        else if(data.result.equals(RUNNING)){
             data.msg = "";
-            data.color =GRAY;
+            data.color = GRAY;
         }
-        else if(data.result.equals("Cancelled")){
+        else if(data.result.equals(CANCELLED)){
             data.msg = "";
-            data.color =GRAY;
-            data.runLink=""; //Can't get the logs for cancelled pod
+            data.color = GRAY;
+            data.runLink = ""; //Can't get the logs for cancelled pod
         }else{
             data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests  
             data.color = RED; 
@@ -460,7 +460,7 @@ public class OpenshiftResource {
      * @return
      */
     private String findPassedFailedFromZipLogs(String namespace, String runPod, boolean exceptionFound){
-        //Abusing the fact that zip displays the files its zipping
+        //Abusing the fact that zip displays the files its zipping to find the number of Pass/Failed images generated
         String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);
         int passedCount = StringUtils.countMatches(zipLogs, PASSED);
         int failedCount = StringUtils.countMatches(zipLogs, FAILED);

@@ -11,9 +11,9 @@
 <span onclick="openNav()"><h3>Menu</h3></span>
 <div class="container" id="main">
     <h2>Current List of FFE Selenium Pipeline Runs</h2>
-   
+    <input type="text" id="searchInput" onkeyup="searchTables()" placeholder="Search for names..">
     <h3>Test 1</h3>
-    <table>
+    <table id="test1">
         <thead>
             <tr>
                 <th>Name</th>
@@ -26,9 +26,9 @@
         </thead>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test1"}
-        <tbody>
+        <tbody>          
             <tr>
-                <td>{cronJob.name}</td>
+                <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
                 <td>{cronJob.runTime}</td>
@@ -40,7 +40,7 @@
         {/for}
     </table>
     <h3>Test 2</h3>
-    <table>
+    <table id="test2">
         <thead>
             <tr>
                 <th>Name</th>
@@ -55,7 +55,7 @@
         {#if cronJob.env == "test2"}
         <tbody>
              <tr>
-                <td>{cronJob.name}</td>
+                <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
                 <td>{cronJob.runTime}</td>
@@ -67,7 +67,7 @@
         {/for}
     </table>
     <h3>Test 3</h3>
-    <table>
+    <table id="test3">
         <thead>
             <tr>
                 <th>Name</th>
@@ -82,7 +82,7 @@
         {#if cronJob.env == "test3"}
         <tbody>
             <tr>
-                <td>{cronJob.name}</td>
+                <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
                 <td>{cronJob.runTime}</td>
@@ -94,7 +94,7 @@
         {/for}
     </table>
     <h3>Test4</h3>
-    <table>
+    <table id="test4">
         <thead>
             <tr>
                 <th>Name</th>
@@ -109,7 +109,7 @@
         {#if cronJob.env == "test4"}
         <tbody>
             <tr>
-                <td>{cronJob.name}</td>
+                <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
                 <td>{cronJob.runTime}</td>
@@ -123,11 +123,11 @@
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="/index.js"></script>
+<script src="/js/index.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
-<link rel="stylesheet" href="/index.css">
+<link rel="stylesheet" href="/css/index.css">
 
 </body>
 </html>

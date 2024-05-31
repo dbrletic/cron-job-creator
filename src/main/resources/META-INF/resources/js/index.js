@@ -54,3 +54,34 @@ function openNav() {
 function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
 }
+
+function searchTables() {
+  const searchInput = document.getElementById('searchInput');
+  const searchValue = searchInput.value.trim();
+  const rowIndex = 0; // Search in the first column
+  const tables = [
+    document.getElementById('test1'),
+    document.getElementById('test2'),
+    document.getElementById('test3'),
+    document.getElementById('test4')
+  ];
+
+  tables.forEach(table => {
+    const rows = table.rows;
+    const searchRegex = new RegExp(searchValue, 'i'); // Create a case-insensitive regular expression
+
+    // Iterate over each row in the table
+    for (let i = 1; i < rows.length; i++) { // Skip the header row
+      const row = rows[i];
+      const cell = row.cells[rowIndex];
+      const cellText = cell.textContent.trim();
+
+      // Check if the cell in the specified row contains the search value
+      if (searchRegex.test(cellText)) {
+        row.style.display = ''; // Show the row
+      } else {
+        row.style.display = 'none'; // Hide the row
+      }
+    }
+  });
+}
