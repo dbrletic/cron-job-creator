@@ -58,6 +58,7 @@ public class OpenshiftResource {
     @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient;
     
+    final private static String CRIO_MSG = "Unable to get logs. Check email for status of run.";
     final private static String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
     final private static String BUILD_FAILURE = "Compliation error. Check logs for errors.";
     final private static String STEP_CONTAINER = "step-build-and-run-selenium-tests";
@@ -65,6 +66,7 @@ public class OpenshiftResource {
     final private static String RAN_BUT_FAILED = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0";
     final private static String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
     final private static String TEST_RUN = "Test run - Run: %d, Passed: %d, Failures: %d";
+    final private static String CRI_O_ERROR = "unable to retrieve container logs for cri-0:";
     final private static String PASSED = "Passed";
     final private static String FAILED = "Failed";
     final private static String RUNNING = "Running";
@@ -82,6 +84,7 @@ public class OpenshiftResource {
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
     private Pattern patternTimeStart = Pattern.compile("Total time:");
     private Pattern patternEnv = Pattern.compile("test\\d+");
+    private Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
 
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
@@ -377,6 +380,7 @@ public class OpenshiftResource {
         String doubleCheck;
         Matcher matcherTestRun = patternTestRun.matcher(runLogs);
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
+        Matcher matcherCRIOError = patternCRIOError.matcher(runLogs); //This is a extreme edge case that can happen to all jobs on a node. 
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
@@ -407,6 +411,13 @@ public class OpenshiftResource {
         }else{
             data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests  
             data.color = RED; 
+        }
+
+        //Doing a double check for issue with the CRI-O system on a pod/node. This is a edge case that comes up red but could have worked. 
+        //Need to have the testers check the email on information about the run. 
+        if(matcherCRIOError.find()){
+            data.msg = CRIO_MSG;
+            data.color = GRAY;
         }
 
         return data;
