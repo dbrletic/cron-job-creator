@@ -71,6 +71,8 @@ public class OpenshiftResource {
     final private static String FAILED = "Failed";
     final private static String RUNNING = "Running";
     final private static String CANCELLED = "Cancelled";
+    final private static String TEST_FAILURE_START = "[INFO]\\n[INFO] Results:\\n[INFO]\\n[ERROR] Failures";
+    final private static String TEST_FAILURE_END = "[INFO]]\\n[ERROR] Tests run:";
   
     final private static String GREEN = "#69ff33"; //Green
     final private static String YELLOW = "#EBF58A"; //Yellow
@@ -85,6 +87,8 @@ public class OpenshiftResource {
     private Pattern patternTimeStart = Pattern.compile("Total time:");
     private Pattern patternEnv = Pattern.compile("test\\d+");
     private Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
+    private Pattern patternStartOfFailedTests = Pattern.compile(TEST_FAILURE_START);
+    private Pattern patternEndOfFailedTests = Pattern.compile(TEST_FAILURE_END);
 
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
@@ -339,6 +343,8 @@ public class OpenshiftResource {
                         .build();       
     }  
 
+    //TODO Move the following methods to their own helper class to clean up code
+
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
      * @param tbList
@@ -381,19 +387,24 @@ public class OpenshiftResource {
         Matcher matcherTestRun = patternTestRun.matcher(runLogs);
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
         Matcher matcherCRIOError = patternCRIOError.matcher(runLogs); //This is a extreme edge case that can happen to all jobs on a node. 
+        Matcher matcherTestFailureStart = patternStartOfFailedTests.matcher(runLogs);
+        Matcher matcherTEstFailureEnd = patternEndOfFailedTests.matcher(runLogs);
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
-                data.msg= findPassedFailedFromZipLogs(namespace, runPod,true);
+                data.msg = findPassedFailedFromZipLogs(namespace, runPod,true);
                 data.color = ORANGE; //Orange Didn't pass but didn't totally fail
+                getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start());
             }
             else if(doubleCheck.contains("Failures: 0")){
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = GREEN;
+                getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start());
             }
             else{
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
-                data.color = YELLOW; 
+                data.color = YELLOW;
+                getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start()); 
             }        
         }
         else if(matcherBuildFailed.find()){
@@ -479,6 +490,13 @@ public class OpenshiftResource {
             return String.format(RUN_BUT_FAILED_MSG, passedCount + failedCount, passedCount, failedCount);
         else
             return String.format(TEST_RUN, passedCount + failedCount, passedCount, failedCount);
-    }   
+    }
+    
+    private String getFailedTests(String runLogs, int startPosition, int finishPosition){
+
+        System.out.println("Start: " + startPosition + " Finished: " + finishPosition);
+        return "";
+
+    }
 
 }
