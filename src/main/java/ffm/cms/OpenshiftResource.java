@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
 public class OpenshiftResource {
 
     @Inject //Generic OpenShift client
-    private OpenShiftClient openshiftClient;
+    private OpenShiftClient openshiftClient; //Make sure to add a ServiceAccount to the deployment that has access to the namespace that has the pipeline runs. 
     
     final private static String CRIO_MSG = "Unable to get logs. Check email for status of run.";
     final private static String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
@@ -66,7 +66,7 @@ public class OpenshiftResource {
     final private static String RAN_BUT_FAILED = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0";
     final private static String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
     final private static String TEST_RUN = "Test run - Run: %d, Passed: %d, Failures: %d";
-    final private static String CRI_O_ERROR = "unable to retrieve container logs for cri-0:";
+    final private static String CRI_O_ERROR = "unable to retrieve container logs for cri-o:";
     final private static String PASSED = "Passed";
     final private static String FAILED = "Failed";
     final private static String RUNNING = "Running";
