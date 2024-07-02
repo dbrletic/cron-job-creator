@@ -120,6 +120,33 @@
         {/if}
         {/for}
     </table>
+    <h3>Test4</h3>
+    <table id="test9">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Test Results</th>
+                <th>Run Time</th>
+                <th>Link</th>
+                <th>Last Upate Time</th>
+            </tr>
+        </thead>
+        {#for cronJob in cronJobs}
+        {#if cronJob.env == "test9"}
+        <tbody>
+            <tr>
+                <td class="cronjobName">{cronJob.name}</td>
+                <td bgcolor="{cronJob.color}">{cronJob.result}</td>
+                <td>{cronJob.msg}</td>
+                <td>{cronJob.runTime}</td>
+                <td><A href="{cronJob.runLink}">Link to Logs</A></td>
+                <td>{cronJob.lastTransitionTime}</td>
+            </tr>
+        </tbody>
+        {/if}
+        {/for}
+    </table>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

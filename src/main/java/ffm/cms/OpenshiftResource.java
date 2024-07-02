@@ -71,8 +71,11 @@ public class OpenshiftResource {
     final private static String FAILED = "Failed";
     final private static String RUNNING = "Running";
     final private static String CANCELLED = "Cancelled";
-    final private static String TEST_FAILURE_START = "[INFO]\\n[INFO] Results:\\n[INFO]\\n[ERROR] Failures";
-    final private static String TEST_FAILURE_END = "[INFO]]\\n[ERROR] Tests run:";
+    final private static String TEST_FAILURE_START = "[INFO] Results:\n" + //
+                "[INFO] \n" + //
+                "[ERROR] Failures:";
+    final private static String TEST_FAILURE_END = "[INFO] \n" + //
+                "[ERROR] Tests run:";
   
     final private static String GREEN = "#69ff33"; //Green
     final private static String YELLOW = "#EBF58A"; //Yellow
@@ -389,22 +392,24 @@ public class OpenshiftResource {
         Matcher matcherCRIOError = patternCRIOError.matcher(runLogs); //This is a extreme edge case that can happen to all jobs on a node. 
         Matcher matcherTestFailureStart = patternStartOfFailedTests.matcher(runLogs);
         Matcher matcherTEstFailureEnd = patternEndOfFailedTests.matcher(runLogs);
+        System.out.println(data.name + " " + matcherTestFailureStart.matches() + " " + matcherTEstFailureEnd);
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
                 data.msg = findPassedFailedFromZipLogs(namespace, runPod,true);
                 data.color = ORANGE; //Orange Didn't pass but didn't totally fail
-                getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start());
+                if(matcherTestFailureStart.matches() &&  matcherTEstFailureEnd.matches())
+                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start());
             }
             else if(doubleCheck.contains("Failures: 0")){
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = GREEN;
-                getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start());
             }
             else{
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = YELLOW;
-                getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start()); 
+                if(matcherTestFailureStart.matches() &&  matcherTEstFailureEnd.matches())
+                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start()); 
             }        
         }
         else if(matcherBuildFailed.find()){
