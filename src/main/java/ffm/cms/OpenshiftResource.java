@@ -67,6 +67,9 @@ public class OpenshiftResource {
     final private static String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
     final private static String TEST_RUN = "Test run - Run: %d, Passed: %d, Failures: %d";
     final private static String CRI_O_ERROR = "unable to retrieve container logs for cri-o:";
+    final private static String NO_TEST_RUN = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed:";
+    final private static String BUILD_SUCCESS = "BUILD SUCCESS";
+    final private static String NO_TEST_RUN_MSG = "Test run - Run: 0, Passed: 0, Failures: 0";
     final private static String PASSED = "Passed";
     final private static String FAILED = "Failed";
     final private static String RUNNING = "Running";
@@ -92,6 +95,7 @@ public class OpenshiftResource {
     private Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
     private Pattern patternStartOfFailedTests = Pattern.compile(TEST_FAILURE_START);
     private Pattern patternEndOfFailedTests = Pattern.compile(TEST_FAILURE_END);
+    private Pattern patternNoTestRun = Pattern.compile(NO_TEST_RUN);
 
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
@@ -391,15 +395,16 @@ public class OpenshiftResource {
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
         Matcher matcherCRIOError = patternCRIOError.matcher(runLogs); //This is a extreme edge case that can happen to all jobs on a node. 
         Matcher matcherTestFailureStart = patternStartOfFailedTests.matcher(runLogs);
-        Matcher matcherTEstFailureEnd = patternEndOfFailedTests.matcher(runLogs);
-        System.out.println(data.name + " " + matcherTestFailureStart.matches() + " " + matcherTEstFailureEnd);
+        Matcher matcherTestFailureEnd = patternEndOfFailedTests.matcher(runLogs);
+        Matcher matcherNoTestRun = patternNoTestRun.matcher(runLogs);
+        System.out.println(data.name + " " + matcherTestFailureStart.matches() + " " + matcherTestFailureEnd);
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
                 data.msg = findPassedFailedFromZipLogs(namespace, runPod,true);
                 data.color = ORANGE; //Orange Didn't pass but didn't totally fail
-                if(matcherTestFailureStart.matches() &&  matcherTEstFailureEnd.matches())
-                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start());
+                if(matcherTestFailureStart.matches() &&  matcherTestFailureEnd.matches())
+                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTestFailureEnd.start());
             }
             else if(doubleCheck.contains("Failures: 0")){
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
@@ -408,8 +413,8 @@ public class OpenshiftResource {
             else{
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = YELLOW;
-                if(matcherTestFailureStart.matches() &&  matcherTEstFailureEnd.matches())
-                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTEstFailureEnd.start()); 
+                if(matcherTestFailureStart.matches() &&  matcherTestFailureEnd.matches())
+                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTestFailureEnd.start()); 
             }        
         }
         else if(matcherBuildFailed.find()){
@@ -424,7 +429,12 @@ public class OpenshiftResource {
             data.msg = "";
             data.color = GRAY;
             data.runLink = ""; //Can't get the logs for cancelled pod
-        }else{
+        }
+        else if(matcherNoTestRun.find()){// Ran but no test were actually run, so nothing to zip up and send. 
+            data.color = ORANGE;
+            data.msg = NO_TEST_RUN_MSG;
+        }
+        else{
             data.msg = CRITICAL_FAILURE; //Didn't even run any Selenium Tests  
             data.color = RED; 
         }
