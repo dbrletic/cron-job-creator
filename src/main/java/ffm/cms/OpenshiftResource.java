@@ -67,7 +67,7 @@ public class OpenshiftResource {
     final private static String RUN_BUT_FAILED_MSG = "Test run but had exception - Run: %d, Passed: %d, Failures: %d";
     final private static String TEST_RUN = "Test run - Run: %d, Passed: %d, Failures: %d";
     final private static String CRI_O_ERROR = "unable to retrieve container logs for cri-o:";
-    final private static String NO_TEST_RUN = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed:";
+    final private static String NO_TEST_RUN = "Tests run: 0, Failures: 0, Errors: 0, Skipped: 0";
     final private static String BUILD_SUCCESS = "BUILD SUCCESS";
     final private static String NO_TEST_RUN_MSG = "Test run - Run: 0, Passed: 0, Failures: 0";
     final private static String PASSED = "Passed";
@@ -397,7 +397,7 @@ public class OpenshiftResource {
         Matcher matcherTestFailureStart = patternStartOfFailedTests.matcher(runLogs);
         Matcher matcherTestFailureEnd = patternEndOfFailedTests.matcher(runLogs);
         Matcher matcherNoTestRun = patternNoTestRun.matcher(runLogs);
-        System.out.println(data.name + " " + matcherTestFailureStart.matches() + " " + matcherTestFailureEnd);
+        System.out.println(data.name + " " + matcherTestFailureStart.matches() + " " + matcherTestFailureEnd.matches());
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
@@ -430,7 +430,7 @@ public class OpenshiftResource {
             data.color = GRAY;
             data.runLink = ""; //Can't get the logs for cancelled pod
         }
-        else if(matcherNoTestRun.find()){// Ran but no test were actually run, so nothing to zip up and send. 
+        else if(matcherNoTestRun.find() && runLogs.contains(BUILD_SUCCESS)){// Ran but no test were actually run (and did not get a exception), so nothing to zip up and send. 
             data.color = ORANGE;
             data.msg = NO_TEST_RUN_MSG;
         }
