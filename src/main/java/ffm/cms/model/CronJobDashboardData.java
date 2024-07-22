@@ -18,7 +18,20 @@ public class CronJobDashboardData {
     public String env;
     public String failedTests;
 
-    public String toString(){
-        return "[name: " + name + " result: " + result + " type: " + type + " msg: " + msg +  " LastTransitionTime: "+ lastTransitionTime +"]";
+    public String toString() {
+        return "[" +
+                "name='" + name + '\'' +
+                ", releaseBranch='" + releaseBranch + '\'' +
+                ", group='" + group + '\'' +
+                ", type='" + type + '\'' +
+                ", msg='" + msg + '\'' +
+                ", result='" + result + '\'' +
+                ", lastTransitionTime='" + lastTransitionTime + '\'' +
+                ", color='" + color + '\'' +
+                ", runLink='" + runLink + '\'' +
+                ", runTime='" + runTime + '\'' +
+                ", env='" + env + '\'' +
+                ", failedTests='" + failedTests + '\'' +
+                ']';
     }
 }
