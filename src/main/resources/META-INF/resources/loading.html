@@ -16,9 +16,10 @@
     <img src="/images/load.gif" alt="Loading gif">
     <script>
         function loadNextPage() {
-            window.location.href = window.location.host + "/openshift/tester-pipelines/dashboard";
+            console.log(window.location.host + "/openshift/tester-pipelines/dashboard");
+            window.location.href = "http://"+ window.location.host + "/openshift/tester-pipelines/dashboard";
         }
-        </script>
+    </script>
   </body>
 
 </html>
