@@ -73,7 +73,7 @@ const serialize_form = form => JSON.stringify(
     const pairDiv = document.createElement('div');
     pairDiv.innerHTML = `
         <input type="text" name="keys" placeholder="Enter the name of the cronjob" required>
-        <input type="text" name="values" placeholder="Enter schedule in * * * * * format" required>
+        <input type="text" name="values" placeholder="Enter schedule in * * * * * format. Use https://crontab.guru/ to verify format" required>
     `;
     container.appendChild(pairDiv);
 }
@@ -85,6 +85,8 @@ async function submitPairs() {
 
     for (let i = 0; i < keys.length; i++) {
         pairs[keys[i].value] = values[i].value;
+
+
     }
 
     const data = {
@@ -113,11 +115,11 @@ async function submitPairs() {
         $('#errorMessage').empty();
         $("#successMessage").show();      
       },
-      error: function(xhr, status, error) {
+      error: function(xhr, status, error, textStatus) {
         $("#successMessage").hide();
         const errorContainer = document.getElementById('errorMessage');
         const container = document.getElementById('pairContainer');
-        errorContainer.textContent = "Error: " + response.statusText;
+        errorContainer.textContent = "Error: " + xhr.getResponseHeader("errorMsg");
         container.innerHTML = '';     
         console.log("Error: " + error);
       }

@@ -18,6 +18,12 @@ import ffm.cms.model.UpdateCronJobSchedule;
 
 import org.apache.commons.io.FileUtils;
 
+import com.cronutils.model.CronType;
+import com.cronutils.model.definition.CronDefinition;
+import com.cronutils.model.definition.CronDefinitionBuilder;
+import com.cronutils.parser.CronParser;
+import com.cronutils.model.Cron;
+
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -131,11 +137,33 @@ public class CronResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
     @Path("/update")
-    public Response updateCronJobs(UpdateCronJobSchedule update) throws IOException{
+    public Response updateCronJobs(UpdateCronJobSchedule update){
         Map<String,String> cronJobsToUpdate = update.getPairs();
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
         String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
+        String invalidCronMsg = "";
+        Cron currentCron; 
+        CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.UNIX);
+        CronParser cronParser = new CronParser(cronDefinition);
+       
+        //Validating all of the Cronjobs before writing files
+         for(Map.Entry<String, String> entry : cronJobsToUpdate.entrySet()){
+            try{
+                currentCron = cronParser.parse(entry.getValue());
+                currentCron.validate();//This is dumb, why does it not just say true or false? At least it gives a reason the cron expression is invalid
+            } catch(java.lang.IllegalArgumentException  e){
+                System.out.println(entry.getKey() +":" + e.getMessage());
+                invalidCronMsg = invalidCronMsg + "\n " + entry.getKey() + ": " + e.getMessage();
+            }
+            continue;
+        }
+
+        if(!invalidCronMsg.isBlank()){
+            System.out.println(invalidCronMsg);
+            return Response.ok().status(400, invalidCronMsg).entity(invalidCronMsg).header("errorMsg", invalidCronMsg).build();       
+        } 
+            
 
         for(Map.Entry<String, String> entry : cronJobsToUpdate.entrySet()){
             System.out.println("Cronjob: " + entry.getKey() + " New Schedule: " + entry.getValue()); 
@@ -146,17 +174,23 @@ public class CronResource {
                 System.out.println(e.getStackTrace());
             }
             
+            
         }
       
         File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
         System.out.println("Add to response: " + zipFileLocation);
         System.out.println("Zip is made: " + downloadZip.isFile());
 
-        return Response
-            .ok(FileUtils.readFileToByteArray(downloadZip))
-            .type("application/zip")
-            .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
-            .build();
+        try {
+            return Response
+                .ok(FileUtils.readFileToByteArray(downloadZip))
+                .type("application/zip")
+                .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
+                .build();
+        } catch (IOException e) {
+            return Response.serverError().status(500).build();
+        }
+        
     }
 
     /**
