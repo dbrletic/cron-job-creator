@@ -154,9 +154,8 @@ public class CronResource {
                 currentCron.validate();//This is dumb, why does it not just say true or false? At least it gives a reason the cron expression is invalid
             } catch(java.lang.IllegalArgumentException  e){
                 System.out.println(entry.getKey() +":" + e.getMessage());
-                invalidCronMsg = invalidCronMsg + "\n " + entry.getKey() + ": " + e.getMessage();
+                invalidCronMsg = invalidCronMsg + "\n" + entry.getKey() + ": " + e.getMessage();
             }
-            continue;
         }
 
         if(!invalidCronMsg.isBlank()){
