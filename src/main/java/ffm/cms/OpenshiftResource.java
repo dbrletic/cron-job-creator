@@ -28,6 +28,7 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestPath;
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +53,7 @@ import java.util.regex.Pattern;
  * @author dbrletic
  */
 @ApplicationScoped
+@RegisterRestClient
 @Path("/openshift")
 public class OpenshiftResource {
 

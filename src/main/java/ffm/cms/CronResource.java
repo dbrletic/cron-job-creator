@@ -17,6 +17,7 @@ import ffm.cms.model.FFEGatlingData;
 import ffm.cms.model.UpdateCronJobSchedule;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,6 +33,7 @@ import jakarta.ws.rs.core.Response;
  * @author dbrletic
  */
 @Path("/ffe-cronjob")
+@RegisterRestClient
 @ApplicationScoped
 public class CronResource {
 
