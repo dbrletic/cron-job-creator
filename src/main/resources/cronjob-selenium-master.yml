@@ -5,9 +5,13 @@ metadata:
   namespace: tester-pipelines
 spec:
   schedule: "SCHEDULE" # HUMAN_READALBE
+  timeZone: EST5EDT
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels: 
+            parent: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj
         spec:
           containers:
           - name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-trigger

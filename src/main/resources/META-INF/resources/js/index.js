@@ -45,6 +45,58 @@ $('#cronForum').on('submit', function(event) {
   });
 });
 
+const validation = new JustValidate('#cronForum');
+
+validation
+  .addField('#releaseBranch', [
+    {
+      rule: 'required',
+      errorMessage: 'Release Branch is required'
+    }
+  ])
+  .addField('#userPassword', [
+    {
+      rule: 'required',
+      errorMessage: 'User Password is required'
+    }
+  ])
+  .addField('#groups', [
+    {
+      rule: 'required',
+      errorMessage: 'Groups is required'
+    }
+  ])
+  .addField('#browser', [
+    {
+      rule: 'required',
+      errorMessage: 'Browser is required'
+    }
+  ])
+  .addField('#url', [
+    {
+      rule: 'required',
+      errorMessage: 'Url is required'
+    }
+  ])
+  .addField('#seleniumTestEmailList', [
+    {
+      rule: 'required',
+      errorMessage: 'Selenium Test Email List  is required'
+    }
+  ])
+  .addField('#cronJobSchedule', [
+    {
+      rule: 'required',
+      errorMessage: 'Cronjob Schedule is required'
+    }
+  ])
+  .addField('#userNameFFM', [
+    {
+      rule: 'required',
+      errorMessage: 'User Name is required',
+    }
+  ]);
+
 /* Set the width of the side navigation to 250px */
 function openNav() {
   document.getElementById("mySidenav").style.width = "350px";
