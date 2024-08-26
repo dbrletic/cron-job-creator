@@ -1,15 +1,24 @@
 package ffm.cms.model;
 
+import jakarta.validation.constraints.NotBlank;
 
 public class FFEData {
 
+    @NotBlank
     private String releaseBranch;
+    @NotBlank
     private String userNameFFM;
+    @NotBlank
     private String userPassword;
+    @NotBlank
     private String groups;
+    @NotBlank
     private String browser;
+    @NotBlank
     private String url;
+    @NotBlank
     private String seleniumTestEmailList;
+    @NotBlank
     private String cronJobSchedule;
     
     public FFEData(String releaseBranch, String userNameFFM, String userPassword, String groups, String browser,

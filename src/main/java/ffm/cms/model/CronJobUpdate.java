@@ -1,9 +1,12 @@
 package ffm.cms.model;
 
+import jakarta.validation.constraints.NotBlank;
 
 public class CronJobUpdate {
 
+    @NotBlank
     private  String cronJobName;
+    @NotBlank
     private  String cronJobSchedule;
  
     public void setCronJobName(String cronJobName){

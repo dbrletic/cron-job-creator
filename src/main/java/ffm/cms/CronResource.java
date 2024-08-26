@@ -27,11 +27,13 @@ import com.cronutils.model.Cron;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.validation.Valid;
 
 /**
  * Handles receiving request to create new cronjob files
@@ -47,7 +49,7 @@ public class CronResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
-    public Response createFiles(FFEData data) throws IOException, ParseException{
+    public Response createFiles(@Valid FFEData data) throws IOException, ParseException{
         System.out.println("Starting up process for " + data.getGroups() + "-" + data.getUrl()) ;
         System.out.println(data.toString());
         List<String> newFilesLocation = new ArrayList<String>();
@@ -137,7 +139,7 @@ public class CronResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
     @Path("/update")
-    public Response updateCronJobs(UpdateCronJobSchedule update){
+ public Response updateCronJobs(@Valid UpdateCronJobSchedule update) throws IOException{
         Map<String,String> cronJobsToUpdate = update.getPairs();
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");

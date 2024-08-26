@@ -11,4 +11,15 @@ public class CronJobData {
     public String humanReadableMsg;
     public String branch;
     public String type;
+
+    public String toString() {
+        return "[" +
+                "name='" + name + '\'' +
+                ", schedule='" + schedule + '\'' +
+                ", cluster='" + cluster + '\'' +
+                ", humanReadableMsg='" + humanReadableMsg + '\'' +
+                ", branch='" + branch + '\'' +
+                ", type='" + type + '\'' +
+                ']';
+    }
 }
