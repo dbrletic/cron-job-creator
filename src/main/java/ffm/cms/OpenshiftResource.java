@@ -155,6 +155,13 @@ public class OpenshiftResource {
             currentJob.type=currentJob.name.substring(0, typeIndexNameEnd);
            // System.out.println("Job name: " + currentJob.name + " Job Type: " + currentJob.type);
 
+           //Setting the env
+           Matcher matcherEnv = patternEnv.matcher(currentJob.name);
+           if(matcherEnv.find()){
+                currentJob.env = currentJob.name.substring(matcherEnv.start(), matcherEnv.end());
+           }
+
+
             cronJobs.add(currentJob);
         }
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
@@ -265,7 +272,13 @@ public class OpenshiftResource {
             if(removeStart == -1) //Manually run pipelines will have not have -tt-**** on the end so we can skip them. 
                 continue;
 
+               
             runPod = pipelineRunToPod.get(pipleLineRun.getMetadata().getName());
+            if (runPod == null){
+                System.out.println(pipleLineRun.getMetadata().getName() + " was not found."); 
+                continue; 
+            }
+                
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             
@@ -480,9 +493,11 @@ public class OpenshiftResource {
      */
     private HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
         HashMap<String, String> podToRunTask = new HashMap<String, String>();
+        System.out.print("Starting map to TaskRun");
         for(TaskRun taskRun : taskRuns){
             String key = taskRun.getMetadata().getLabels().get("tekton.dev/pipelineRun");
             String value = taskRun.getStatus().getPodName();    
+            System.out.println("key: " + key + " value: " + value);
             podToRunTask.put(key, value);
         }
         return podToRunTask;

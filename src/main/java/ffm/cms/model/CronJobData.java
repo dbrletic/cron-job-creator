@@ -11,6 +11,7 @@ public class CronJobData {
     public String humanReadableMsg;
     public String branch;
     public String type;
+    public String env;
 
     public String toString() {
         return "[" +

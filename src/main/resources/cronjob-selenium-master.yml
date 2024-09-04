@@ -4,8 +4,8 @@ metadata:
   name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj
   namespace: tester-pipelines
 spec:
-  schedule: "SCHEDULE" # HUMAN_READALBE
-  timeZone: EST5EDT
+  schedule: "SCHEDULE" # HUMAN_READALBE 
+  # timeZone: EST5EDT
   jobTemplate:
     spec:
       template:
