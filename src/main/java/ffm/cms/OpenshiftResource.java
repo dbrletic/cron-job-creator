@@ -438,7 +438,6 @@ public class OpenshiftResource {
         }
         else if(matcherNoTestRun.find() && runLogs.contains(BUILD_SUCCESS)){// Ran but no test were actually run (and did not get a exception), so nothing to zip up and send. 
             data.color = ORANGE;
-            data.failedTests = getFailedTests(runLogs);
             data.msg = NO_TEST_RUN_MSG;
         }
         else{

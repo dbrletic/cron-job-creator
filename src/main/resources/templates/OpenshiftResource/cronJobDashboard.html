@@ -9,7 +9,7 @@
 {/include}
 <!-- Use any element to open the sidenav -->
 <span onclick="openNav()"><h3>Menu</h3></span>
-<div class="container" id="main">
+<div class="full-screen" id="main">
     <h2>Current List of FFE Selenium Pipeline Runs</h2>
     <input type="text" id="searchInput" onkeyup="searchTables()" placeholder="Search for names..">
     <h3>Test 1</h3>
@@ -32,7 +32,7 @@
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
-                <td class="reveal-cell">{cronJob.failedTests}</td>
+                <td class="reveal-cell" class="errorText">{cronJob.failedTests}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>

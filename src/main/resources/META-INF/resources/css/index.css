@@ -60,11 +60,8 @@
   }
 
   .full-screen {
-    width: 100vw; /* 100% of the viewport width */
-    height: 100vh; /* 100% of the viewport height */
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
 
   .reveal-cell { 
@@ -77,6 +74,7 @@
     
   .reveal-cell.expanded { 
     white-space: normal; 
-    max-width: none; 
+    max-width: none;
+    white-space: pre-line;
   }
    
