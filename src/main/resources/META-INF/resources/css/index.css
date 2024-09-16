@@ -58,3 +58,25 @@
     border: 1px solid #ddd; /* Add a grey border */
     margin-bottom: 12px; /* Add some space below the input */
   }
+
+  .full-screen {
+    width: 100vw; /* 100% of the viewport width */
+    height: 100vh; /* 100% of the viewport height */
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .reveal-cell { 
+    cursor: pointer; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    max-width: 150px; 
+  } 
+    
+  .reveal-cell.expanded { 
+    white-space: normal; 
+    max-width: none; 
+  }
+   

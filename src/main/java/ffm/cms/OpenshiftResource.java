@@ -76,11 +76,9 @@ public class OpenshiftResource {
     final private static String FAILED = "Failed";
     final private static String RUNNING = "Running";
     final private static String CANCELLED = "Cancelled";
-    final private static String TEST_FAILURE_START = "[INFO] Results:\n" + //
-                "[INFO] \n" + //
-                "[ERROR] Failures:";
-    final private static String TEST_FAILURE_END = "[INFO] \n" + //
-                "[ERROR] Tests run:";
+    final private static String TEST_FAILURE_START = "[ERROR] Failures:";
+    final private static String TEST_FAILURE_END = "[ERROR] Tests run:";
+    final private static String INFO = "[INFO]";
   
     final private static String GREEN = "#69ff33"; //Green
     final private static String YELLOW = "#EBF58A"; //Yellow
@@ -95,8 +93,6 @@ public class OpenshiftResource {
     private Pattern patternTimeStart = Pattern.compile("Total time:");
     private Pattern patternEnv = Pattern.compile("test\\d+");
     private Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
-    private Pattern patternStartOfFailedTests = Pattern.compile(TEST_FAILURE_START);
-    private Pattern patternEndOfFailedTests = Pattern.compile(TEST_FAILURE_END);
     private Pattern patternNoTestRun = Pattern.compile(NO_TEST_RUN);
 
     //Sorts CronJobDashboardData by their names
@@ -409,17 +405,13 @@ public class OpenshiftResource {
         Matcher matcherTestRun = patternTestRun.matcher(runLogs);
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
         Matcher matcherCRIOError = patternCRIOError.matcher(runLogs); //This is a extreme edge case that can happen to all jobs on a node. 
-        Matcher matcherTestFailureStart = patternStartOfFailedTests.matcher(runLogs);
-        Matcher matcherTestFailureEnd = patternEndOfFailedTests.matcher(runLogs);
         Matcher matcherNoTestRun = patternNoTestRun.matcher(runLogs);
-        System.out.println(data.name + " " + matcherTestFailureStart.matches() + " " + matcherTestFailureEnd.matches());
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
                 data.msg = findPassedFailedFromZipLogs(namespace, runPod,true);
                 data.color = ORANGE; //Orange Didn't pass but didn't totally fail
-                if(matcherTestFailureStart.matches() &&  matcherTestFailureEnd.matches())
-                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTestFailureEnd.start());
+                data.failedTests = getFailedTests(runLogs);
             }
             else if(doubleCheck.contains("Failures: 0")){
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
@@ -428,8 +420,7 @@ public class OpenshiftResource {
             else{
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = YELLOW;
-                if(matcherTestFailureStart.matches() &&  matcherTestFailureEnd.matches())
-                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTestFailureEnd.start()); 
+                data.failedTests = getFailedTests(runLogs);
             }        
         }
         else if(matcherBuildFailed.find()){
@@ -447,6 +438,7 @@ public class OpenshiftResource {
         }
         else if(matcherNoTestRun.find() && runLogs.contains(BUILD_SUCCESS)){// Ran but no test were actually run (and did not get a exception), so nothing to zip up and send. 
             data.color = ORANGE;
+            data.failedTests = getFailedTests(runLogs);
             data.msg = NO_TEST_RUN_MSG;
         }
         else{
@@ -523,10 +515,27 @@ public class OpenshiftResource {
         else
             return String.format(TEST_RUN, passedCount + failedCount, passedCount, failedCount);
     }
-    
-    private String getFailedTests(String runLogs, int startPosition, int finishPosition){
 
-        System.out.println("Start: " + startPosition + " Finished: " + finishPosition);
+    /**
+     * Finds the selenium test that failed during a mvn test
+     * @param runLogs
+     * @return
+     */
+    private String getFailedTests(String runLogs){
+
+        int failureStart = runLogs.indexOf(TEST_FAILURE_START);
+        if(failureStart > 0){
+            int failureEnd = runLogs.indexOf(TEST_FAILURE_END, failureStart);
+            //Basically removing the [ERROR] Failures: from the string
+            String failuresMsg = runLogs.substring(failureStart + TEST_FAILURE_START.length(), failureEnd);
+            int infoStart= failuresMsg.indexOf(INFO);
+            //Remove INFO itself from the failure message
+            String finalFailureMsg = failuresMsg.substring(0, infoStart);
+            //This remove the extra little bit of endline and space above and below the failure msgs. 
+            finalFailureMsg = finalFailureMsg.substring(2, finalFailureMsg.length()-1);
+            //System.out.println(finalFailureMsg);
+            return finalFailureMsg;
+        }
         return "";
 
     }

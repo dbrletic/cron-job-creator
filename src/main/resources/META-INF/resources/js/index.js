@@ -107,6 +107,7 @@ function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
 }
 
+/* Allows you to search the tables */
 function searchTables() {
   const searchInput = document.getElementById('searchInput');
   const searchValue = searchInput.value.trim();
@@ -136,4 +137,18 @@ function searchTables() {
       }
     }
   });
-}
+  }
+
+  /* Allows for extending of failures */
+  addEventListener('DOMContentLoaded', function() { 
+    var test1 = document.getElementById('test1'); 
+    
+    test1.addEventListener('click', function(e) {
+       if (e.target.classList.contains('reveal-cell')){ 
+          e.target.classList.toggle('expanded'); 
+        } 
+    });
+    
+    
+   }); 
+   
