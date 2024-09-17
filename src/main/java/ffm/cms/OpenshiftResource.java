@@ -321,7 +321,7 @@ public class OpenshiftResource {
             //There should only be one pipeline conditions. No idea why it was made as a list
             Condition pipelineCondition = pipelineConditions.get(0);
             data.result = pipelineCondition.getReason();
-            data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
+            data.lastTransitionTime = createReadableDate(pipelineCondition.getLastTransitionTime());
            
             //Setting the color and message
             data = getColorStatusAndMsg(data, runLogs, namespace, runPod); 
@@ -460,7 +460,7 @@ public class OpenshiftResource {
      * @param date The date to be converted
      * @return A easer to read date
      */
-    private String createReadableData(String date){
+    private String createReadableDate(String date){
 
         //Just in case the cronjob has not run yet and the last Transaction time is null or empty/blank. 
         if(date == null || date.isBlank())
@@ -470,7 +470,7 @@ public class OpenshiftResource {
         Instant instant = Instant.parse(date);
 
         // Create a DateTimeFormatter with the desired format
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm z MM-dd-yyyy").withZone(ZoneId.systemDefault());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm MM-dd-yyyy z").withZone(ZoneId.of("America/New_York"));
 
         // Format the Instant to a readable string
         return formatter.format(instant);
