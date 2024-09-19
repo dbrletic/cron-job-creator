@@ -97,6 +97,8 @@ public class OpenshiftResource {
 
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
+    //Sorts CronJobDashboardData by their release brance
+    Comparator<CronJobDashboardData> releaseBranchSorter = (a, b) -> a.name.compareToIgnoreCase(b.releaseBranch);
 
     @CheckedTemplate
     public static class Templates {
@@ -312,6 +314,8 @@ public class OpenshiftResource {
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in a eailer build of the file generator. Files could still be around
             data.name = data.name.replaceAll("-cronjob","");
 
+            //Getting the releaseBranch from cronjob name
+            data.releaseBranch = getReleaseBranchFromName(data.name);
             
             //Creating link to piplerun logs and hosting the files
             //The -- is how I seperate the dash in the cronjob name and the pod name. Will be used later to get run logs from a pod for a specific run
@@ -329,7 +333,8 @@ public class OpenshiftResource {
             dashboardData.add(data);
         }
        
-        Collections.sort(dashboardData, nameSorter); //Sorting everything by  name of the cronjob
+        Collections.sort(dashboardData, nameSorter);
+        Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
@@ -516,7 +521,8 @@ public class OpenshiftResource {
     }
 
     /**
-     * Finds the selenium test that failed during a mvn test
+     * Finds the selenium test that failed during a mvn test. NOTE: If there is a exception mvn test will not list out the test that failed. 
+     * Will have to use the zip output to find which pass/failed. 
      * @param runLogs
      * @return
      */
@@ -537,6 +543,18 @@ public class OpenshiftResource {
         }
         return "";
 
+    }
+
+    /**
+     * Gets the release branch (to be used for sorting) from the name of the cronjob
+     * @param cronjobName
+     * @return
+     */
+    private String getReleaseBranchFromName(String cronjobName){
+
+        //Since all cronjob names follow the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH we know everything after test<number>- is the release branch name
+        int startPosition = cronjobName.indexOf("test") + 6;
+        return cronjobName.substring(startPosition, cronjobName.length());
     }
 
 }
