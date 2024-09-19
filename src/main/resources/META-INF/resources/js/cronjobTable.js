@@ -18,7 +18,8 @@
       document.getElementById('test1'),
       document.getElementById('test2'),
       document.getElementById('test3'),
-      document.getElementById('test4')
+      document.getElementById('test4'),
+      document.getElementById('test9')
     ];
   
     tables.forEach(table => {
