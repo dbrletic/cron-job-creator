@@ -98,7 +98,7 @@ public class OpenshiftResource {
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
     //Sorts CronJobDashboardData by their release brance
-    Comparator<CronJobDashboardData> releaseBranchSorter = (a, b) -> a.name.compareToIgnoreCase(b.releaseBranch);
+    Comparator<CronJobDashboardData> releaseBranchSorter = (a, b) -> a.releaseBranch.compareToIgnoreCase(b.releaseBranch);
 
     @CheckedTemplate
     public static class Templates {
@@ -553,7 +553,7 @@ public class OpenshiftResource {
     private String getReleaseBranchFromName(String cronjobName){
 
         //Since all cronjob names follow the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH we know everything after test<number>- is the release branch name
-        int startPosition = cronjobName.indexOf("test") + 6;
+        int startPosition = cronjobName.indexOf("test") + 6; //Basically taking out test<number>- to get the name
         return cronjobName.substring(startPosition, cronjobName.length());
     }
 
