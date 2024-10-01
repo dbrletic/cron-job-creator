@@ -32,7 +32,7 @@
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
-                <td class="reveal-cell" class="errorText">{cronJob.failedTests}</td>
+                <td class="reveal-cell">{cronJob.failedTests}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
@@ -42,7 +42,7 @@
         {/for}
     </table>
     <h3>Test 2</h3>
-    <table id="test2">
+    <table id="test2" class="display" data-order='[[ 0, "asc" ]]'>
         <thead>
             <tr>
                 <th>Name</th>
@@ -159,12 +159,18 @@
     </table>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+
 <script src="/js/cronjobTable.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
 <link rel="stylesheet" href="/css/index.css">
+
+
 
 </body>
 </html>

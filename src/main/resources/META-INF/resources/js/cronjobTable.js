@@ -41,7 +41,7 @@
       }
     });
     }
-  
+
     /* Allows for extending of failures */
     document.addEventListener('DOMContentLoaded', function() { 
       var test1 = document.getElementById('test1'); 
@@ -60,7 +60,7 @@
         if (e.target.classList.contains('reveal-cell')){ 
            e.target.classList.toggle('expanded'); 
          } 
-     });
+      }); 
 
      test3.addEventListener('click', function(e) {
         if (e.target.classList.contains('reveal-cell')){ 
@@ -80,6 +80,5 @@
          } 
      });
       
-     }); 
-     
+     });      
   
