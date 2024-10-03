@@ -72,7 +72,7 @@
         if (e.target.classList.contains('reveal-cell')){ 
            e.target.classList.toggle('expanded'); 
          } 
-     });
+     }); 
 
      test9.addEventListener('click', function(e) {
         if (e.target.classList.contains('reveal-cell')){ 
@@ -80,5 +80,21 @@
          } 
      });
       
-     });      
-  
+     });     
+     
+     /* Setting DataTables on all the tables */
+     $(document).ready( function () {
+      var test4 = new DataTable('#test4', {
+        paging: false,
+        autoWidth: false, 
+        columnDefs:  [
+          { "width": "25%", "targets": 0 },
+          { "width": "7%", "targets": 1 },
+          { "width": "21%", "targets": 2 },
+          { "width": "20%", "targets": 3 },
+          { "width": "7%", "targets": 4 },
+          { "width": "8%", "targets": 5 },
+          { "width": "12%", "targets": 6 }
+      ]
+      } );
+     });

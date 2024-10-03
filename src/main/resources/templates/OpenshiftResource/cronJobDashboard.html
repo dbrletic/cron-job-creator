@@ -25,9 +25,10 @@
                 <th>Finish Time</th>
             </tr>
         </thead>
+        <tbody> 
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test1"}
-        <tbody>          
+                 
             <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
@@ -37,9 +38,10 @@
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
-        </tbody>
+        
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test 2</h3>
     <table id="test2" class="display" data-order='[[ 0, "asc" ]]'>
@@ -54,9 +56,9 @@
                 <th>Last Upate Time</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test2"}
-        <tbody>
              <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
@@ -66,9 +68,9 @@
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
-        </tbody>
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test 3</h3>
     <table id="test3">
@@ -83,9 +85,10 @@
                 <th>Last Upate Time</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test3"}
-        <tbody>
+        
             <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
@@ -95,12 +98,13 @@
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
-        </tbody>
+        
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test4</h3>
-    <table id="test4">
+    <table id="test4" class="hover compact" width="100%" data-page-length="25" data-order="[[ 1, &quot;asc&quot; ]]">
         <thead>
             <tr>
                 <th>Name</th>
@@ -112,9 +116,9 @@
                 <th>Last Upate Time</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test4"}
-        <tbody>
             <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
@@ -123,10 +127,10 @@
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
-            </tr>
-        </tbody>
+            </tr>      
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test9</h3>
     <table id="test9">
@@ -141,9 +145,10 @@
                 <th>Last Upate Time</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test9"}
-        <tbody>
+        
             <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
@@ -153,17 +158,18 @@
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
-        </tbody>
+
         {/if}
         {/for}
+        </tbody>
     </table>
 </div>
 
-<script
-  src="https://code.jquery.com/jquery-3.7.1.min.js"
-  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-  crossorigin="anonymous"></script>
 
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/2.1.7/dataRender/ellipsis.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.7/css/dataTables.dataTables.css">
 <script src="/js/cronjobTable.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
