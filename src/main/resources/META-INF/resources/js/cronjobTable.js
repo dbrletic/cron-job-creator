@@ -84,7 +84,59 @@
      
      /* Setting DataTables on all the tables */
      $(document).ready( function () {
+      var test1 = new DataTable('#test1', {
+        paging: false,
+        autoWidth: false, 
+        columnDefs:  [
+          { "width": "25%", "targets": 0 },
+          { "width": "7%", "targets": 1 },
+          { "width": "21%", "targets": 2 },
+          { "width": "20%", "targets": 3 },
+          { "width": "7%", "targets": 4 },
+          { "width": "8%", "targets": 5 },
+          { "width": "12%", "targets": 6 }
+      ]
+      } );
+      var test2 = new DataTable('#test2', {
+        paging: false,
+        autoWidth: false, 
+        columnDefs:  [
+          { "width": "25%", "targets": 0 },
+          { "width": "7%", "targets": 1 },
+          { "width": "21%", "targets": 2 },
+          { "width": "20%", "targets": 3 },
+          { "width": "7%", "targets": 4 },
+          { "width": "8%", "targets": 5 },
+          { "width": "12%", "targets": 6 }
+      ]
+      } );
+      var test3 = new DataTable('#test3', {
+        paging: false,
+        autoWidth: false, 
+        columnDefs:  [
+          { "width": "25%", "targets": 0 },
+          { "width": "7%", "targets": 1 },
+          { "width": "21%", "targets": 2 },
+          { "width": "20%", "targets": 3 },
+          { "width": "7%", "targets": 4 },
+          { "width": "8%", "targets": 5 },
+          { "width": "12%", "targets": 6 }
+      ]
+      } );
       var test4 = new DataTable('#test4', {
+        paging: false,
+        autoWidth: false, 
+        columnDefs:  [
+          { "width": "25%", "targets": 0 },
+          { "width": "7%", "targets": 1 },
+          { "width": "21%", "targets": 2 },
+          { "width": "20%", "targets": 3 },
+          { "width": "7%", "targets": 4 },
+          { "width": "8%", "targets": 5 },
+          { "width": "12%", "targets": 6 }
+      ]
+      } );
+      var test9 = new DataTable('#test9', {
         paging: false,
         autoWidth: false, 
         columnDefs:  [
