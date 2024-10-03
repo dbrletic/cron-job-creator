@@ -333,8 +333,6 @@ public class OpenshiftResource {
             dashboardData.add(data);
         }
        
-        Collections.sort(dashboardData, nameSorter);
-        Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
