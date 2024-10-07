@@ -9,152 +9,174 @@
 {/include}
 <!-- Use any element to open the sidenav -->
 <span onclick="openNav()"><h3>Menu</h3></span>
-<div class="container" id="main">
-    <h2>Current List of FFE Selenium Pipeline Runs</h2>
+<div class="full-screen" id="main">
+    <center><h2>Current List of FFE Selenium Pipeline Runs</h2></center>
     <input type="text" id="searchInput" onkeyup="searchTables()" placeholder="Search for names..">
     <h3>Test 1</h3>
-    <table id="test1">
+    <table id="test1" class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot; ]]">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Result</th>
                 <th>Test Results</th>
+                <th>Test Failures</th>
                 <th>Run Time</th>
                 <th>Link</th>
                 <th>Finish Time</th>
             </tr>
         </thead>
+        <tbody> 
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test1"}
-        <tbody>          
+                 
             <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
+                <td class="reveal-cell">{cronJob.failedTests}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
-        </tbody>
+        
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test 2</h3>
-    <table id="test2">
+    <table id="test2" class="hover compact" width="100%"  data-order="[[ 0, &quot;asc&quot; ]]">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Result</th>
                 <th>Test Results</th>
+                <th>Test Failures</th>
                 <th>Run Time</th>
                 <th>Link</th>
                 <th>Last Upate Time</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test2"}
-        <tbody>
              <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
+                <td class="reveal-cell">{cronJob.failedTests}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
-        </tbody>
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test 3</h3>
-    <table id="test3">
+    <table id="test3" class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot;]]">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Result</th>
                 <th>Test Results</th>
+                <th>Test Failures</th>
                 <th>Run Time</th>
                 <th>Link</th>
                 <th>Last Upate Time</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test3"}
-        <tbody>
+        
             <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
+                <td class="reveal-cell">{cronJob.failedTests}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
-        </tbody>
+        
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test4</h3>
-    <table id="test4">
+    <table id="test4" class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot;]]">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Result</th>
                 <th>Test Results</th>
+                <th>Test Failures</th>
                 <th>Run Time</th>
                 <th>Link</th>
                 <th>Last Upate Time</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test4"}
-        <tbody>
             <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
+                <td class="reveal-cell">{cronJob.failedTests}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
-            </tr>
-        </tbody>
+            </tr>      
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test9</h3>
-    <table id="test9">
+    <table id="test9" class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot; ]]">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Result</th>
                 <th>Test Results</th>
+                <th>Test Failures</th>
                 <th>Run Time</th>
                 <th>Link</th>
                 <th>Last Upate Time</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test9"}
-        <tbody>
+        
             <tr>
                 <td class="cronjobName">{cronJob.name}</td>
                 <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                 <td>{cronJob.msg}</td>
+                <td class="reveal-cell">{cronJob.failedTests}</td>
                 <td>{cronJob.runTime}</td>
                 <td><A href="{cronJob.runLink}">Link to Logs</A></td>
                 <td>{cronJob.lastTransitionTime}</td>
             </tr>
-        </tbody>
+
         {/if}
         {/for}
+        </tbody>
     </table>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="/js/index.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/2.1.7/dataRender/ellipsis.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.7/css/dataTables.dataTables.css">
+<script src="/js/cronjobTable.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
 <link rel="stylesheet" href="/css/index.css">
+
+
 
 </body>
 </html>

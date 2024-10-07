@@ -76,11 +76,9 @@ public class OpenshiftResource {
     final private static String FAILED = "Failed";
     final private static String RUNNING = "Running";
     final private static String CANCELLED = "Cancelled";
-    final private static String TEST_FAILURE_START = "[INFO] Results:\n" + //
-                "[INFO] \n" + //
-                "[ERROR] Failures:";
-    final private static String TEST_FAILURE_END = "[INFO] \n" + //
-                "[ERROR] Tests run:";
+    final private static String TEST_FAILURE_START = "[ERROR] Failures:";
+    final private static String TEST_FAILURE_END = "[ERROR] Tests run:";
+    final private static String INFO = "[INFO]";
   
     final private static String GREEN = "#69ff33"; //Green
     final private static String YELLOW = "#EBF58A"; //Yellow
@@ -95,12 +93,12 @@ public class OpenshiftResource {
     private Pattern patternTimeStart = Pattern.compile("Total time:");
     private Pattern patternEnv = Pattern.compile("test\\d+");
     private Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
-    private Pattern patternStartOfFailedTests = Pattern.compile(TEST_FAILURE_START);
-    private Pattern patternEndOfFailedTests = Pattern.compile(TEST_FAILURE_END);
     private Pattern patternNoTestRun = Pattern.compile(NO_TEST_RUN);
 
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
+    //Sorts CronJobDashboardData by their release brance
+    Comparator<CronJobDashboardData> releaseBranchSorter = (a, b) -> a.releaseBranch.compareToIgnoreCase(b.releaseBranch);
 
     @CheckedTemplate
     public static class Templates {
@@ -154,6 +152,13 @@ public class OpenshiftResource {
             int typeIndexNameEnd = currentJob.name.indexOf("-");
             currentJob.type=currentJob.name.substring(0, typeIndexNameEnd);
            // System.out.println("Job name: " + currentJob.name + " Job Type: " + currentJob.type);
+
+           //Setting the env
+           Matcher matcherEnv = patternEnv.matcher(currentJob.name);
+           if(matcherEnv.find()){
+                currentJob.env = currentJob.name.substring(matcherEnv.start(), matcherEnv.end());
+           }
+
 
             cronJobs.add(currentJob);
         }
@@ -265,7 +270,13 @@ public class OpenshiftResource {
             if(removeStart == -1) //Manually run pipelines will have not have -tt-**** on the end so we can skip them. 
                 continue;
 
+               
             runPod = pipelineRunToPod.get(pipleLineRun.getMetadata().getName());
+            if (runPod == null){
+                System.out.println(pipleLineRun.getMetadata().getName() + " was not found."); 
+                continue; 
+            }
+                
             CronJobDashboardData data = new CronJobDashboardData(); 
             data.name = pipleLineRun.getMetadata().getName().substring(0, removeStart);
             
@@ -303,6 +314,8 @@ public class OpenshiftResource {
             data.name = data.name.replaceAll("-confjob",""); //Had a typo in a eailer build of the file generator. Files could still be around
             data.name = data.name.replaceAll("-cronjob","");
 
+            //Getting the releaseBranch from cronjob name
+            data.releaseBranch = getReleaseBranchFromName(data.name);
             
             //Creating link to piplerun logs and hosting the files
             //The -- is how I seperate the dash in the cronjob name and the pod name. Will be used later to get run logs from a pod for a specific run
@@ -312,7 +325,7 @@ public class OpenshiftResource {
             //There should only be one pipeline conditions. No idea why it was made as a list
             Condition pipelineCondition = pipelineConditions.get(0);
             data.result = pipelineCondition.getReason();
-            data.lastTransitionTime = createReadableData(pipelineCondition.getLastTransitionTime());
+            data.lastTransitionTime = createReadableDate(pipelineCondition.getLastTransitionTime());
            
             //Setting the color and message
             data = getColorStatusAndMsg(data, runLogs, namespace, runPod); 
@@ -320,7 +333,6 @@ public class OpenshiftResource {
             dashboardData.add(data);
         }
        
-        Collections.sort(dashboardData, nameSorter); //Sorting everything by  name of the cronjob
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
@@ -396,17 +408,13 @@ public class OpenshiftResource {
         Matcher matcherTestRun = patternTestRun.matcher(runLogs);
         Matcher matcherBuildFailed = patternBuildFailed.matcher(runLogs);
         Matcher matcherCRIOError = patternCRIOError.matcher(runLogs); //This is a extreme edge case that can happen to all jobs on a node. 
-        Matcher matcherTestFailureStart = patternStartOfFailedTests.matcher(runLogs);
-        Matcher matcherTestFailureEnd = patternEndOfFailedTests.matcher(runLogs);
         Matcher matcherNoTestRun = patternNoTestRun.matcher(runLogs);
-        System.out.println(data.name + " " + matcherTestFailureStart.matches() + " " + matcherTestFailureEnd.matches());
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
                 data.msg = findPassedFailedFromZipLogs(namespace, runPod,true);
                 data.color = ORANGE; //Orange Didn't pass but didn't totally fail
-                if(matcherTestFailureStart.matches() &&  matcherTestFailureEnd.matches())
-                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTestFailureEnd.start());
+                data.failedTests = getFailedTests(runLogs);
             }
             else if(doubleCheck.contains("Failures: 0")){
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
@@ -415,8 +423,7 @@ public class OpenshiftResource {
             else{
                 data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = YELLOW;
-                if(matcherTestFailureStart.matches() &&  matcherTestFailureEnd.matches())
-                    getFailedTests(runLogs, matcherTestFailureStart.end(), matcherTestFailureEnd.start()); 
+                data.failedTests = getFailedTests(runLogs);
             }        
         }
         else if(matcherBuildFailed.find()){
@@ -456,7 +463,7 @@ public class OpenshiftResource {
      * @param date The date to be converted
      * @return A easer to read date
      */
-    private String createReadableData(String date){
+    private String createReadableDate(String date){
 
         //Just in case the cronjob has not run yet and the last Transaction time is null or empty/blank. 
         if(date == null || date.isBlank())
@@ -466,7 +473,7 @@ public class OpenshiftResource {
         Instant instant = Instant.parse(date);
 
         // Create a DateTimeFormatter with the desired format
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm z MM-dd-yyyy").withZone(ZoneId.systemDefault());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm MM-dd-yyyy z").withZone(ZoneId.of("America/New_York"));
 
         // Format the Instant to a readable string
         return formatter.format(instant);
@@ -480,9 +487,11 @@ public class OpenshiftResource {
      */
     private HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
         HashMap<String, String> podToRunTask = new HashMap<String, String>();
+        System.out.print("Starting map to TaskRun");
         for(TaskRun taskRun : taskRuns){
             String key = taskRun.getMetadata().getLabels().get("tekton.dev/pipelineRun");
             String value = taskRun.getStatus().getPodName();    
+            //System.out.println("key: " + key + " value: " + value);
             podToRunTask.put(key, value);
         }
         return podToRunTask;
@@ -508,12 +517,42 @@ public class OpenshiftResource {
         else
             return String.format(TEST_RUN, passedCount + failedCount, passedCount, failedCount);
     }
-    
-    private String getFailedTests(String runLogs, int startPosition, int finishPosition){
 
-        System.out.println("Start: " + startPosition + " Finished: " + finishPosition);
+    /**
+     * Finds the selenium test that failed during a mvn test. NOTE: If there is a exception mvn test will not list out the test that failed. 
+     * Will have to use the zip output to find which pass/failed. 
+     * @param runLogs
+     * @return
+     */
+    private String getFailedTests(String runLogs){
+
+        int failureStart = runLogs.indexOf(TEST_FAILURE_START);
+        if(failureStart > 0){
+            int failureEnd = runLogs.indexOf(TEST_FAILURE_END, failureStart);
+            //Basically removing the [ERROR] Failures: from the string
+            String failuresMsg = runLogs.substring(failureStart + TEST_FAILURE_START.length(), failureEnd);
+            int infoStart= failuresMsg.indexOf(INFO);
+            //Remove INFO itself from the failure message
+            String finalFailureMsg = failuresMsg.substring(0, infoStart);
+            //This remove the extra little bit of endline and space above and below the failure msgs. 
+            finalFailureMsg = finalFailureMsg.substring(2, finalFailureMsg.length()-1);
+            //System.out.println(finalFailureMsg);
+            return finalFailureMsg;
+        }
         return "";
 
+    }
+
+    /**
+     * Gets the release branch (to be used for sorting) from the name of the cronjob
+     * @param cronjobName
+     * @return
+     */
+    private String getReleaseBranchFromName(String cronjobName){
+
+        //Since all cronjob names follow the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH we know everything after test<number>- is the release branch name
+        int startPosition = cronjobName.indexOf("test") + 6; //Basically taking out test<number>- to get the name
+        return cronjobName.substring(startPosition, cronjobName.length());
     }
 
 }
