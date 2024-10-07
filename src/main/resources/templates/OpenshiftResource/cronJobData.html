@@ -13,7 +13,7 @@
     <h2>Current List of FFE Selenium CronJobs</h2>
     <input type="text" id="searchInput" onkeyup="searchTables()" placeholder="Search for names..">
     <h3>Test 1</h3>
-    <table id="test1">
+    <table id="test1" class="display" width="100%">
         <thead>
             <tr>
                 <th>Name</th>
@@ -22,21 +22,21 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test1"}
-        <tbody>
             <tr>
                 <td>{cronJob.name}</td>
                 <td>{cronJob.branch}</td>
                 <td>{cronJob.schedule}</td>
                 <td>{cronJob.humanReadableMsg}</td>
             </tr>
-        </tbody>
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test 2</h3>
-    <table id="test2">
+    <table id="test2" class="display" width="100%">
         <thead>
             <tr>
                 <th>Name</th>
@@ -45,21 +45,21 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test2"}
-        <tbody>
             <tr>
                 <td>{cronJob.name}</td>
                 <td>{cronJob.branch}</td>
                 <td>{cronJob.schedule}</td>
                 <td>{cronJob.humanReadableMsg}</td>
             </tr>
-        </tbody>
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test 3</h3>
-    <table id ="test3">
+    <table id ="test3" class="display" width="100%">
         <thead>
             <tr>
                 <th>Name</th>
@@ -68,21 +68,21 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+         <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test3"}
-        <tbody>
             <tr>
                 <td>{cronJob.name}</td>
                 <td>{cronJob.branch}</td>
                 <td>{cronJob.schedule}</td>
                 <td>{cronJob.humanReadableMsg}</td>
             </tr>
-        </tbody>
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test 4</h3>
-    <table id="test4">
+    <table id="test4" class="display" width="100%">
         <thead>
             <tr>
                 <th>Name</th>
@@ -91,21 +91,22 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test4"}
-        <tbody>
+       
             <tr>
                 <td>{cronJob.name}</td>
                 <td>{cronJob.branch}</td>
                 <td>{cronJob.schedule}</td>
                 <td>{cronJob.humanReadableMsg}</td>
             </tr>
-        </tbody>
         {/if}
         {/for}
+        </tbody>
     </table>
     <h3>Test 9</h3>
-    <table id="test9">
+    <table id="test9" class="display" width="100%">
         <thead>
             <tr>
                 <th>Name</th>
@@ -114,22 +115,24 @@
                 <th>Schedule Description</th>
             </tr>
         </thead>
+        <tbody>
         {#for cronJob in cronJobs}
         {#if cronJob.env == "test9"}
-        <tbody>
             <tr>
                 <td>{cronJob.name}</td>
                 <td>{cronJob.branch}</td>
                 <td>{cronJob.schedule}</td>
                 <td>{cronJob.humanReadableMsg}</td>
             </tr>
-        </tbody>
         {/if}
         {/for}
+        </tbody>
     </table>
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="/js/index.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.7/css/dataTables.dataTables.css">
+<script src="/js/cronjobData.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
