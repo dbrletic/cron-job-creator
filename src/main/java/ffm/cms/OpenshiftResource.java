@@ -373,6 +373,7 @@ public class OpenshiftResource {
     @Path("/{namespace}/listSeleniumReports")
     public List<String> listSeleniumReports(@RestPath String namespace){
 
+        System.out.println("Checking on folder: " + REPORTS_DIRECTORY);
         java.nio.file.Path dirPath = Paths.get(REPORTS_DIRECTORY);
         List<String> fileList = new ArrayList<>();
 
@@ -384,7 +385,7 @@ public class OpenshiftResource {
             e.printStackTrace();
             // Handle the exception (e.g., log it, return an error response, etc.)
         }
-
+        System.out.println(fileList);
         return fileList;
 
     }
