@@ -371,24 +371,21 @@ public class OpenshiftResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{namespace}/listSeleniumReports")
-    public Response listSeleniumReports(@RestPath String namespace){
+    public List<String> listSeleniumReports(@RestPath String namespace){
 
-        File directory = new File(REPORTS_DIRECTORY);
-        if (!directory.exists() || !directory.isDirectory()) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Directory not found: " + REPORTS_DIRECTORY)
-                    .build();
-        }
-
+        java.nio.file.Path dirPath = Paths.get(REPORTS_DIRECTORY);
         List<String> fileList = new ArrayList<>();
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                fileList.add(file.getName());
-            }
+
+        try {
+            Files.list(dirPath).forEach(path -> {
+                fileList.add(path.getFileName().toString());
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Handle the exception (e.g., log it, return an error response, etc.)
         }
 
-        return Response.ok(fileList).build();
+        return fileList;
 
     }
     //TODO Move the following methods to their own helper class to clean up code
