@@ -11,6 +11,6 @@ spec:
     - bindings:
         - kind: TriggerBinding
           ref: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-binding
-      name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-trigger
+      name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-trigger
       template:
         ref: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-tt

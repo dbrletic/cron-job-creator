@@ -14,7 +14,7 @@ spec:
             parent: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj
         spec:
           containers:
-          - name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj-trigger
+          - name: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH
             image: {{ .Values.baseImageRegistry }}/ffe-curl:0.0.1
             args: ["curl", "-X", "POST", "--data", "{}", "el-CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj.tester-pipelines.svc.cluster.local:8080"]
             envFrom:
