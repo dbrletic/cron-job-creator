@@ -48,6 +48,3 @@ spec:
         workspaces:
           - emptyDir: {}
             name: config-source
-          - name: shared-workspace
-            persistentVolumeClaim:
-              claimName: selenium-pipeline-results-pvc
