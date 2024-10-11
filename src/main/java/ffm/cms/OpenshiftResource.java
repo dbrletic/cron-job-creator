@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import ffm.cms.model.FileInfo;
 
 /**
  * Handles getting information from OpenShift like Cronjob Schedules, logs, etc
@@ -371,22 +372,18 @@ public class OpenshiftResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{namespace}/listSeleniumReports")
-    public List<String> listSeleniumReports(@RestPath String namespace){
+    public Response  listSeleniumReports(@RestPath String namespace){
 
         System.out.println("Checking on folder: " + REPORTS_DIRECTORY);
-        java.nio.file.Path dirPath = Paths.get(REPORTS_DIRECTORY);
-        List<String> fileList = new ArrayList<>();
-
-        try {
-            Files.list(dirPath).forEach(path -> {
-                fileList.add(path.getFileName().toString());
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Handle the exception (e.g., log it, return an error response, etc.)
+        File directory  = new File(REPORTS_DIRECTORY);
+        if (!directory.exists() || !directory.isDirectory()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                           .entity("Invalid directory path")
+                           .build();
         }
-        System.out.println(fileList);
-        return fileList;
+
+        List<FileInfo> fileList = listFilesAndDirectories(directory);
+        return Response.ok(fileList).build();
 
     }
     //TODO Move the following methods to their own helper class to clean up code
@@ -578,6 +575,22 @@ public class OpenshiftResource {
         //Since all cronjob names follow the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH we know everything after test<number>- is the release branch name
         int startPosition = cronjobName.indexOf("test") + 6;
         return cronjobName.substring(startPosition, cronjobName.length());
+    }
+
+    private List<FileInfo> listFilesAndDirectories(File directory) {
+        List<FileInfo> fileList = new ArrayList<>();
+        File[] files = directory.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                fileList.add(new FileInfo(file.getName(), file.isDirectory()));
+                if (file.isDirectory()) {
+                    fileList.addAll(listFilesAndDirectories(file));
+                }
+            }
+        }
+
+        return fileList;
     }
 
 }
