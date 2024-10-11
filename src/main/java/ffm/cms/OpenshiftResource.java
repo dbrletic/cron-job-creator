@@ -79,6 +79,7 @@ public class OpenshiftResource {
     final private static String TEST_FAILURE_START = "[ERROR] Failures:";
     final private static String TEST_FAILURE_END = "[ERROR] Tests run:";
     final private static String INFO = "[INFO]";
+    final private static String REPORTS_DIRECTORY="/testing/selenium/pipeline-reports";
   
     final private static String GREEN = "#69ff33"; //Green
     final private static String YELLOW = "#EBF58A"; //Yellow
@@ -98,7 +99,7 @@ public class OpenshiftResource {
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
     //Sorts CronJobDashboardData by their release brance
-    Comparator<CronJobDashboardData> releaseBranchSorter = (a, b) -> a.releaseBranch.compareToIgnoreCase(b.releaseBranch);
+    Comparator<CronJobDashboardData> releaseBranchSorter = (a, b) -> a.name.compareToIgnoreCase(b.releaseBranch);
 
     @CheckedTemplate
     public static class Templates {
@@ -333,6 +334,8 @@ public class OpenshiftResource {
             dashboardData.add(data);
         }
        
+        Collections.sort(dashboardData, nameSorter); //Sorting everything by name 
+        Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
@@ -364,6 +367,30 @@ public class OpenshiftResource {
                         .build();       
     }  
 
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{namespace}/listSeleniumReports")
+    public Response listSeleniumReports(@RestPath String namespace){
+
+        File directory = new File(REPORTS_DIRECTORY);
+        if (!directory.exists() || !directory.isDirectory()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Directory not found: " + REPORTS_DIRECTORY)
+                    .build();
+        }
+
+        List<String> fileList = new ArrayList<>();
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                fileList.add(file.getName());
+            }
+        }
+
+        return Response.ok(fileList).build();
+
+    }
     //TODO Move the following methods to their own helper class to clean up code
 
     /**
@@ -491,7 +518,7 @@ public class OpenshiftResource {
         for(TaskRun taskRun : taskRuns){
             String key = taskRun.getMetadata().getLabels().get("tekton.dev/pipelineRun");
             String value = taskRun.getStatus().getPodName();    
-            //System.out.println("key: " + key + " value: " + value);
+            System.out.println("key: " + key + " value: " + value);
             podToRunTask.put(key, value);
         }
         return podToRunTask;
@@ -551,7 +578,7 @@ public class OpenshiftResource {
     private String getReleaseBranchFromName(String cronjobName){
 
         //Since all cronjob names follow the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH we know everything after test<number>- is the release branch name
-        int startPosition = cronjobName.indexOf("test") + 6; //Basically taking out test<number>- to get the name
+        int startPosition = cronjobName.indexOf("test") + 6;
         return cronjobName.substring(startPosition, cronjobName.length());
     }
 
