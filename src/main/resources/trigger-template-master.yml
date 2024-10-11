@@ -40,9 +40,14 @@ spec:
             value: $(tt.params.browser)
           - name: seleniumTestEmailList
             value: $(tt.params.seleniumTestEmailList)
+          - name: pipelineRunName
+            value: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH
         pipelineRef:
           name: {{ .Values.cluster }}-selenium-grid-test-pipeline
         serviceAccountName: pipeline
         workspaces:
           - emptyDir: {}
             name: config-source
+          - name: shared-workspace
+            persistentVolumeClaim:
+              claimName: selenium-pipeline-results-pvc
