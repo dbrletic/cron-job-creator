@@ -2,6 +2,7 @@ package ffm.cms;
 
 import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;
+import ffm.cms.model.CronJobReports;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
@@ -47,7 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import ffm.cms.model.FileInfo;
+
+
 
 /**
  * Handles getting information from OpenShift like Cronjob Schedules, logs, etc
@@ -107,6 +109,7 @@ public class OpenshiftResource {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs);
+        public static native TemplateInstance cronJobReportHistory(List<CronJobReports> cronJobsReports);
     }
 
     @GET()
@@ -370,20 +373,28 @@ public class OpenshiftResource {
 
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_HTML)
     @Path("/{namespace}/listSeleniumReports")
-    public Response  listSeleniumReports(@RestPath String namespace){
+    public TemplateInstance  listSeleniumReports(@RestPath String namespace){
 
-        System.out.println("Checking on folder: " + REPORTS_DIRECTORY);
-        File directory  = new File(REPORTS_DIRECTORY);
-        if (!directory.exists() || !directory.isDirectory()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("Invalid directory path")
-                           .build();
-        }
-
-        List<FileInfo> fileList = listFilesAndDirectories(directory);
-        return Response.ok(fileList).build();
+        List<CronJobReports> reportList = new ArrayList<>();
+        List<String> pipleRunNames = listSubFolders(REPORTS_DIRECTORY);
+        //Goes REPORTS_DIRECTORY/indivialRuns/date/*.tar.gz and *.html
+        for(String pipleRunName: pipleRunNames){
+            List<String> indivialRuns = listSubFolders(REPORTS_DIRECTORY + "/" + pipleRunName);
+            for(String indivialRun:indivialRuns ){
+                CronJobReports cronJobReport = new CronJobReports();
+                String fullPath = REPORTS_DIRECTORY + "/" + pipleRunName + "/" + indivialRun;
+                HashMap<String, File> zipAndHtml = findFiles(fullPath);
+            
+                cronJobReport.name=pipleRunName;
+                cronJobReport.lastRunDate=indivialRun;
+                cronJobReport.reportUrl=fullPath + "/" + zipAndHtml.get("html");
+                cronJobReport.zipUrl=fullPath + "/" + zipAndHtml.get("zip");
+                reportList.add(cronJobReport);
+            }
+       }
+        return Templates.cronJobReportHistory(reportList);
 
     }
     //TODO Move the following methods to their own helper class to clean up code
@@ -577,20 +588,51 @@ public class OpenshiftResource {
         return cronjobName.substring(startPosition, cronjobName.length());
     }
 
-    private List<FileInfo> listFilesAndDirectories(File directory) {
-        List<FileInfo> fileList = new ArrayList<>();
-        File[] files = directory.listFiles();
+   
+    private List<String>  listSubFolders(String parentFolderLocation){
+        List<String> folderNames = new ArrayList<>();
+        File parentFolder = new File(parentFolderLocation);
+        if (parentFolder.exists() && parentFolder.isDirectory()) {
+            File[] files = parentFolder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        folderNames.add(file.getName());
+                    }
+                }
+            }
+        }
+        return folderNames;
+    }
 
+    private HashMap<String, File> findFiles(String folderPath) {
+        HashMap<String, File> result = new HashMap<>();
+        File folder = new File(folderPath);
+        
+        if (!folder.exists() || !folder.isDirectory()) {
+            throw new IllegalArgumentException("Invalid folder path");
+        }
+
+        File[] files = folder.listFiles();
         if (files != null) {
             for (File file : files) {
-                fileList.add(new FileInfo(file.getName(), file.isDirectory()));
-                if (file.isDirectory()) {
-                    fileList.addAll(listFilesAndDirectories(file));
+                if (file.isFile()) {
+                    String fileName = file.getName().toLowerCase();
+                    if (fileName.endsWith(".tar.gz") && !result.containsKey("zip")) {
+                        result.put("zip", file);
+                    } else if (fileName.endsWith(".html") && !result.containsKey("html")) {
+                        result.put("html", file);
+                    }
+                    if (result.size() == 2) {
+                        break;
+                    }
                 }
             }
         }
 
-        return fileList;
+        return result;
     }
 
+
 }
+

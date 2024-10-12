@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>FFE Selenium Report History</title>
+</head>
+<body>
+{#include menu.html}
+{/include}
+<!-- Use any element to open the sidenav -->
+<span onclick="openNav()"><h3>Menu</h3></span>
+<div class="container" id="main">
+    <h2>Current List of FFE Selenium Reports</h2>
+    <table id="reports" class="hover compact" width="100%" data-order="[[ 1, &quot;asc&quot; ]]">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Date Finished</th>
+                <th>Test Zip</th>
+                <th>Test HTML</th>
+            </tr>
+        </thead>
+        <tbody> 
+        {#for cronJobReport in cronJobsReports}                 
+        <tr>
+            <td>{cronJobReport.name}</td>
+            <td>{cronJobReport.lastRunDate}</td>
+            <td><A href="{cronJobReport.reportUrl}">Link to Report</A></td>
+            <td><A href="{cronJobReport.zipUrl}">Link to full Zip</A>"</td>
+        </tr>
+        {/for}
+        </tbody>
+    </table>
+
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/2.1.7/dataRender/ellipsis.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.7/css/dataTables.dataTables.css">
+<script src="/js/cronjobReport.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+<link rel="stylesheet" href="/css/index.css">
+
+
+
+</body>
+</html>
