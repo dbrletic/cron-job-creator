@@ -1,4 +1,4 @@
-package ffm.cms;
+package ffm.cms.openshift;
 
 import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;

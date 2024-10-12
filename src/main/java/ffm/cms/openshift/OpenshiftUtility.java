@@ -1,4 +1,4 @@
-package ffm.cms;
+package ffm.cms.openshift;
 
 import java.time.Instant;
 import java.time.ZoneId;

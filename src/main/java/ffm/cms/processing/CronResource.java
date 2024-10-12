@@ -1,4 +1,4 @@
-package ffm.cms;
+package ffm.cms.processing;
 
 import java.io.File;
 import java.io.FileInputStream;
