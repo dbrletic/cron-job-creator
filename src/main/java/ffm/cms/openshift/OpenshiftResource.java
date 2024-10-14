@@ -84,7 +84,6 @@ public class OpenshiftResource {
     final private static String TEST_FAILURE_START = "[ERROR] Failures:";
     final private static String TEST_FAILURE_END = "[ERROR] Tests run:";
     final private static String INFO = "[INFO]";
-    final private static String URL_TO_STATIC_FILES = "/static/pipeline/reports/";
   
     final private static String GREEN = "#69ff33"; //Green
     final private static String YELLOW = "#EBF58A"; //Yellow
@@ -385,21 +384,20 @@ public class OpenshiftResource {
 
         List<CronJobReports> reportList = new ArrayList<>();
         List<String> pipleRunNames = listSubFolders(pipelinePVCMountPath);
-        //Goes URL_TO_STATIC_FILES/indivialRuns/date/*.tar.gz and *.html
-        //The URL is linked to the PVC through here: https://quarkus.io/guides/http-reference
+        //Goes pipelinePVCMountPath/indivialRuns/date/*.tar.gz and *.html
         for(String pipleRunName: pipleRunNames){
             System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + pipleRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + pipleRunName);
             for(String indivialRun:indivialRuns ){
                 CronJobReports cronJobReport = new CronJobReports();
-                String fullPath = pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun;
+                String fullPath = "/reports" + "/" + pipleRunName + "/" + indivialRun; //Creating the URL to use later
                 System.out.println("Finding files in: " + pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun);
                 HashMap<String, File> zipAndHtml = findFiles(fullPath);
             
                 cronJobReport.name=pipleRunName;
                 cronJobReport.lastRunDate=indivialRun;
-                cronJobReport.reportUrl=fullPath + "/" + zipAndHtml.get("html");
-                cronJobReport.zipUrl=fullPath + "/" + zipAndHtml.get("zip");
+                cronJobReport.reportUrl=fullPath + "/" + "html/" + zipAndHtml.get("html");
+                cronJobReport.zipUrl=fullPath + "/" + "zip/" + zipAndHtml.get("zip");
                 reportList.add(cronJobReport);
             }
         }
