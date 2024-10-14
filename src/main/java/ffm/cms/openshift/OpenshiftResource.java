@@ -390,14 +390,15 @@ public class OpenshiftResource {
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + pipleRunName);
             for(String indivialRun:indivialRuns ){
                 CronJobReports cronJobReport = new CronJobReports();
-                String fullPath = "/reports" + "/" + pipleRunName + "/" + indivialRun; //Creating the URL to use later
+                String fullPath = pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun; //Creating the URL to use later
+                String urlPath = "/reports" + "/" + pipleRunName + "/" + indivialRun;
                 System.out.println("Finding files in: " + pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun);
-                HashMap<String, File> zipAndHtml = findFiles(fullPath);
+                HashMap<String, String> zipAndHtml = findFiles(fullPath);
             
                 cronJobReport.name=pipleRunName;
                 cronJobReport.lastRunDate=indivialRun;
-                cronJobReport.reportUrl=fullPath + "/" + "html/" + zipAndHtml.get("html");
-                cronJobReport.zipUrl=fullPath + "/" + "zip/" + zipAndHtml.get("zip");
+                cronJobReport.reportUrl=urlPath + "/" + "html/" + zipAndHtml.get("html");
+                cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipAndHtml.get("zip");
                 reportList.add(cronJobReport);
             }
         }
@@ -612,8 +613,8 @@ public class OpenshiftResource {
         return folderNames;
     }
 
-    private HashMap<String, File> findFiles(String folderPath) {
-        HashMap<String, File> result = new HashMap<>();
+    private HashMap<String, String> findFiles(String folderPath) {
+        HashMap<String, String> result = new HashMap<>();
         File folder = new File(folderPath);
         
         if (!folder.exists() || !folder.isDirectory()) {
@@ -626,9 +627,9 @@ public class OpenshiftResource {
                 if (file.isFile()) {
                     String fileName = file.getName().toLowerCase();
                     if (fileName.endsWith(".tar.gz") && !result.containsKey("zip")) {
-                        result.put("zip", file);
+                        result.put("zip", fileName);
                     } else if (fileName.endsWith(".html") && !result.containsKey("html")) {
-                        result.put("html", file);
+                        result.put("html", fileName);
                     }
                     if (result.size() == 2) {
                         break;

@@ -43,7 +43,7 @@ public class HtmlReportRender {
     }
 
     @GET
-    @Path("/{pipleRunName}/{indivialRun}/zip/{filename}")
+    @Path("/{pipeLineRunName}/{indivialRun}/zip/{filename}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response getFile(@RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String filename) {
         
@@ -66,5 +66,13 @@ public class HtmlReportRender {
         }
     }
 
+    @GET
+    @Path("/{pipeLineRunName}/{indivialRun}/zip/{filename}")
+    @Produces("image/jpeg")
+    pubic Response getImage(){
+        //testing/selenium/pipeline-reports/sreregression-01-test2-py25-version-10-2-test2/16-27-11-10-2024/SRF_Med_007-1011241636-Failed.jpeg
+        
+
+    }
     
 }
