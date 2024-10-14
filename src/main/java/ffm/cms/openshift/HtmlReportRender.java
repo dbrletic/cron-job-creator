@@ -34,8 +34,15 @@ public class HtmlReportRender {
         System.out.println("Looking up html file: " + htmlLookup);
         java.nio.file.Path path = Paths.get(htmlLookup);
         try {
-            String htmlContent = Files.readString(path);
-            return Response.ok(htmlContent).type("text/html").build();
+            
+            if(html.contains(".jpeg")){
+                return Response.ok(path.toFile()).build();
+            }
+            else {
+                String htmlContent = Files.readString(path);
+                return Response.ok(htmlContent).type("text/html").build();
+            }       
+            
         } catch (IOException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                            .entity("Error reading the HTML file").build();
@@ -64,15 +71,5 @@ public class HtmlReportRender {
             return Response.status(Response.Status.NOT_FOUND)
                            .entity("File not found").build();
         }
-    }
-
-    @GET
-    @Path("/{pipeLineRunName}/{indivialRun}/zip/{filename}")
-    @Produces("image/jpeg")
-    pubic Response getImage(){
-        //testing/selenium/pipeline-reports/sreregression-01-test2-py25-version-10-2-test2/16-27-11-10-2024/SRF_Med_007-1011241636-Failed.jpeg
-        
-
-    }
-    
+    } 
 }
