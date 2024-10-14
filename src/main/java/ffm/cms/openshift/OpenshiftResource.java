@@ -388,10 +388,12 @@ public class OpenshiftResource {
         //Goes URL_TO_STATIC_FILES/indivialRuns/date/*.tar.gz and *.html
         //The URL is linked to the PVC through here: https://quarkus.io/guides/http-reference
         for(String pipleRunName: pipleRunNames){
+            System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + pipleRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + pipleRunName);
             for(String indivialRun:indivialRuns ){
                 CronJobReports cronJobReport = new CronJobReports();
-                String fullPath = URL_TO_STATIC_FILES + pipleRunName + "/" + indivialRun;
+                String fullPath = pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun;
+                System.out.println("Finding files in: " + pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun);
                 HashMap<String, File> zipAndHtml = findFiles(fullPath);
             
                 cronJobReport.name=pipleRunName;
