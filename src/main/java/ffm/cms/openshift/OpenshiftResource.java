@@ -29,6 +29,7 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestPath;
 import java.io.File;
@@ -61,8 +62,9 @@ import java.util.regex.Pattern;
 public class OpenshiftResource {
 
     @Inject //Generic OpenShift client
-    private OpenShiftClient openshiftClient; //Make sure to add a ServiceAccount to the deployment that has access to the namespace that has the pipeline runs. 
+    private OpenShiftClient openshiftClient; //Make sure to add a ServiceAccount to the deployment that has access to the namespace that has the pipeline runs.  This will automatticaly add in the kubeconfig file that gives the client the needed permissions. 
     
+    //All the private Static String
     final private static String CRIO_MSG = "Unable to get logs. Check email for status of run.";
     final private static String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
     final private static String BUILD_FAILURE = "Compliation error. Check logs for errors.";
@@ -82,7 +84,7 @@ public class OpenshiftResource {
     final private static String TEST_FAILURE_START = "[ERROR] Failures:";
     final private static String TEST_FAILURE_END = "[ERROR] Tests run:";
     final private static String INFO = "[INFO]";
-    final private static String REPORTS_DIRECTORY="/testing/selenium/pipeline-reports";
+    final private static String URL_TO_STATIC_FILES = "/static/pipeline/reports/";
   
     final private static String GREEN = "#69ff33"; //Green
     final private static String YELLOW = "#EBF58A"; //Yellow
@@ -91,7 +93,7 @@ public class OpenshiftResource {
     final private static String ORANGE = "#F0C476"; //Orange
 
 
-
+    //All the Pattern Matching 
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
     private Pattern patternTimeStart = Pattern.compile("Total time:");
@@ -111,6 +113,10 @@ public class OpenshiftResource {
         public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs);
         public static native TemplateInstance cronJobReportHistory(List<CronJobReports> cronJobsReports);
     }
+
+    @Inject
+    @ConfigProperty(name = "quarkus.openshift.mounts.pipeline-storage.path")
+    private String pipelinePVCMountPath;
 
     @GET()
     @Path("/{namespace}/cronjobs")
@@ -378,13 +384,14 @@ public class OpenshiftResource {
     public TemplateInstance  listSeleniumReports(@RestPath String namespace){
 
         List<CronJobReports> reportList = new ArrayList<>();
-        List<String> pipleRunNames = listSubFolders(REPORTS_DIRECTORY);
-        //Goes REPORTS_DIRECTORY/indivialRuns/date/*.tar.gz and *.html
+        List<String> pipleRunNames = listSubFolders(pipelinePVCMountPath);
+        //Goes URL_TO_STATIC_FILES/indivialRuns/date/*.tar.gz and *.html
+        //The URL is linked to the PVC through here: https://quarkus.io/guides/http-reference
         for(String pipleRunName: pipleRunNames){
-            List<String> indivialRuns = listSubFolders(REPORTS_DIRECTORY + "/" + pipleRunName);
+            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + pipleRunName);
             for(String indivialRun:indivialRuns ){
                 CronJobReports cronJobReport = new CronJobReports();
-                String fullPath = REPORTS_DIRECTORY + "/" + pipleRunName + "/" + indivialRun;
+                String fullPath = URL_TO_STATIC_FILES + pipleRunName + "/" + indivialRun;
                 HashMap<String, File> zipAndHtml = findFiles(fullPath);
             
                 cronJobReport.name=pipleRunName;
@@ -393,7 +400,7 @@ public class OpenshiftResource {
                 cronJobReport.zipUrl=fullPath + "/" + zipAndHtml.get("zip");
                 reportList.add(cronJobReport);
             }
-       }
+        }
         return Templates.cronJobReportHistory(reportList);
 
     }
