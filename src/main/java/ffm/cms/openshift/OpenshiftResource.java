@@ -45,8 +45,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,6 +92,10 @@ public class OpenshiftResource {
     final private static String RED = "#ff4763"; //Red
     final private static String GRAY = "#f6f6f6"; //Gray
     final private static String ORANGE = "#F0C476"; //Orange
+
+    final private static String JS_START = "$(document).ready( function () {";
+    final private static String JS_END = " });";
+    final private static String JS_REPEAT_AND_REPLACE ="var REAPLCE = new DataTable('#REPLACE', {paging: false } );";
 
 
     //All the Pattern Matching 
@@ -168,8 +174,6 @@ public class OpenshiftResource {
            if(matcherEnv.find()){
                 currentJob.env = currentJob.name.substring(matcherEnv.start(), matcherEnv.end());
            }
-
-
             cronJobs.add(currentJob);
         }
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
@@ -223,7 +227,7 @@ public class OpenshiftResource {
             if(currentJob.name.startsWith("gatling"))
                 cronJobs.add(currentJob);
         }
-        return Templates.gatlingCronJobData(cronJobs);
+        return Templates.gatlingCronJobData(cronJobs); //Add in the data 
     }
 
     @GET
@@ -253,6 +257,7 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
+        Set <String> uniqueEnvs = new HashSet<>();
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         int cronjobCounter = 0; //Count how many CronJob pipelines were displayeds
         HashMap<String, String> pipelineRunToPod;
@@ -314,6 +319,7 @@ public class OpenshiftResource {
             //Getting the Enviroment the code was run on
             if(matcherEnv.find()){
                 data.env = data.name.substring(matcherEnv.start(), matcherEnv.end());
+                uniqueEnvs.add(data.env); //Getting only the Enviroment Names that I need once
             }
        
              //Setting the type of Pipeline that was run. It always the text before the first -
@@ -341,15 +347,20 @@ public class OpenshiftResource {
             data = getColorStatusAndMsg(data, runLogs, namespace, runPod); 
             cronjobCounter++;
             dashboardData.add(data);
+
+            //TODO Create a ArrayList of all the unique env, pass that to the Template instance, and use that to only have to create one
+            //Like it will be a for loop of unique array list, but then under it will if env == headername write out
+            //Would take out extra HTML loops. Need to Dynamically write the DataTable.js javascript
         }
-       
+        List<String> uniqueEnvNameList = new ArrayList<>(uniqueEnvs);
+        String dataTableJS = createDataTableLoadingJS(uniqueEnvNameList);
         Collections.sort(dashboardData, nameSorter); //Sorting everything by name 
         Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
         
-        return  Templates.cronJobDashboard(dashboardData);
+        return  Templates.cronJobDashboard(dashboardData).data("dataTableJS", dataTableJS);
     }
 
     @GET
@@ -384,7 +395,7 @@ public class OpenshiftResource {
 
         List<CronJobReports> reportList = new ArrayList<>();
         List<String> pipleRunNames = listSubFolders(pipelinePVCMountPath);
-        //Goes pipelinePVCMountPath/indivialRuns/date/*.tar.gz and *.html
+        //Goes pipelinePVCMountPath/indivialRunsName/date/*.tar.gz and *.html
         for(String pipleRunName: pipleRunNames){
             System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + pipleRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + pipleRunName);
@@ -402,7 +413,8 @@ public class OpenshiftResource {
                 reportList.add(cronJobReport);
             }
         }
-        return Templates.cronJobReportHistory(reportList);
+        String dataTableJS = createDataTableLoadingJS(pipleRunNames);
+        return Templates.cronJobReportHistory(reportList).data("dataTableJS", dataTableJS);
 
     }
     //TODO Move the following methods to their own helper class to clean up code
@@ -639,6 +651,16 @@ public class OpenshiftResource {
         }
 
         return result;
+    }
+
+    private String createDataTableLoadingJS(List<String> headerNames){
+        
+        String loadDataTables = "";
+        for(String name: headerNames){
+            loadDataTables =  loadDataTables + JS_REPEAT_AND_REPLACE.replace("REPLACE", name);
+            loadDataTables = loadDataTables + "\n";
+        }
+        return JS_START + loadDataTables + JS_END;
     }
 
 

@@ -16,6 +16,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+/**
+ * Takes in a REST request and return either a HTML page or zip file located on the supplied PVC mount to render a Selenium Report through the Dashboard
+ * @author dbrletic
+ */
 @ApplicationScoped
 @RegisterRestClient
 @Path("/reports")
@@ -25,6 +29,14 @@ public class HtmlReportRender {
     @ConfigProperty(name = "quarkus.openshift.mounts.pipeline-storage.path")
     private String pipelinePVCMountPath;
     
+     /**
+     * Find the given HTML file or jpeg file on the PVC Mount
+     * What happens is that the HTML file is loaded first and then reaches out for the associated jpegs to complete the report
+     * @param pipeLineRunName The name of the pipeline run
+     * @param indivialRun The individual run, in the format of its completed time stamp
+     * @param html The name of the file to look for
+     * @return
+     */
     @GET
     @Path("/{pipeLineRunName}/{indivialRun}/html/{html}")
     @Produces(MediaType.TEXT_HTML)
@@ -49,6 +61,13 @@ public class HtmlReportRender {
         }
     }
 
+    /**
+     * Finds and returns a given zip file of a report on the PVC Mount
+     * @param pipeLineRunName
+     * @param indivialRun
+     * @param filename
+     * @return
+     */
     @GET
     @Path("/{pipeLineRunName}/{indivialRun}/zip/{filename}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
