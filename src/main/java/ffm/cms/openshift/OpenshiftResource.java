@@ -390,13 +390,16 @@ public class OpenshiftResource {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
-    @Path("/{namespace}/listSeleniumReports")
-    public TemplateInstance  listSeleniumReports(@RestPath String namespace){
+    @Path("/{namespace}/listSeleniumReports/{type}")
+    public TemplateInstance  listSeleniumReports(@RestPath String namespace, @RestPath String type){
 
+        //type shold be cronjob, users,all
         List<CronJobReports> reportList = new ArrayList<>();
         List<String> pipleRunNames = listSubFolders(pipelinePVCMountPath);
         //Goes pipelinePVCMountPath/indivialRunsName/date/*.tar.gz and *.html
         for(String pipleRunName: pipleRunNames){
+            if(skipOrNot(type, pipleRunName))
+                continue; //
             System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + pipleRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + pipleRunName);
             for(String indivialRun:indivialRuns ){
@@ -415,7 +418,6 @@ public class OpenshiftResource {
         }
         String dataTableJS = createDataTableLoadingJS(pipleRunNames);
         return Templates.cronJobReportHistory(reportList).data("dataTableJS", dataTableJS);
-
     }
     //TODO Move the following methods to their own helper class to clean up code
 
@@ -661,6 +663,26 @@ public class OpenshiftResource {
             loadDataTables = loadDataTables + "\n";
         }
         return JS_START + loadDataTables + JS_END;
+    }
+
+    private boolean skipOrNot(String type, String pipelineRunName){
+        switch (type) {
+            case "cronjob":
+                if(pipelineRunName.endsWith("-cj"))
+                    return false;
+                else 
+                    return true;
+            case "users":
+                if(!pipelineRunName.endsWith("-cj"))
+                    return false;
+                else 
+                    return true;
+            case "all":
+                return false;
+            default:
+                return false;
+        }
+
     }
 
 
