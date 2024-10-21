@@ -17,7 +17,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Takes in a REST request and return either a HTML page or zip file located on the supplied PVC mount to render a Selenium Report through the Dashboard
+ * Takes in a REST request and return either a HTML page, image, or zip file located on the supplied PVC mount to render a Selenium Report through the Dashboard
  * @author dbrletic
  */
 @ApplicationScoped
