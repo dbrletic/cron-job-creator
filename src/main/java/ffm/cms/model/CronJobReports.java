@@ -8,4 +8,5 @@ public class CronJobReports {
     public String lastRunDate;
     public String zipUrl;
     public String reportUrl;
+    public String logUrl;
 }

@@ -18,6 +18,7 @@
                 <th>Date Run Finished</th>
                 <th>Test HTML Report</th>
                 <th>Test ZIP</th>
+                <th>Test Log File</th>
             </tr>
         </thead>
         <tbody> 
@@ -27,6 +28,7 @@
             <td>{cronJobReport.lastRunDate}</td>
             <td><A href="{cronJobReport.reportUrl}">Link to Report</A></td>
             <td><A href="{cronJobReport.zipUrl}">Link to full Zip</A></td>
+            <td><A href="{cronJobReport.logUrl}">Link to Log File</A></td>
         </tr>
         {/for}
         </tbody>

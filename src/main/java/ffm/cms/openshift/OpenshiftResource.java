@@ -407,12 +407,13 @@ public class OpenshiftResource {
                 String fullPath = pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun; //Creating the URL to use later
                 String urlPath = "/reports" + "/" + pipleRunName + "/" + indivialRun;
                 System.out.println("Finding files in: " + pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun);
-                HashMap<String, String> zipAndHtml = findFiles(fullPath);
+                HashMap<String, String> zipHtmlLog = findFiles(fullPath);
             
                 cronJobReport.name=pipleRunName;
                 cronJobReport.lastRunDate=indivialRun;
-                cronJobReport.reportUrl=urlPath + "/" + "html/" + zipAndHtml.get("html");
-                cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipAndHtml.get("zip");
+                cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
+                cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
+                cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
                 reportList.add(cronJobReport);
             }
         }
@@ -645,7 +646,10 @@ public class OpenshiftResource {
                     } else if (fileName.endsWith(".html") && !result.containsKey("html")) {
                         result.put("html", fileName);
                     }
-                    if (result.size() == 2) {
+                    if(fileName.endsWith(".log") && !result.containsKey("log")){
+                        result.put("log", fileName);
+                    }
+                    if (result.size() == 3) {
                         break;
                     }
                 }

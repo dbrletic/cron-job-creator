@@ -91,4 +91,35 @@ public class HtmlReportRender {
                            .entity("File not found").build();
         }
     } 
+
+     /**
+     * Finds and returns a given zip file of a report on the PVC Mount
+     * @param pipeLineRunName
+     * @param indivialRun
+     * @param filename
+     * @return
+     */
+    @GET
+    @Path("/{pipeLineRunName}/{indivialRun}/log/{filename}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getLogFile(@RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String filename) {
+        
+        String FILE_BASE_PATH = pipelinePVCMountPath + "/" + pipeLineRunName + "/" + indivialRun;
+        java.nio.file.Path filePath = Paths.get(FILE_BASE_PATH, filename);
+
+        System.out.println("Looking for log at " + filePath);
+        if (Files.exists(filePath) && Files.isRegularFile(filePath)) {
+            try {
+                return Response.ok(Files.readAllBytes(filePath), MediaType.APPLICATION_OCTET_STREAM)
+                               .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                               .build();
+            } catch (IOException e) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                               .entity("File read error").build();
+            }
+        } else {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("File not found").build();
+        }
+    } 
 }

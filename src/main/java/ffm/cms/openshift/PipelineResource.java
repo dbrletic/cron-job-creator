@@ -35,7 +35,7 @@ public class PipelineResource {
 
     @Inject
     @ConfigProperty(name = "ffe.selenium.pipeline.name")
-    private String openshiftPipelineName;
+    private String openshiftSeleniumPipelineName;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -60,9 +60,9 @@ public class PipelineResource {
 
         return sb.toString();
     }
-    
+     
     private PipelineRun createPipelineRun(FFEStartPipeline data, String namespace){
-        String pipelineName = openshiftPipelineName + "-" + generateRandomString(5);
+       String pipelineName = openshiftSeleniumPipelineName + "-" + generateRandomString(5);
         
         PipelineRun pipelineRun = new PipelineRunBuilder()
         .withNewMetadata()
@@ -70,7 +70,7 @@ public class PipelineResource {
             .withNamespace(namespace)
         .endMetadata()
         .withNewSpec()
-            .withPipelineRef(new PipelineRefBuilder().withName(openshiftPipelineName).build())
+            .withPipelineRef(new PipelineRefBuilder().withName(openshiftSeleniumPipelineName).build())
             .addNewParam()
                 .withName("releaseBranch")
                 .withNewValue(data.getReleaseBranch())  // Replace with your branch name
