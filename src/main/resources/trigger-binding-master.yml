@@ -19,3 +19,5 @@ spec:
       value: BROWSER
     - name: seleniumTestEmailList
       value: SELENIUMTESTEMAILLIST
+    - name: pipelineRunName
+      value: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj

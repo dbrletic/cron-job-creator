@@ -19,6 +19,8 @@ spec:
       name: browser
     - description: The Email list for results
       name: seleniumTestEmailList
+    - description: The name of the pipelineRun to save to the PVC
+      name: pipelineRunName
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
@@ -41,7 +43,7 @@ spec:
           - name: seleniumTestEmailList
             value: $(tt.params.seleniumTestEmailList)
           - name: pipelineRunName
-            value: CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH
+            value: $(tt.params.pipelineRunName)
         pipelineRef:
           name: {{ .Values.cluster }}-selenium-grid-test-pipeline
         serviceAccountName: pipeline

@@ -138,7 +138,7 @@ public class CronResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
     @Path("/update")
- public Response updateCronJobs(@Valid UpdateCronJobSchedule update) throws IOException{
+    public Response updateCronJobs(@Valid UpdateCronJobSchedule update) throws IOException{
         Map<String,String> cronJobsToUpdate = update.getPairs();
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
