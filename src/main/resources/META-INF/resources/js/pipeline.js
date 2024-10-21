@@ -24,19 +24,10 @@ const serialize_form = form => JSON.stringify(
       url: '/pipeline/tester-pipelines/startRun',
       data: jsonData,
       contentType: 'application/json',
-      xhrFields:{
-        responseType: 'blob'
-      },
-      success: function(response) {
-        $("#cronForum")[0].reset();
-        var link = document.createElement('a');
-        let today = new Date().toISOString().slice(0, 10)
-        link.href = window.URL.createObjectURL(response)
-        link.download = data.groups + "-" + data.url + "-" + today + ".zip";
-        document.body.appendChild(link);
-        link.click();
-        $('#errorMessage').empty();
+      success: function(data) {
+        $("#piplelineRunForm")[0].reset();
         $("#successMessage").show();      
+        $("#successMessage").text("Pipeline Run Create: " + data);
       },
       error: function(xhr, status, error) {
         $("#successMessage").hide();     
