@@ -38,11 +38,11 @@ public class HtmlReportRender {
      * @return
      */
     @GET
-    @Path("/{pipeLineRunName}/{indivialRun}/html/{html}")
+    @Path("/{type}/{pipeLineRunName}/{indivialRun}/html/{html}")
     @Produces(MediaType.TEXT_HTML)
-    public Response getHtmlPage(@RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String html) {
+    public Response getHtmlPage(@RestPath String type, @RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String html) {
         
-        String htmlLookup = pipelinePVCMountPath + "/" + pipeLineRunName + "/" + indivialRun +"/" + html;
+        String htmlLookup = pipelinePVCMountPath + "/" + type + "/" + pipeLineRunName + "/" + indivialRun +"/" + html;
         System.out.println("Looking up html file: " + htmlLookup);
         java.nio.file.Path path = Paths.get(htmlLookup);
         try {
@@ -69,11 +69,11 @@ public class HtmlReportRender {
      * @return
      */
     @GET
-    @Path("/{pipeLineRunName}/{indivialRun}/zip/{filename}")
+    @Path("/{type}/{pipeLineRunName}/{indivialRun}/zip/{filename}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getFile(@RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String filename) {
+    public Response getFile(@RestPath String type, @RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String filename) {
         
-        String FILE_BASE_PATH = pipelinePVCMountPath + "/" + pipeLineRunName + "/" + indivialRun;
+        String FILE_BASE_PATH = pipelinePVCMountPath + "/" + type + "/" + pipeLineRunName + "/" + indivialRun;
         java.nio.file.Path filePath = Paths.get(FILE_BASE_PATH, filename);
 
         System.out.println("Looking for zip at " + filePath);
@@ -100,11 +100,11 @@ public class HtmlReportRender {
      * @return
      */
     @GET
-    @Path("/{pipeLineRunName}/{indivialRun}/log/{filename}")
+    @Path("/{type}/{pipeLineRunName}/{indivialRun}/log/{filename}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getLogFile(@RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String filename) {
+    public Response getLogFile(@RestPath String type, @RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String filename) {
         
-        String FILE_BASE_PATH = pipelinePVCMountPath + "/" + pipeLineRunName + "/" + indivialRun;
+        String FILE_BASE_PATH = pipelinePVCMountPath + "/" + type + "/" + pipeLineRunName + "/" + indivialRun;
         java.nio.file.Path filePath = Paths.get(FILE_BASE_PATH, filename);
 
         System.out.println("Looking for log at " + filePath);
