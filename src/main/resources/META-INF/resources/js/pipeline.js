@@ -21,7 +21,7 @@ const serialize_form = form => JSON.stringify(
     console.log(jsonData);
     $.ajax({
       type: 'POST',
-      url: '/pipeline/tester-pipelines/startRun',
+      url: '/pipeline/pipeline/startRun',
       data: jsonData,
       contentType: 'application/json',
       success: function(data) {

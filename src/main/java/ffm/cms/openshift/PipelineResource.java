@@ -70,7 +70,7 @@ public class PipelineResource {
             .withNamespace(namespace)
         .endMetadata()
         .withNewSpec()
-            .withPipelineRef(new PipelineRefBuilder().withName(pipelineName).build())
+            .withPipelineRef(new PipelineRefBuilder().withName(openshiftPipelineName).build())
             .addNewParam()
                 .withName("releaseBranch")
                 .withNewValue(data.getReleaseBranch())  // Replace with your branch name
