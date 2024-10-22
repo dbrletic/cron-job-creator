@@ -10,7 +10,6 @@ const serialize_form = form => JSON.stringify(
       userNameFFM: document.getElementById('userNameFFM').value,
       userPassword: document.getElementById('userPassword').value,
       groups: document.getElementById('groups').value,
-      browser: document.getElementById('browser').value,
       url: document.getElementById('url').value,
       seleniumTestEmailList: document.getElementById('seleniumTestEmailList').value,
       logs: document.getElementById('logs').value,

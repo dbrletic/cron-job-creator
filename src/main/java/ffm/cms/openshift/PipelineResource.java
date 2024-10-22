@@ -131,7 +131,7 @@ public class PipelineResource {
             .endParam()
             .addNewParam()
                 .withName("browser")
-                .withNewValue(data.getBrowser())  // Replace with your URL
+                .withNewValue("box")  // This is always going to be box to run on OpenShift
             .endParam()
             .addNewParam()
                 .withName("seleniumTestEmailList")
