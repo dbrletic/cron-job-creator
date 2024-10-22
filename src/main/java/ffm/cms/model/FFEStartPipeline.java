@@ -16,8 +16,6 @@ public class FFEStartPipeline {
     @NotBlank
     private String groups;
     @NotBlank
-    private String browser;
-    @NotBlank
     private String url;
     @NotBlank
     private String seleniumTestEmailList;

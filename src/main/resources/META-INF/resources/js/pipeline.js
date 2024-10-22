@@ -58,12 +58,6 @@ const serialize_form = form => JSON.stringify(
         errorMessage: 'Groups is required'
       }
     ])
-    .addField('#browser', [
-      {
-        rule: 'required',
-        errorMessage: 'Browser is required'
-      }
-    ])
     .addField('#url', [
       {
         rule: 'required',
@@ -92,6 +86,11 @@ const serialize_form = form => JSON.stringify(
         {
           rule: 'required',
           errorMessage: 'A Pipeline run name is required'
+        },
+        {
+          rule: 'customRegexp',
+          value: '/^[A-Za-z\-]+$',
+          errorMessage: 'Pipeline Run Name can only have letters and -'
         }
       ])
     .addField('#userNameFFM', [
