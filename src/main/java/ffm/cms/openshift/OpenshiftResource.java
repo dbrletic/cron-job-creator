@@ -402,7 +402,7 @@ public class OpenshiftResource {
         }else{
             //Basically just listed both cj and users reports
             reportList = createCronJobReportFromFolder("cj");
-            reportList.addAll(createCronJobReportFromFolder("type"));
+            reportList.addAll(createCronJobReportFromFolder("users"));
         }
 
         /*
@@ -434,7 +434,7 @@ public class OpenshiftResource {
         List<CronJobReports> reportList = new ArrayList<>();
         for(String pipleRunName: pipleRunNames){
             System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipleRunName);
-            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + pipleRunName);
+            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipleRunName);
             for(String indivialRun:indivialRuns ){
                 CronJobReports cronJobReport = new CronJobReports();
                 String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipleRunName + "/" + indivialRun; //Creating the URL to use later
