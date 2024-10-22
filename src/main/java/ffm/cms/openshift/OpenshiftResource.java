@@ -388,15 +388,21 @@ public class OpenshiftResource {
     }  
 
 
+    /**
+     * Creates a report based upon the files on the PVC
+     * @param namespace Current namespace of the project
+     * @param type The type of reports to get, either cronjobs (cj), users, or all
+     * @return
+     */
     @GET
     @Produces(MediaType.TEXT_HTML)
     @Path("/{namespace}/listSeleniumReports/{type}")
     public TemplateInstance  listSeleniumReports(@RestPath String namespace, @RestPath String type){
 
-        //type shold be cronjob, users,all
+        //type shold be cj, users,all
         List<CronJobReports> reportList = new ArrayList<>();
         //List<String> pipleRunNames = listSubFolders(pipelinePVCMountPath);
-        //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz and *.html
+        //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz, *.html, and *.log
         if(type.equals("cj") || type.equals("users")){
             reportList = createCronJobReportFromFolder(type);
         }else{
@@ -404,37 +410,22 @@ public class OpenshiftResource {
             reportList = createCronJobReportFromFolder("cj");
             reportList.addAll(createCronJobReportFromFolder("users"));
         }
-
-        /*
-        for(String pipleRunName: pipleRunNames){
-            System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipleRunName);
-            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + pipleRunName);
-            for(String indivialRun:indivialRuns ){
-                CronJobReports cronJobReport = new CronJobReports();
-                String fullPath = pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun; //Creating the URL to use later
-                String urlPath = "/reports" + "/" + pipleRunName + "/" + indivialRun;
-                System.out.println("Finding files in: " + pipelinePVCMountPath + "/" + pipleRunName + "/" + indivialRun);
-                HashMap<String, String> zipHtmlLog = findFiles(fullPath);
-            
-                cronJobReport.name=pipleRunName;
-                cronJobReport.lastRunDate=indivialRun;
-                cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
-                cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
-                cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
-                reportList.add(cronJobReport);
-            }
-        } */
         //String dataTableJS = createDataTableLoadingJS(pipleRunNames);
         return Templates.cronJobReportHistory(reportList);//.data("dataTableJS", dataTableJS);
     }
     //TODO Move the following methods to their own helper class to clean up code
 
+    /**
+     * Creates a ArrayList of cronJobReports based upon the type (cj or users). Searchs through the PVCMountPath to figure out all the subfolders that contain reports. 
+     * @param type Which folder type to go into, either cj or users
+     * @return
+     */
     private List<CronJobReports> createCronJobReportFromFolder(String type){
-        List<String> pipleRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
+        List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
         List<CronJobReports> reportList = new ArrayList<>();
         for(String pipleRunName: pipleRunNames){
             System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipleRunName);
-            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipleRunName);
+            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipleRunName);//Each pipe
             for(String indivialRun:indivialRuns ){
                 CronJobReports cronJobReport = new CronJobReports();
                 String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipleRunName + "/" + indivialRun; //Creating the URL to use later
@@ -643,6 +634,11 @@ public class OpenshiftResource {
     }
 
    
+    /**
+     * List all the subfolders of a given parent
+     * @param parentFolderLocation
+     * @return
+     */
     private List<String>  listSubFolders(String parentFolderLocation){
         List<String> folderNames = new ArrayList<>();
         File parentFolder = new File(parentFolderLocation);
@@ -659,6 +655,11 @@ public class OpenshiftResource {
         return folderNames;
     }
 
+    /**
+     * Finds the first zip, html, and log file in a given folder path
+     * @param folderPath The folder path on the OS to search for
+     * @return
+     */
     private HashMap<String, String> findFiles(String folderPath) {
         HashMap<String, String> result = new HashMap<>();
         File folder = new File(folderPath);
@@ -690,6 +691,11 @@ public class OpenshiftResource {
         return result;
     }
 
+    /**
+     * Creates a javascript method that loads all the tables on a page to use with DataTable.js
+     * @param headerNames The names of all the tables 
+     * @return 
+     */
     private String createDataTableLoadingJS(List<String> headerNames){
         
         String loadDataTables = "";
@@ -699,27 +705,5 @@ public class OpenshiftResource {
         }
         return JS_START + loadDataTables + JS_END;
     }
-
-    private boolean skipOrNot(String type, String pipelineRunName){
-        switch (type) {
-            case "cronjob":
-                if(pipelineRunName.endsWith("-cj"))
-                    return false;
-                else 
-                    return true;
-            case "users":
-                if(!pipelineRunName.endsWith("-cj"))
-                    return false;
-                else 
-                    return true;
-            case "all":
-                return false;
-            default:
-                return false;
-        }
-
-    }
-
-
 }
 
