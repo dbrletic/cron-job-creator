@@ -110,9 +110,8 @@ public class HtmlReportRender {
         System.out.println("Looking for log at " + filePath);
         if (Files.exists(filePath) && Files.isRegularFile(filePath)) {
             try {
-                return Response.ok(Files.readAllBytes(filePath), MediaType.APPLICATION_OCTET_STREAM)
-                               .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
-                               .build();
+                String logContent = Files.readString(filePath);
+                return Response.ok(logContent).build();
             } catch (IOException e) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                                .entity("File read error").build();

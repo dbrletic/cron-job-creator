@@ -5,9 +5,14 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestPath;
 
 import ffm.cms.model.FFEStartPipeline;
+import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.tekton.client.TektonClient;
+import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.PipelineRef;
+import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBinding;
+import io.fabric8.tekton.pipeline.v1beta1.Param;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRefBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRunBuilder;
@@ -19,6 +24,10 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 @ApplicationScoped
@@ -29,6 +38,9 @@ public class PipelineResource {
     @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient; //Make sure to add a ServiceAccount to the deployment that has access to the namespace that has the pipeline runs.  This will automatticaly add in the kubeconfig file that gives the client the needed permissions. 
     
+    //@Inject
+    //TektonClient tknClient;
+
     @Inject
     @ConfigProperty(name = "quarkus.openshift.mounts.pipeline-storage.path")
     private String pipelinePVCMountPath;
@@ -42,8 +54,10 @@ public class PipelineResource {
     @Blocking
     @Path("{namespace}/startRun")
     public String startPipelineRun(@RestPath String namespace, @Valid FFEStartPipeline data) {
+       
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
         PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).create(createPipelineRun(data,namespace));
+        System.out.println("Kicking off new pipeline " + createdPipelineRun.getMetadata().getName() + " in namespace " + namespace  + "based upon " + openshiftSeleniumPipelineName);
         return createdPipelineRun.getMetadata().getName();
     }
 
@@ -62,11 +76,35 @@ public class PipelineResource {
     }
      
     private PipelineRun createPipelineRun(FFEStartPipeline data, String namespace){
-       String pipelineName = openshiftSeleniumPipelineName + "-" + generateRandomString(5);
-        
+       /* String pipelineName = openshiftSeleniumPipelineName + "-" + generateRandomString(5);
+        List<Param> params = new ArrayList<Param>();
+
+       PipelineRun pipelineRun = new PipelineRunBuilder().build();
+       //Building basic information
+       pipelineRun.getMetadata().setGenerateName(openshiftSeleniumPipelineName + "-");
+       pipelineRun.getMetadata().setNamespace(namespace);
+       pipelineRun.getSpec().setPipelineRef(new PipelineRefBuilder().withName(openshiftSeleniumPipelineName).build());
+       //Adding all the Params
+       params.add(new ParamBuilder().withName("releaseBranch").withNewValue(data.getReleaseBranch()).build());
+       params.add(new ParamBuilder().withName("userName").withNewValue(data.getUserNameFFM()).build());
+       params.add(new ParamBuilder().withName("userPassword").withNewValue(data.getUserPassword()).build());
+       params.add(new ParamBuilder().withName("groups").withNewValue(data.getGroups()).build());
+       params.add(new ParamBuilder().withName("url").withNewValue(data.getUrl()).build());
+       params.add(new ParamBuilder().withName("browser").withNewValue(data.getBrowser()).build());
+       params.add(new ParamBuilder().withName("seleniumTestEmailList").withNewValue(data.getSeleniumTestEmailList()).build());
+       params.add(new ParamBuilder().withName("logs").withNewValue(data.getLogs()).build());
+       params.add(new ParamBuilder().withName("pipelineRunName").withNewValue(data.getPipelineRunName()).build());
+       params.add(new ParamBuilder().withName("mvnArgs").withNewValue(data.getMvnArgs()).build());
+       
+       pipelineRun.getSpec().setParams(params); */ 
+       
+       WorkspaceBinding configWorkspace = new WorkspaceBinding();
+       configWorkspace.setName("config-source");
+       configWorkspace.setEmptyDir(new EmptyDirVolumeSource());
+
         PipelineRun pipelineRun = new PipelineRunBuilder()
         .withNewMetadata()
-            .withGenerateName(pipelineName)
+            .withGenerateName(openshiftSeleniumPipelineName + "-")
             .withNamespace(namespace)
         .endMetadata()
         .withNewSpec()
@@ -102,7 +140,7 @@ public class PipelineResource {
             .addNewParam()
                 .withName("logs")
                 .withNewValue(data.getLogs())  // Replace with your URL
-        .endParam()
+            .endParam()
             .addNewParam()
                 .withName("mvnArgs")
                 .withNewValue(data.getMvnArgs())  // Replace with your URL
@@ -111,8 +149,9 @@ public class PipelineResource {
                 .withName("pipelineRunName")
                 .withNewValue(data.getPipelineRunName())  // Replace with your URL
         .endParam()
+        .withWorkspaces(Collections.singletonList(configWorkspace))
         .endSpec()
-        .build();
+        .build(); 
         
         return pipelineRun;
     }
