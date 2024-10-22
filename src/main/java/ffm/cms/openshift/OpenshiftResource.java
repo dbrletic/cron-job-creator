@@ -391,7 +391,7 @@ public class OpenshiftResource {
     /**
      * Creates a report based upon the files on the PVC
      * @param namespace Current namespace of the project
-     * @param type The type of reports to get, either cronjobs (cj), users, or all
+     * @param type The type of reports to get, either cronjobs (cj), users, or all. If defaults to all if anything besides cj or users
      * @return
      */
     @GET
@@ -401,7 +401,6 @@ public class OpenshiftResource {
 
         //type shold be cj, users,all
         List<CronJobReports> reportList = new ArrayList<>();
-        //List<String> pipleRunNames = listSubFolders(pipelinePVCMountPath);
         //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz, *.html, and *.log
         if(type.equals("cj") || type.equals("users")){
             reportList = createCronJobReportFromFolder(type);
@@ -423,17 +422,17 @@ public class OpenshiftResource {
     private List<CronJobReports> createCronJobReportFromFolder(String type){
         List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
         List<CronJobReports> reportList = new ArrayList<>();
-        for(String pipleRunName: pipleRunNames){
-            System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipleRunName);
-            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipleRunName);//Each pipe
+        for(String pipelineRunName: pipelineRunNames){
+            System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
+            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
             for(String indivialRun:indivialRuns ){
                 CronJobReports cronJobReport = new CronJobReports();
-                String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipleRunName + "/" + indivialRun; //Creating the URL to use later
-                String urlPath = "/reports" + "/"  + type + "/" + pipleRunName + "/" + indivialRun;
-                System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipleRunName + "/" + indivialRun);
+                String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipelineRunName + "/" + indivialRun; //Creating the URL to use later
+                String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
+                System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
                 HashMap<String, String> zipHtmlLog = findFiles(fullPath);
             
-                cronJobReport.name=pipleRunName;
+                cronJobReport.name=pipelineRunName;
                 cronJobReport.lastRunDate=indivialRun;
                 cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
                 cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
@@ -636,7 +635,7 @@ public class OpenshiftResource {
    
     /**
      * List all the subfolders of a given parent
-     * @param parentFolderLocation
+     * @param parentFolderLocation Parent folder to look through
      * @return
      */
     private List<String>  listSubFolders(String parentFolderLocation){

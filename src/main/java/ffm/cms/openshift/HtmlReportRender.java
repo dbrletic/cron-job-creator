@@ -63,9 +63,9 @@ public class HtmlReportRender {
 
     /**
      * Finds and returns a given zip file of a report on the PVC Mount
-     * @param pipeLineRunName
-     * @param indivialRun
-     * @param filename
+    * @param pipeLineRunName The name of the pipeline run
+     * @param indivialRun The individual run, in the format of its completed time stamp
+     * @param filename The zip file name to look for
      * @return
      */
     @GET
@@ -93,10 +93,10 @@ public class HtmlReportRender {
     } 
 
      /**
-     * Finds and returns a given zip file of a report on the PVC Mount
-     * @param pipeLineRunName
-     * @param indivialRun
-     * @param filename
+     * Finds and returns a given log file of a report on the PVC Mount
+    * @param pipeLineRunName The name of the pipeline run
+     * @param indivialRun The individual run, in the format of its completed time stamp
+     * @param filename The log file name to look for
      * @return
      */
     @GET
