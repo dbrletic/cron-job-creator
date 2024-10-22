@@ -93,7 +93,7 @@ public class HtmlReportRender {
     } 
 
      /**
-     * Finds and returns a given log file of a report on the PVC Mount
+     * Finds and returns a given log file of a report on the PVC Mount. Due to trying to render it with all the spacing in the browser had to slightly change rendering the file
     * @param pipeLineRunName The name of the pipeline run
      * @param indivialRun The individual run, in the format of its completed time stamp
      * @param filename The log file name to look for
@@ -101,8 +101,8 @@ public class HtmlReportRender {
      */
     @GET
     @Path("/{type}/{pipeLineRunName}/{indivialRun}/log/{filename}")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getLogFile(@RestPath String type, @RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String filename) {
+    @Produces(MediaType.TEXT_HTML)
+    public String  getLogFile(@RestPath String type, @RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String filename) {
         
         String FILE_BASE_PATH = pipelinePVCMountPath + "/" + type + "/" + pipeLineRunName + "/" + indivialRun;
         java.nio.file.Path filePath = Paths.get(FILE_BASE_PATH, filename);
@@ -111,14 +111,21 @@ public class HtmlReportRender {
         if (Files.exists(filePath) && Files.isRegularFile(filePath)) {
             try {
                 String logContent = Files.readString(filePath);
-                return Response.ok(logContent).build();
+                String escapedLogContent = escapeHtml(logContent);
+                return "<html><head><style>pre { white-space: pre-wrap; }</style></head><body><pre>" + escapedLogContent + "</pre></body></html>";
             } catch (IOException e) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                               .entity("File read error").build();
+                return "<html><body>Error reading log file</body></html>";
             }
         } else {
-            return Response.status(Response.Status.NOT_FOUND)
-                           .entity("File not found").build();
+            return "<html><body>File not Found.</body></html>";
         }
-    } 
+    }
+
+    private String escapeHtml(String str) {
+        return str.replace("&", "&amp;")
+                  .replace("<", "&lt;")
+                  .replace(">", "&gt;")
+                  .replace("\"", "&quot;")
+                  .replace("'", "&#39;");
+    }
 }
