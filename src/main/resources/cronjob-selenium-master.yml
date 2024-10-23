@@ -5,7 +5,7 @@ metadata:
   namespace: tester-pipelines
 spec:
   schedule: "SCHEDULE" # HUMAN_READALBE 
-  # timeZone: EST5EDT
+  timeZone: EST5EDT
   jobTemplate:
     spec:
       template:
