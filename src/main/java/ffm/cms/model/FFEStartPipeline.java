@@ -1,7 +1,6 @@
 package ffm.cms.model;
 
 import jakarta.validation.constraints.NotBlank;
-
 import lombok.Data;
 
 @Data

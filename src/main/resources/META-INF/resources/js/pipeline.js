@@ -20,13 +20,13 @@ const serialize_form = form => JSON.stringify(
     console.log(jsonData);
     $.ajax({
       type: 'POST',
-      url: '/pipeline/pipeline/startRun',
+      url: '/pipeline/tester-pipelines/startRun',
       data: jsonData,
       contentType: 'application/json',
       success: function(data) {
         $("#piplelineRunForm")[0].reset();
         $("#successMessage").show();      
-        $("#successMessage").text("Pipeline Run Create: " + data);
+        $("#successMessage").text("Pipeline Run Created: " + data);
       },
       error: function(xhr, status, error) {
         $("#successMessage").hide();     
@@ -86,11 +86,6 @@ const serialize_form = form => JSON.stringify(
         {
           rule: 'required',
           errorMessage: 'A Pipeline run name is required'
-        },
-        {
-          rule: 'customRegexp',
-          value: '/^[A-Za-z\-]+$',
-          errorMessage: 'Pipeline Run Name can only have letters and -'
         }
       ])
     .addField('#userNameFFM', [

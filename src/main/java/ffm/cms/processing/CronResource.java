@@ -17,6 +17,7 @@ import ffm.cms.model.FFEGatlingData;
 import ffm.cms.model.UpdateCronJobSchedule;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpStatus;
 
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
@@ -51,6 +52,10 @@ public class CronResource {
     public Response createFiles(@Valid FFEData data) throws IOException, ParseException{
         System.out.println("Starting up process for " + data.getGroups() + "-" + data.getUrl()) ;
         System.out.println(data.toString());
+        if(data.getReleaseBranch().length() + data.getGroups().length() + data.getUrl().length() > 52){
+            //Since ReleaseBranch, Groups, and Url are used to create names of the jobs there is so long the combo can be. 
+            return Response.status(HttpStatus.SC_BAD_REQUEST, "Release Branch, Groups, and Url are too long.").build();
+        }
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
         String zipFileLocation = projectDir + File.separator + data.getGroups() + "-" + data.getUrl() + ".zip";
