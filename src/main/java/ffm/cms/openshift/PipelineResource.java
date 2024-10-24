@@ -7,7 +7,6 @@ import org.jboss.resteasy.reactive.RestPath;
 import ffm.cms.model.FFEStartPipeline;
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
-import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.tekton.client.TektonClient;
 import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBinding;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRefBuilder;
