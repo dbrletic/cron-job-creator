@@ -54,6 +54,7 @@ public class CleanUpBean {
     @Scheduled(cron = "0 5 * * 1 ?") //Runs every Monday at 5 am. 
     void cleanUpOldPipelineRuns(){
         try {
+            System.out.println("Starting Cleanup of files older then 7 days.");
             cleanOldFilesAndFolders(Paths.get(pipelineMountPath));
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -74,7 +75,7 @@ public class CleanUpBean {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 if (attrs.lastModifiedTime().toInstant().isBefore(cutoffTime)) {
-                    System.out.println("Deleting file: " + file);
+                    System.out.println("Deleting file: " +  file.toAbsolutePath());
                     Files.delete(file); // Delete the file
                 }
                 return FileVisitResult.CONTINUE;

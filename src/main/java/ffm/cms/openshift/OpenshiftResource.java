@@ -39,6 +39,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -105,6 +106,10 @@ public class OpenshiftResource {
     private Pattern patternEnv = Pattern.compile("test\\d+");
     private Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
     private Pattern patternNoTestRun = Pattern.compile(NO_TEST_RUN);
+
+    //Formatting for folder name to Date
+    DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("m-H-d-M-yyyy");
+    DateTimeFormatter desiredFormatter = DateTimeFormatter.ofPattern("m:H d/M/yyyy");
 
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
@@ -431,9 +436,10 @@ public class OpenshiftResource {
                 String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
                 System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
                 HashMap<String, String> zipHtmlLog = findFiles(fullPath);
-            
+                LocalDateTime dateTime = LocalDateTime.parse(indivialRun, originalFormatter);
+                
                 cronJobReport.name=pipelineRunName;
-                cronJobReport.lastRunDate=indivialRun;
+                cronJobReport.lastRunDate=dateTime.format(desiredFormatter);
                 cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
                 cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
                 cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
