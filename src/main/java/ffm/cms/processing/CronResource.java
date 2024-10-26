@@ -202,13 +202,35 @@ public class CronResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/mass-update")
     public Response massUpdate(ScheduleJob[] jobs){
-        
+        List<String> newFilesLocation = new ArrayList<String>();
+        String projectDir = System.getProperty("user.dir");
+        String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
+
         for(ScheduleJob job: jobs){
-            System.out.println(job.toString());
+            
+            System.out.println("Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule());
+            try{
+                newFilesLocation.add(cronjobHandler.updateCronJOb(job.getJobName(),  job.getSchedule()));
+            } catch (IOException | ParseException e){
+                System.out.println(e.getMessage());
+                System.out.println(e.getStackTrace());
+            }
         }
-        return Response.ok().entity("Schedules processed successfully!").build();
+        File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
+        System.out.println("Add to response: " + zipFileLocation);
+        System.out.println("Zip is made: " + downloadZip.isFile());
+
+        try {
+            return Response
+                .ok(FileUtils.readFileToByteArray(downloadZip))
+                .type("application/zip")
+                .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
+                .build();
+        } catch (IOException e) {
+            return Response.serverError().status(500).build();
+        }
     }
 
     /**
