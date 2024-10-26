@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass Cronjob Schedule Submission</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Submit Mass Cronjob Updated Schedule</h1>
+    <form id="regressionForm">
+        <textarea id="scheduleData" placeholder="Paste your schedule data here..."></textarea>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('regressionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const scheduleData = document.getElementById('scheduleData').value;
+            const lines = scheduleData.trim().split('\n');
+            const jobs = [];
+
+            for (let i = 0; i < lines.length; i += 4) {
+                if (lines[i]) {
+                    const job = {
+                        jobName: lines[i],
+                        additionalInfo: lines[i + 1] || '',
+                        schedule: lines[i + 2],
+                        description: lines[i + 3]
+                    };
+                    jobs.push(job);
+                }
+            }
+
+            // Send the jobs data to the Quarkus API
+            fetch('/ffe-cronjob/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jobs)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Schedule submitted successfully!');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Error submitting schedule.');
+            });
+        });
+    </script>
+
+</body>
+</html>

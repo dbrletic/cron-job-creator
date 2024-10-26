@@ -14,6 +14,7 @@ import java.util.zip.ZipOutputStream;
 
 import ffm.cms.model.FFEData;
 import ffm.cms.model.FFEGatlingData;
+import ffm.cms.model.ScheduleJob;
 import ffm.cms.model.UpdateCronJobSchedule;
 
 import org.apache.commons.io.FileUtils;
@@ -32,6 +33,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -198,6 +200,17 @@ public class CronResource {
         
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response massUpdate(ScheduleJob[] jobs){
+        
+        for(ScheduleJob job: jobs){
+            System.out.println(job.toString());
+        }
+        return Response.ok().entity("Schedules processed successfully!").build();
+    }
+
     /**
      * Helper method that zips up a bunch of files, delete the zipped file, and returns the location of the newly created zip
      * @param newFilesLocation Array of location of the files to be zipped
@@ -250,6 +263,7 @@ public class CronResource {
         String uuidString = uuid.toString().replace("-", "");
         return uuidString.substring(0, 5);
     }
+
 
 
 }
