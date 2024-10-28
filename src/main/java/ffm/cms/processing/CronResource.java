@@ -33,7 +33,6 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -207,15 +206,18 @@ public class CronResource {
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
         String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
-
+        String updates="";
         for(ScheduleJob job: jobs){
             
             System.out.println("Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule());
+            updates = updates + "\n" + "Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule();
             try{
                 newFilesLocation.add(cronjobHandler.updateCronJOb(job.getJobName(),  job.getSchedule()));
             } catch (IOException | ParseException e){
+                
                 System.out.println(e.getMessage());
                 System.out.println(e.getStackTrace());
+                return Response.serverError().status(500).entity("Parsing Error of files").build();
             }
         }
         File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);

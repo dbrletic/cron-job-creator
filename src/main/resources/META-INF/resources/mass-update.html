@@ -12,11 +12,12 @@
         <textarea id="scheduleData" placeholder="Paste your schedule data here..." rows="30"></textarea>
         <center><button type="submit">Submit</button></center>
     </form>
-
+    <div style="color:#43916B" id="successMessage" hidden="true"> 
+        <p>Successfully Updated Cronjob Schedules</p>
+      </div>
+    <div style="color:#CF4B2F" id="errorMessage"></div>
+    </div>
     <script src="/js/mass-update.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,6 +43,15 @@
         }
         button:hover {
             background-color: #45a049;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 

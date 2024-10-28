@@ -2,16 +2,14 @@ document.getElementById('regressionForm').addEventListener('submit', function(ev
     event.preventDefault();
 
     const scheduleData = document.getElementById('scheduleData').value;
-    const lines = scheduleData.trim().split('\n').filter(line => line.trim() !== '');;
+    const lines = scheduleData.trim().split('\n').filter(line => line.trim() !== '');
     const jobs = [];
 
-    for (let i = 0; i < lines.length; i += 4) {
+    for (let i = 0; i < lines.length; i += 2) {
         if (lines[i]) {
             const job = {
                 jobName: lines[i],
-                additionalInfo: lines[i + 1] || '',
-                schedule: lines[i + 2],
-                description: lines[i + 3]
+                schedule: lines[i + 1]
             };
             jobs.push(job);
         }
@@ -27,7 +25,11 @@ document.getElementById('regressionForm').addEventListener('submit', function(ev
     })
     .then(response => {
         if (!response.ok) {
-        throw new Error('Network response was not ok');
+            $("<p>Error: " + response +"</p>").appendTo('#errorMessage');
+        if (response.ok) {
+            const data = response.message;
+            console.log(data);
+        }
     }
     return response.blob(); // Convert the response to a Blob
      })
@@ -41,6 +43,7 @@ document.getElementById('regressionForm').addEventListener('submit', function(ev
         a.click(); // Programmatically click the link to trigger the download
         a.remove(); // Clean up the link element
         URL.revokeObjectURL(url); // Release the object URL
+        
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
