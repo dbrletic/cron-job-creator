@@ -39,7 +39,6 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -106,11 +105,7 @@ public class OpenshiftResource {
     private Pattern patternEnv = Pattern.compile("test\\d+");
     private Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
     private Pattern patternNoTestRun = Pattern.compile(NO_TEST_RUN);
-
-    //Formatting for folder name to Date
-    DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("H-M-d-m-yyyy");
-    DateTimeFormatter desiredFormatter = DateTimeFormatter.ofPattern("mm:HH M d, yyyy");
-
+    
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
     //Sorts CronJobDashboardData by their release brance
