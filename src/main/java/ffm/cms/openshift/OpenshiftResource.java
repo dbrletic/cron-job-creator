@@ -706,7 +706,7 @@ public class OpenshiftResource {
     }
 
     /**
-     * Creates a readable string date from the folder Name
+     * Creates a readable string date from the folder Name. Converts military time to AM/PM and Month/Day/Year. 
      * @param folderName
      * @return
      */
@@ -714,7 +714,13 @@ public class OpenshiftResource {
         //Format of folder name is %H-%M-%d-%m-%Y"
         //ex: 10-09-28-10-2024
         String[] splitFolderName = folderName.split("-");
-        String formattedDate =splitFolderName[1] + ":" + splitFolderName[0] + " " + splitFolderName[3] + "-" + splitFolderName[2] + "-" + splitFolderName[4];
+        int minutes = Integer.parseInt(splitFolderName[1] );
+        int hours = Integer.parseInt(splitFolderName[0]);
+         // Convert to 12-hour format
+         String period = (hours < 12) ? "AM" : "PM";
+         int convertedHour = (hours % 12 == 0) ? 12 : hours % 12;
+
+        String formattedDate = String.format("%d:%02d %s", convertedHour, minutes, period) + " " + splitFolderName[3] + "-" + splitFolderName[2] + "-" + splitFolderName[4];
         return formattedDate;
     }
 }

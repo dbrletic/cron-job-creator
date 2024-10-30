@@ -17,6 +17,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
@@ -119,4 +120,16 @@ public class PipelineResource {
         return pipelineRun;
     }
     
+    @GET
+    @Path("{namespace}/{pipelineRunName}")
+    public String getPipelineStatus(@RestPath String namespace, @RestPath String pipelineRunName) {
+       
+        TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
+        //PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).create(createPipelineRun(data,namespace)); 
+        PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).resource(createPipelineRun(data,namespace)).create();
+        System.out.println("Kicking off new pipeline " + createdPipelineRun.getMetadata().getName() + " in namespace " + namespace  + "based upon " + openshiftSeleniumPipelineName);
+        return createdPipelineRun.getMetadata().getName();
+    }
+     
+
 }
