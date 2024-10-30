@@ -108,8 +108,8 @@ public class OpenshiftResource {
     private Pattern patternNoTestRun = Pattern.compile(NO_TEST_RUN);
 
     //Formatting for folder name to Date
-    DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("m-H-d-M-yyyy");
-    DateTimeFormatter desiredFormatter = DateTimeFormatter.ofPattern("m:H d/M/yyyy");
+    DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("H-M-d-m-yyyy");
+    DateTimeFormatter desiredFormatter = DateTimeFormatter.ofPattern("mm:HH M d, yyyy");
 
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
@@ -436,10 +436,9 @@ public class OpenshiftResource {
                 String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
                 System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
                 HashMap<String, String> zipHtmlLog = findFiles(fullPath);
-                LocalDateTime dateTime = LocalDateTime.parse(indivialRun, originalFormatter);
                 
                 cronJobReport.name=pipelineRunName;
-                cronJobReport.lastRunDate=dateTime.format(desiredFormatter);
+                cronJobReport.lastRunDate=createDateFromFolderName(indivialRun);
                 cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
                 cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
                 cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
@@ -709,6 +708,19 @@ public class OpenshiftResource {
             loadDataTables = loadDataTables + "\n";
         }
         return JS_START + loadDataTables + JS_END;
+    }
+
+    /**
+     * Creates a readable string date from the folder Name
+     * @param folderName
+     * @return
+     */
+    private String createDateFromFolderName(String folderName){
+        //Format of folder name is %H-%M-%d-%m-%Y"
+        //ex: 10-09-28-10-2024
+        String[] splitFolderName = folderName.split("-");
+        String formattedDate =splitFolderName[1] + ":" + splitFolderName[0] + " " + splitFolderName[3] + "-" + splitFolderName[2] + "-" + splitFolderName[4];
+        return formattedDate;
     }
 }
 
