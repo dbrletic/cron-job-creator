@@ -17,6 +17,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
@@ -53,6 +54,14 @@ public class PipelineResource {
     }
      
 
+    @GET
+    @Path("/update-files")
+    public String updateFiles(){
+        System.out.println("Scanning local files at tmp");
+
+        return "Edited all the files";
+
+    }
     /**
      * Creates a new pipeline from the supplied data
      * @param data The data to add to the pipeline
