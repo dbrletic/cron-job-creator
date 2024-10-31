@@ -119,17 +119,4 @@ public class PipelineResource {
         
         return pipelineRun;
     }
-    
-    @GET
-    @Path("{namespace}/{pipelineRunName}")
-    public String getPipelineStatus(@RestPath String namespace, @RestPath String pipelineRunName) {
-       
-        TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
-        //PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).create(createPipelineRun(data,namespace)); 
-        PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).resource(createPipelineRun(data,namespace)).create();
-        System.out.println("Kicking off new pipeline " + createdPipelineRun.getMetadata().getName() + " in namespace " + namespace  + "based upon " + openshiftSeleniumPipelineName);
-        return createdPipelineRun.getMetadata().getName();
-    }
-     
-
 }

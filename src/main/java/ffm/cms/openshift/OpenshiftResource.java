@@ -105,7 +105,7 @@ public class OpenshiftResource {
     private Pattern patternEnv = Pattern.compile("test\\d+");
     private Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
     private Pattern patternNoTestRun = Pattern.compile(NO_TEST_RUN);
-    
+
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
     //Sorts CronJobDashboardData by their release brance
@@ -711,17 +711,16 @@ public class OpenshiftResource {
      * @return
      */
     private String createDateFromFolderName(String folderName){
-        //Format of folder name is %H-%M-%d-%m-%Y"
+        //Format of folder name is %M-%H-%d-%m-%Y""
         //ex: 10-09-28-10-2024
         String[] splitFolderName = folderName.split("-");
-        int minutes = Integer.parseInt(splitFolderName[1] );
-        int hours = Integer.parseInt(splitFolderName[0]);
+        int minutes = Integer.parseInt(splitFolderName[2] );
+        int hours = Integer.parseInt(splitFolderName[1]);
          // Convert to 12-hour format
          String period = (hours < 12) ? "AM" : "PM";
          int convertedHour = (hours % 12 == 0) ? 12 : hours % 12;
 
-        String formattedDate = String.format("%d:%02d %s", convertedHour, minutes, period) + " " + splitFolderName[3] + "-" + splitFolderName[2] + "-" + splitFolderName[4];
+        String formattedDate = String.format("%d:%02d %s", convertedHour, minutes, period) + " " + splitFolderName[3] + "/" + splitFolderName[2] + "/" + splitFolderName[4];
         return formattedDate;
     }
 }
-
