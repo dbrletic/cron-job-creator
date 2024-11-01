@@ -9,4 +9,5 @@ public class CronJobReports {
     public String zipUrl;
     public String reportUrl;
     public String logUrl;
+    public String env;
 }

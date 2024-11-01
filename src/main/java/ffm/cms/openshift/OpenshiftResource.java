@@ -2,7 +2,6 @@ package ffm.cms.openshift;
 
 import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;
-import ffm.cms.model.CronJobReports;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
@@ -29,7 +28,6 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestPath;
 import java.io.File;
@@ -116,12 +114,7 @@ public class OpenshiftResource {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs);
-        public static native TemplateInstance cronJobReportHistory(List<CronJobReports> cronJobsReports);
     }
-
-    @Inject
-    @ConfigProperty(name = "quarkus.openshift.mounts.pipeline-storage.path")
-    private String pipelinePVCMountPath;
 
     @GET()
     @Path("/{namespace}/cronjobs")
@@ -388,61 +381,8 @@ public class OpenshiftResource {
     }  
 
 
-    /**
-     * Creates a report based upon the files on the PVC
-     * @param namespace Current namespace of the project
-     * @param type The type of reports to get, either cronjobs (cj), users, or all. If defaults to all if anything besides cj or users
-     * @return
-     */
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    @Path("/{namespace}/listSeleniumReports/{type}")
-    public TemplateInstance  listSeleniumReports(@RestPath String namespace, @RestPath String type){
-
-        //type shold be cj, users,all
-        List<CronJobReports> reportList = new ArrayList<>();
-        //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz, *.html, and *.log
-        if(type.equals("cj") || type.equals("users")){
-            reportList = createCronJobReportFromFolder(type);
-        }else{
-            //Basically just listed both cj and users reports
-            reportList = createCronJobReportFromFolder("cj");
-            reportList.addAll(createCronJobReportFromFolder("users"));
-        }
-        //String dataTableJS = createDataTableLoadingJS(pipleRunNames);
-        return Templates.cronJobReportHistory(reportList);//.data("dataTableJS", dataTableJS);
-    }
+  
     //TODO Move the following methods to their own helper class to clean up code
-
-    /**
-     * Creates a ArrayList of cronJobReports based upon the type (cj or users). Searchs through the PVCMountPath to figure out all the subfolders that contain reports. 
-     * @param type Which folder type to go into, either cj or users
-     * @return
-     */
-    private List<CronJobReports> createCronJobReportFromFolder(String type){
-        List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
-        List<CronJobReports> reportList = new ArrayList<>();
-        for(String pipelineRunName: pipelineRunNames){
-            System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
-            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
-            for(String indivialRun:indivialRuns ){
-                CronJobReports cronJobReport = new CronJobReports();
-                String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipelineRunName + "/" + indivialRun; //Creating the URL to use later
-                String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
-                System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
-                HashMap<String, String> zipHtmlLog = findFiles(fullPath);
-                
-                cronJobReport.name=pipelineRunName;
-                cronJobReport.lastRunDate=createDateFromFolderName(indivialRun);
-                cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
-                cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
-                cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
-                reportList.add(cronJobReport);
-            }
-        }
-        return reportList;
-
-    }
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
      * @param tbList
@@ -632,64 +572,6 @@ public class OpenshiftResource {
         return cronjobName.substring(startPosition, cronjobName.length());
     }
 
-   
-    /**
-     * List all the subfolders of a given parent
-     * @param parentFolderLocation Parent folder to look through
-     * @return
-     */
-    private List<String>  listSubFolders(String parentFolderLocation){
-        List<String> folderNames = new ArrayList<>();
-        File parentFolder = new File(parentFolderLocation);
-        if (parentFolder.exists() && parentFolder.isDirectory()) {
-            File[] files = parentFolder.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        folderNames.add(file.getName());
-                    }
-                }
-            }
-        }
-        return folderNames;
-    }
-
-    /**
-     * Finds the first zip, html, and log file in a given folder path
-     * @param folderPath The folder path on the OS to search for
-     * @return
-     */
-    private HashMap<String, String> findFiles(String folderPath) {
-        HashMap<String, String> result = new HashMap<>();
-        File folder = new File(folderPath);
-        
-        if (!folder.exists() || !folder.isDirectory()) {
-            throw new IllegalArgumentException("Invalid folder path");
-        }
-
-        File[] files = folder.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isFile()) {
-                    String fileName = file.getName().toLowerCase();
-                    if (fileName.endsWith(".tar.gz") && !result.containsKey("zip")) {
-                        result.put("zip", fileName);
-                    } else if (fileName.endsWith(".html") && !result.containsKey("html")) {
-                        result.put("html", fileName);
-                    }
-                    if(fileName.endsWith(".log") && !result.containsKey("log")){
-                        result.put("log", fileName);
-                    }
-                    if (result.size() == 3) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
     /**
      * Creates a javascript method that loads all the tables on a page to use with DataTable.js
      * @param headerNames The names of all the tables 
@@ -705,22 +587,5 @@ public class OpenshiftResource {
         return JS_START + loadDataTables + JS_END;
     }
 
-    /**
-     * Creates a readable string date from the folder Name. Converts military time to AM/PM and Month/Day/Year. 
-     * @param folderName
-     * @return
-     */
-    private String createDateFromFolderName(String folderName){
-        //Format of folder name is %M-%H-%d-%m-%Y""
-        //ex: 10-09-28-10-2024
-        String[] splitFolderName = folderName.split("-");
-        int minutes = Integer.parseInt(splitFolderName[2] );
-        int hours = Integer.parseInt(splitFolderName[1]);
-         // Convert to 12-hour format
-         String period = (hours < 12) ? "AM" : "PM";
-         int convertedHour = (hours % 12 == 0) ? 12 : hours % 12;
-
-        String formattedDate = String.format("%d:%02d %s", convertedHour, minutes, period) + " " + splitFolderName[3] + "/" + splitFolderName[2] + "/" + splitFolderName[4];
-        return formattedDate;
-    }
+   
 }
