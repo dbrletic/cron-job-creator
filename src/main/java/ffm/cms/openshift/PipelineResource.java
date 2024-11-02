@@ -58,7 +58,7 @@ public class PipelineResource {
 
     @CheckedTemplate
     public static class Templates {
-        public static native TemplateInstance cronJobReportHistory(List<CronJobReports> cronJobsReports);
+        public static native TemplateInstance cronJobReportHistory(List<CronJobReports> cronJobsReports, String dataTableJS, List<String> uniqueEnvs);
     }
 
     /**
@@ -95,7 +95,7 @@ public class PipelineResource {
         List<CronJobReports> reportList = new ArrayList<>();
         List<String> runNames;
         Matcher matcherEnv;
-        Set <String> uniqueEnvs = new TreeSet<>();
+        List <String> uniqueEnvs = new ArrayList<>();
         //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz, *.html, and *.log
         if(type.equals("cj") || type.equals("users")){
             reportList = createCronJobReportFromFolder(type);
@@ -120,9 +120,10 @@ public class PipelineResource {
         }
         
         String dataTableJS = createDataTableLoadingJS(uniqueEnvs);
+        Collections.sort(uniqueEnvs);
         System.out.println(uniqueEnvs);
         System.out.println(dataTableJS);
-        return Templates.cronJobReportHistory(reportList).data("dataTableJS", dataTableJS).data("uniqueEnvs", uniqueEnvs);
+        return Templates.cronJobReportHistory(reportList, dataTableJS, uniqueEnvs);
     }
      
     /**
@@ -203,7 +204,7 @@ public class PipelineResource {
     }
 
     /**
-     * Finds the first zip, html, and log file in a given folder path
+     * Finds the first zip, html, and log file in a given folder path. There should only be one of each. 
      * @param folderPath The folder path on the OS to search for
      * @return
      */
@@ -249,11 +250,11 @@ public class PipelineResource {
         configWorkspace.setName("config-source");
         configWorkspace.setEmptyDir(new EmptyDirVolumeSource());
 
-        //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
+        //Have to add the release branch to the name, making sure that there are not any slash that could mess up the folder name. 
         String cleanReleaseBranch = data.getReleaseBranch().replace("/", "-");
         cleanReleaseBranch = cleanReleaseBranch.replace("\\", "-");
 
-         //Also have to remove any _ since that is not allowed in the name of a folder
+         //Also have to remove any _ to keep names consistent 
         cleanReleaseBranch = cleanReleaseBranch.replace("_", "-");
 
         //Also have to remove any . since that is not allowed in the name of a folder
@@ -261,7 +262,7 @@ public class PipelineResource {
 
         //Same deal as above but with groups
         String cleanGroup = data.getGroups().replace("_", "-");
-        //Format for pipelineRunName is CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH, following the rest of the project. Any pipelineRunName kicked off manually will not have -cj on the end
+        //Format for pipelineRunName is CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH. Any pipelineRunName kicked off manually will not have -cj on the end
         String pipelineRunName = cleanGroup + "-" + data.getUrl() + "-" + cleanReleaseBranch;
 
         PipelineRun pipelineRun = new PipelineRunBuilder()
@@ -323,7 +324,7 @@ public class PipelineResource {
      * @param headerNames The names of all the tables 
      * @return 
      */
-    private String createDataTableLoadingJS(Set<String> headerNames){
+    private String createDataTableLoadingJS(List<String> headerNames){
         
         String loadDataTables = "";
         for(String name: headerNames){

@@ -33,9 +33,9 @@
         {/for}
         </tbody>
     </table> -->
-    {#each uniqueEnvs}
-        <h1>{this}</h1>
-        <table id={this} class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot; ]]">
+    {#for env in uniqueEnvs}
+        <h1>{env}</h1>
+        <table id={env} class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot; ]]">
         <thead>
             <tr>
                 <th>Test Name</th>
@@ -47,7 +47,7 @@
         </thead>
         <tbody> 
         {#for cronJobReport in cronJobsReports}
-            {#if cronJobReport.env == this}               
+            {#if cronJobReport.env == env}               
                 <tr>
                     <td>{cronJobReport.name}</td>
                     <td>{cronJobReport.lastRunDate}</td>
@@ -59,7 +59,7 @@
         {/for}
         </tbody>
         </table>
-    {/each}
+    {/for}
     
 
 </div>
