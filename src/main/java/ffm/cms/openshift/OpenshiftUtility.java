@@ -18,7 +18,9 @@ import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import jakarta.inject.Inject;
 
-
+/**
+ * This is suppose to be a generic untilty class that holds the most used methods
+ */
 public class OpenshiftUtility {
 
     @Inject //Generic OpenShift client
@@ -64,7 +66,7 @@ public class OpenshiftUtility {
      * @param tbList
      * @return A Map that binds a cronjob name to its Trigger Binding releaseBranch value
      */
-    private Map<String,String> bindParamsToBranch(List<TriggerBinding> tbList){
+    public Map<String,String> bindParamsToBranch(List<TriggerBinding> tbList){
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
 
         //Easier to just grab the releaseBranch all once and just map them to the name of the TriggerBinding
@@ -87,7 +89,7 @@ public class OpenshiftUtility {
      * @param runPod
      * @return
      */
-    private CronJobDashboardData getColorStatusAndMsg(CronJobDashboardData data, String runLogs, String namespace, String runPod){
+    public CronJobDashboardData getColorStatusAndMsg(CronJobDashboardData data, String runLogs, String namespace, String runPod){
 
         /**
          * Red - job failed, no results
@@ -156,7 +158,7 @@ public class OpenshiftUtility {
      * @param date The date to be converted
      * @return A easer to read date
      */
-    private String createReadableDate(String date){
+    public String createReadableDate(String date){
 
         //Just in case the cronjob has not run yet and the last Transaction time is null or empty/blank. 
         if(date == null || date.isBlank())
@@ -178,7 +180,7 @@ public class OpenshiftUtility {
      * @param taskRuns A array of all the TaskRuns 
      * @return A Hashmap that is maps the pod that a given PipelineRun was executed on 
      */
-    private HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
+    public HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
         HashMap<String, String> podToRunTask = new HashMap<String, String>();
         System.out.print("Starting map to TaskRun");
         for(TaskRun taskRun : taskRuns){
@@ -200,7 +202,7 @@ public class OpenshiftUtility {
      * @param exceptionFound
      * @return
      */
-    private String findPassedFailedFromZipLogs(String namespace, String runPod, boolean exceptionFound){
+    public String findPassedFailedFromZipLogs(String namespace, String runPod, boolean exceptionFound){
         //Abusing the fact that zip displays the files its zipping to find the number of Pass/Failed images generated
         String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);
         int passedCount = StringUtils.countMatches(zipLogs, PASSED);
@@ -217,7 +219,7 @@ public class OpenshiftUtility {
      * @param runLogs
      * @return
      */
-    private String getFailedTests(String runLogs){
+    public String getFailedTests(String runLogs){
 
         int failureStart = runLogs.indexOf(TEST_FAILURE_START);
         if(failureStart > 0){
@@ -241,7 +243,7 @@ public class OpenshiftUtility {
      * @param cronjobName
      * @return
      */
-    private String getReleaseBranchFromName(String cronjobName){
+    public String getReleaseBranchFromName(String cronjobName){
 
         //Since all cronjob names follow the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH we know everything after test<number>- is the release branch name
         int startPosition = cronjobName.indexOf("test") + 6;
@@ -253,7 +255,7 @@ public class OpenshiftUtility {
      * @param headerNames The names of all the tables 
      * @return 
      */
-    private String createDataTableLoadingJS(List<String> headerNames){
+    public String createDataTableLoadingJS(List<String> headerNames){
         
         String loadDataTables = "";
         for(String name: headerNames){
