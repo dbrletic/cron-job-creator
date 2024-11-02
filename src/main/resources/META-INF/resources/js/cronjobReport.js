@@ -8,9 +8,9 @@
     document.getElementById("mySidenav").style.width = "0";
   }
 
-   /* Setting DataTables on all the tables */
+   /* Setting DataTables on all the tables 
    $(document).ready( function () {
         var reports = new DataTable('#reports', {
         paging: false
         } );
-    });
+    }); */
