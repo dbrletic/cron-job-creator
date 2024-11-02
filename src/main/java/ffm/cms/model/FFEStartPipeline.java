@@ -21,8 +21,6 @@ public class FFEStartPipeline {
     @NotBlank
     private String mvnArgs;
     @NotBlank
-    private String pipelineRunName;
-    @NotBlank
     private String logs;
 
 }

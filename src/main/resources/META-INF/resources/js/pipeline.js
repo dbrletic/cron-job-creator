@@ -13,8 +13,8 @@ const serialize_form = form => JSON.stringify(
       url: document.getElementById('url').value,
       seleniumTestEmailList: document.getElementById('seleniumTestEmailList').value,
       logs: document.getElementById('logs').value,
-      mvnArgs: document.getElementById('mvnArgs').value,
-      pipelineRunName: document.getElementById('pipelineRunName').value
+      mvnArgs: document.getElementById('mvnArgs').value
+      //pipelineRunName: document.getElementById('pipelineRunName').value
     };
     const jsonData = JSON.stringify(data);
     console.log(jsonData);

@@ -245,9 +245,24 @@ public class PipelineResource {
      */
     private PipelineRun createPipelineRun(FFEStartPipeline data, String namespace){
       
-       WorkspaceBinding configWorkspace = new WorkspaceBinding();
-       configWorkspace.setName("config-source");
-       configWorkspace.setEmptyDir(new EmptyDirVolumeSource());
+        WorkspaceBinding configWorkspace = new WorkspaceBinding();
+        configWorkspace.setName("config-source");
+        configWorkspace.setEmptyDir(new EmptyDirVolumeSource());
+
+        //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
+        String cleanReleaseBranch = data.getReleaseBranch().replace("/", "-");
+        cleanReleaseBranch = cleanReleaseBranch.replace("\\", "-");
+
+         //Also have to remove any _ since that is not allowed in the name of a folder
+        cleanReleaseBranch = cleanReleaseBranch.replace("_", "-");
+
+        //Also have to remove any . since that is not allowed in the name of a folder
+        cleanReleaseBranch = cleanReleaseBranch.replace(".", "-");
+
+        //Same deal as above but with groups
+        String cleanGroup = data.getGroups().replace("_", "-");
+        //Format for pipelineRunName is CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH, following the rest of the project. Any pipelineRunName kicked off manually will not have -cj on the end
+        String pipelineRunName = cleanGroup + "-" + data.getUrl() + "-" + cleanReleaseBranch;
 
         PipelineRun pipelineRun = new PipelineRunBuilder()
         .withNewMetadata()
@@ -294,7 +309,7 @@ public class PipelineResource {
             .endParam()
             .addNewParam()
                 .withName("pipelineRunName")
-                .withNewValue(data.getPipelineRunName())  
+                .withNewValue(pipelineRunName)  
         .endParam()
         .withWorkspaces(Collections.singletonList(configWorkspace))
         .endSpec()
