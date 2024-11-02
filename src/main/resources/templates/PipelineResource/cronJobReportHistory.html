@@ -11,7 +11,7 @@
 <span onclick="openNav()"><h3>Menu</h3></span>
 <div class="container" id="main">
     <h2>Current List of FFE Selenium Reports</h2>
-    <table id="reports" class="hover compact" width="100%" data-order="[[ 1, &quot;asc&quot; ]]">
+    <!-- <table id="reports" class="hover compact" width="100%" data-order="[[ 1, &quot;asc&quot; ]]">
         <thead>
             <tr>
                 <th>Test Name</th>
@@ -32,8 +32,34 @@
         </tr>
         {/for}
         </tbody>
-    </table>
-
+    </table> -->
+    {#each uniqueEnvs}
+        <h1>{this}</h1>
+        <table id={this} class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot; ]]">
+        <thead>
+            <tr>
+                <th>Test Name</th>
+                <th>Run Finished Date</th>
+                <th>Test HTML Report</th>
+                <th>Test ZIP</th>
+                <th>Test Log File</th>
+            </tr>
+        </thead>
+        <tbody> 
+        {#for cronJobReport in cronJobsReports}
+            {#if cronJobReport.env == this}               
+                <tr>
+                    <td>{cronJobReport.name}</td>
+                    <td>{cronJobReport.lastRunDate}</td>
+                    <td><A href="{cronJobReport.reportUrl}">Link to Report</A></td>
+                    <td><A href="{cronJobReport.zipUrl}">Link to full Zip</A></td>
+                    <td><A href="{cronJobReport.logUrl}">Link to Log File</A></td>
+                </tr>
+            {/if}
+        {/for}
+        </tbody>
+        </table>
+    {/each}
     
 
 </div>

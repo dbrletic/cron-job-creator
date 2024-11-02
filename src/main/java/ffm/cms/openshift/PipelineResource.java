@@ -122,7 +122,7 @@ public class PipelineResource {
         String dataTableJS = createDataTableLoadingJS(uniqueEnvs);
         System.out.println(uniqueEnvs);
         System.out.println(dataTableJS);
-        return Templates.cronJobReportHistory(reportList).data("dataTableJS", dataTableJS);
+        return Templates.cronJobReportHistory(reportList).data("dataTableJS", dataTableJS).data("uniqueEnvs", uniqueEnvs);
     }
      
     /**
