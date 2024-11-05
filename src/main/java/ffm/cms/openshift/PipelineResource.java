@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,15 +49,16 @@ public class PipelineResource {
     private String pipelinePVCMountPath;
 
     private final static String SELENIUM_GRID_BROWSER = "box";
-    final private static String JS_START = "$(document).ready( function () {";
+    final private static String JS_START = "$(document).ready( function () { \n";
     final private static String JS_END = " });";
-    final private static String JS_REPEAT_AND_REPLACE ="var REAPLCE = new DataTable('#REPLACE', {paging: false } );";
+    //final private static String JS_REPEAT_AND_REPLACE ="var REPLACE = new DataTable(\\'#REPLACE\\', {paging: false } );";
+    //final private static String JS_REPEAT_AND_REPLACE ="var REPLACE = new DataTable(#REPLACE);";
 
     private Pattern patternEnv = Pattern.compile("test\\d+");
 
     @CheckedTemplate
     public static class Templates {
-        public static native TemplateInstance cronJobReportHistory(List<CronJobReports> cronJobsReports, String dataTableJS, List<String> uniqueEnvs);
+        public static native TemplateInstance cronJobReportHistory(List<CronJobReports> cronJobsReports, List<String> uniqueEnvs);
     }
 
     /**
@@ -117,11 +119,17 @@ public class PipelineResource {
            }
         }
         
-        String dataTableJS = createDataTableLoadingJS(uniqueEnvs);
+        
+        
+        // Remote the duplicate using a HashSet
+        HashSet<String> hashUniqueEnvs = new HashSet<>(uniqueEnvs);
+        
+        //Converting the set Back to a ArrayList
+        uniqueEnvs = new ArrayList<>(hashUniqueEnvs);
+
+
         Collections.sort(uniqueEnvs);
-        System.out.println(uniqueEnvs);
-        System.out.println(dataTableJS);
-        return Templates.cronJobReportHistory(reportList, dataTableJS, uniqueEnvs);
+        return Templates.cronJobReportHistory(reportList, uniqueEnvs);
     }
      
     /**
@@ -133,13 +141,13 @@ public class PipelineResource {
         List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
         List<CronJobReports> reportList = new ArrayList<>();
         for(String pipelineRunName: pipelineRunNames){
-            System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
+            //System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
             for(String indivialRun:indivialRuns ){
                 CronJobReports cronJobReport = new CronJobReports();
                 String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipelineRunName + "/" + indivialRun; //Creating the URL to use later
                 String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
-                System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
+                //System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
                 HashMap<String, String> zipHtmlLog = findFiles(fullPath);
                 
                 cronJobReport.name=pipelineRunName;
@@ -321,7 +329,7 @@ public class PipelineResource {
      * Creates a javascript method that loads all the tables on a page to use with DataTable.js
      * @param headerNames The names of all the tables 
      * @return 
-     */
+     
     private String createDataTableLoadingJS(List<String> headerNames){
         
         String loadDataTables = "";
@@ -330,7 +338,7 @@ public class PipelineResource {
             loadDataTables = loadDataTables + "\n";
         }
         return JS_START + loadDataTables + JS_END;
-    }
+    }*/
 
      //Saving this code in case I ever have to add another field to a bunch of files again. 
     /** 

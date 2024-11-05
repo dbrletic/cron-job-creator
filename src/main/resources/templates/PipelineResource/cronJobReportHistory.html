@@ -34,7 +34,7 @@
         </tbody>
     </table> -->
     {#for env in uniqueEnvs}
-        <h1>{env}</h1>
+        <h3>{env}</h3>
         <table id={env} class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot; ]]">
         <thead>
             <tr>
@@ -70,14 +70,11 @@
 <script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
 <script src="https://cdn.datatables.net/plug-ins/2.1.7/dataRender/ellipsis.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.7/css/dataTables.dataTables.css">
-<script src="/js/cronjobReport.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
 <link rel="stylesheet" href="/css/index.css">
-<script>
-    {dataTableJS}
-</script>
+<script src="/js/cronjobReport.js"></script>
 
 
 </body>

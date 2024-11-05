@@ -51,7 +51,7 @@ public class CleanUpBean {
         }
     }
 
-    @Scheduled(cron = "0 5 * * 1 ?") //Runs every Monday at 5 am. 
+    @Scheduled(cron = "0 6 * * * ?", timeZone = "EDT") //Runs every morning at 6 am EDT 
     void cleanUpOldPipelineRuns(){
         try {
             System.out.println("Starting Cleanup of files older then 7 days.");

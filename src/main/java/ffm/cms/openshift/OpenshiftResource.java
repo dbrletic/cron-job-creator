@@ -91,9 +91,9 @@ public class OpenshiftResource {
     final private static String GRAY = "#f6f6f6"; //Gray
     final private static String ORANGE = "#F0C476"; //Orange
 
-    final private static String JS_START = "$(document).ready( function () {";
+    final private static String JS_START = "$(document).ready( function () { \\n";
     final private static String JS_END = " });";
-    final private static String JS_REPEAT_AND_REPLACE ="var REAPLCE = new DataTable('#REPLACE', {paging: false } );";
+    final private static String JS_REPEAT_AND_REPLACE ="var REAPLCE = new DataTable(#REPLACE, {paging: false } );";
 
 
     //All the Pattern Matching 
@@ -581,8 +581,10 @@ public class OpenshiftResource {
         
         String loadDataTables = "";
         for(String name: headerNames){
+            System.out.println("Add in name: " + name);
             loadDataTables =  loadDataTables + JS_REPEAT_AND_REPLACE.replace("REPLACE", name);
             loadDataTables = loadDataTables + "\n";
+            System.out.println(loadDataTables);
         }
         return JS_START + loadDataTables + JS_END;
     }
