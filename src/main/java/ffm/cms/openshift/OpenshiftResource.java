@@ -91,11 +91,6 @@ public class OpenshiftResource {
     final private static String GRAY = "#f6f6f6"; //Gray
     final private static String ORANGE = "#F0C476"; //Orange
 
-    final private static String JS_START = "$(document).ready( function () { \\n";
-    final private static String JS_END = " });";
-    final private static String JS_REPEAT_AND_REPLACE ="var REAPLCE = new DataTable(#REPLACE, {paging: false } );";
-
-
     //All the Pattern Matching 
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
@@ -571,23 +566,4 @@ public class OpenshiftResource {
         int startPosition = cronjobName.indexOf("test") + 6;
         return cronjobName.substring(startPosition, cronjobName.length());
     }
-
-    /**
-     * Creates a javascript method that loads all the tables on a page to use with DataTable.js
-     * @param headerNames The names of all the tables 
-     * @return 
-     */
-    private String createDataTableLoadingJS(List<String> headerNames){
-        
-        String loadDataTables = "";
-        for(String name: headerNames){
-            System.out.println("Add in name: " + name);
-            loadDataTables =  loadDataTables + JS_REPEAT_AND_REPLACE.replace("REPLACE", name);
-            loadDataTables = loadDataTables + "\n";
-            System.out.println(loadDataTables);
-        }
-        return JS_START + loadDataTables + JS_END;
-    }
-
-   
 }
