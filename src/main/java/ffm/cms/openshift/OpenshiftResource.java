@@ -113,7 +113,7 @@ public class OpenshiftResource {
     public static class Templates {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
-        public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs);
+        public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs, List<String> uniqueEnvs);
     }
 
     @GET()
@@ -250,7 +250,7 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
-        Set <String> uniqueEnvs = new HashSet<>();
+        Set <String> uniqueEnvsList = new HashSet<>();
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         int cronjobCounter = 0; //Count how many CronJob pipelines were displayeds
         HashMap<String, String> pipelineRunToPod;
@@ -312,7 +312,7 @@ public class OpenshiftResource {
             //Getting the Enviroment the code was run on
             if(matcherEnv.find()){
                 data.env = data.name.substring(matcherEnv.start(), matcherEnv.end());
-                uniqueEnvs.add(data.env); //Getting only the Enviroment Names that I need once
+                uniqueEnvsList.add(data.env); //Getting only the Enviroment Names that I need once
             }
        
              //Setting the type of Pipeline that was run. It always the text before the first -
@@ -345,15 +345,15 @@ public class OpenshiftResource {
             //Like it will be a for loop of unique array list, but then under it will if env == headername write out
             //Would take out extra HTML loops. Need to Dynamically write the DataTable.js javascript
         }
-        List<String> uniqueEnvNameList = new ArrayList<>(uniqueEnvs);
-        String dataTableJS = createDataTableLoadingJS(uniqueEnvNameList);
+        List<String> uniqueEnvs = new ArrayList<>(uniqueEnvsList);
         Collections.sort(dashboardData, nameSorter); //Sorting everything by name 
         Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
+        Collections.sort(uniqueEnvs); 
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
         
-        return  Templates.cronJobDashboard(dashboardData).data("dataTableJS", dataTableJS);
+        return  Templates.cronJobDashboard(dashboardData, uniqueEnvs);
     }
 
     @GET

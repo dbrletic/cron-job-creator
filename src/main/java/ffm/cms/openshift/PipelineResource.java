@@ -49,10 +49,6 @@ public class PipelineResource {
     private String pipelinePVCMountPath;
 
     private final static String SELENIUM_GRID_BROWSER = "box";
-    final private static String JS_START = "$(document).ready( function () { \n";
-    final private static String JS_END = " });";
-    //final private static String JS_REPEAT_AND_REPLACE ="var REPLACE = new DataTable(\\'#REPLACE\\', {paging: false } );";
-    //final private static String JS_REPEAT_AND_REPLACE ="var REPLACE = new DataTable(#REPLACE);";
 
     private Pattern patternEnv = Pattern.compile("test\\d+");
 
