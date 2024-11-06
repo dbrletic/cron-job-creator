@@ -5,7 +5,8 @@
     <title>FFE Cronjob Creator</title>
   </head>
   <body>
-  {% include '/static/nav.html' %}
+     {#include nav.html} {/include}
+     <BR>
     <div class="container" id="main">
       <div class="contrainer" id="checkCronJobSchedule">
           <h3>Verify Current CronJob Schedule</h3>
@@ -17,7 +18,7 @@
             <label for="verifyCronJobSchedule">Current CronJob Schedule</label>
             <input type="text" class="form-control" id="verifyCronJobSchedule" readonly>
           </div>
-          <button type="submit" class="button button-outline" id="GetSchedule">Get Schedule</button>
+          <button type="submit" class="btn btn-primary" id="GetSchedule">Get Schedule</button>
       </div>
     </P>
 
@@ -26,8 +27,8 @@
     </div>
     <label>Cronjobs:</label>
     <div id="pairContainer"></div>
-    <button type="button" class="button button-outline" onclick="addPair()">Add Cronjob</button>
-    <button type="button" class="button button-outline" onclick="submitPairs()">Submit</button>
+    <button type="button" class="btn btn-primary" onclick="addPair()">Add Cronjob</button>
+    <button type="button" class="btn btn-primary" onclick="submitPairs()">Submit</button>
     <div style="color:#43916B" id="successMessage" hidden="true"> 
       <p>Successfully Updated Cronjob Schedule</p>
     </div>

@@ -72,8 +72,8 @@ const serialize_form = form => JSON.stringify(
     const container = document.getElementById('pairContainer');
     const pairDiv = document.createElement('div');
     pairDiv.innerHTML = `
-        <input type="text" name="keys" placeholder="Enter the name of the cronjob" required>
-        <input type="text" name="values" placeholder="Enter schedule in * * * * * format. Use https://crontab.guru/ to verify format" required>
+        <input type="text" name="keys" placeholder="Enter the name of the cronjob" class="form-control" required>
+        <input type="text" name="values" class="form-control" placeholder="Enter schedule in * * * * * format. Use https://crontab.guru/ to verify format" required>
     `;
     container.appendChild(pairDiv);
 }

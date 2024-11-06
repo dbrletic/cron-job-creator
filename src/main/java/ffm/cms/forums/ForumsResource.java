@@ -2,8 +2,8 @@ package ffm.cms.forums;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import io.fabric8.openshift.api.model.TemplateInstance;
 import io.quarkus.qute.CheckedTemplate;
+import io.quarkus.qute.TemplateInstance;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -29,28 +29,28 @@ public class ForumsResource {
     }
     
     @GET
-    @Path("/createSeleniumCronjob")
+    @Path("/create-job")
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance newSeleniumCronJobForum(){
         return Templates.newSeleniumJob();
     }
 
     @GET
-    @Path("/updateCronJobSchedule")
+    @Path("/update-job")
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance updateSeleniumConjobSchedule(){
         return Templates.updateCronJobSchedule();
     }
 
     @GET
-    @Path("/massUpdate")
+    @Path("/mass-update")
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance massUpdate(){
         return Templates.massUpdate();
     }
 
     @GET
-    @Path("/startPipeline")
+    @Path("/start-pipeline")
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance startPipeline(){
         return Templates.startPipeline();
