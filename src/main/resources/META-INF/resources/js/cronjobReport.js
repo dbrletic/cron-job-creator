@@ -52,4 +52,23 @@
           paging: false
         } );
     }
+
+    // Get the current URL
+    const currentUrl = window.location.pathname;
+    if (currentUrl.endsWith("cj")) {
+      document.getElementById("cjCronjobs").classList.value="btn btn-primary";
+      document.getElementById("allCronJob").classList.value="btn btn-secondary";
+      document.getElementById("userCronjobs").classList.value="btn btn-secondary";
+    }
+    if (currentUrl.endsWith("users")) {
+      document.getElementById("cjCronjobs").classList.value="btn btn-secondary";
+      document.getElementById("allCronJob").classList.value="btn btn-secondary";
+      document.getElementById("userCronjobs").classList.value="btn btn-primary";
+    }
+    if (currentUrl.endsWith("all")) {
+      document.getElementById("cjCronjobs").classList.value="btn btn-secondary";
+      document.getElementById("allCronJob").classList.value="btn btn-primary";
+      document.getElementById("userCronjobs").classList.value="btn btn-secondary";
+    }
+
     });
