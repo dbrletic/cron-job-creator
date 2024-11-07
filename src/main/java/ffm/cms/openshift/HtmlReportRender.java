@@ -43,7 +43,6 @@ public class HtmlReportRender {
     public Response getHtmlPage(@RestPath String type, @RestPath String pipeLineRunName, @RestPath String indivialRun, @RestPath String html) {
         
         String htmlLookup = pipelinePVCMountPath + "/" + type + "/" + pipeLineRunName + "/" + indivialRun +"/" + html;
-        System.out.println("Looking up html file: " + htmlLookup);
         java.nio.file.Path path = Paths.get(htmlLookup);
         try {
             

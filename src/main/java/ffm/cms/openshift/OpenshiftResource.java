@@ -499,11 +499,11 @@ public class OpenshiftResource {
      */
     private HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
         HashMap<String, String> podToRunTask = new HashMap<String, String>();
-        System.out.print("Starting map to TaskRun");
+        //System.out.println("Starting map to TaskRun");
         for(TaskRun taskRun : taskRuns){
             String key = taskRun.getMetadata().getLabels().get("tekton.dev/pipelineRun");
             String value = taskRun.getStatus().getPodName();    
-            System.out.println("key: " + key + " value: " + value);
+            //System.out.println("key: " + key + " value: " + value);
             podToRunTask.put(key, value);
         }
         return podToRunTask;
