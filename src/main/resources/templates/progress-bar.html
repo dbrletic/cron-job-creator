@@ -46,7 +46,7 @@
 <script>
 
     // Get all elements with the class 'progress-name'
-    const progressElements  = document.querySelectorAll('.progress-bar');
+    const progressElements  = document.querySelectorAll('.progress-bar-link');
 
     progressElements.forEach(element => {
         element.addEventListener('click', function() {
@@ -67,7 +67,7 @@
             if (width >= 100) {
               progressBar.style.width = 0;
             }
-        }, 500); // Update the progress bar every 500ms
+        }, 200); // Update the progress bar every 300ms
       });
 
     });
