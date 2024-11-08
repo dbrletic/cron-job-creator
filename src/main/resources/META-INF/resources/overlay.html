@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Overlay with Progress Bar</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Additional custom styling */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1050; /* Above other elements */
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .progress-container {
+            width: 80%;
+            max-width: 400px;
+        }
+
+        /* Ensuring the progress bar is centered inside the overlay */
+        .progress-bar {
+            height: 30px;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="mt-5">Click to simulate long request</h1>
+    <button id="loadButton" class="btn btn-primary mt-3">Send Request</button>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="overlay">
+    <div class="progress-container">
+        <!-- Progress bar -->
+        <div class="progress">
+            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0;"></div>
+        </div>
+        <div class="loading-text">Loading, please wait...</div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"></script>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="overlay">
+    <div class="progress-container">
+        <!-- Progress bar -->
+        <div class="progress">
+            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0;"></div>
+        </div>
+        <div class="loading-text">Loading, please wait...</div>
+    </div>
+</div>
+<style>
+    /* Additional custom styling */
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1050; /* Above other elements */
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .progress-container {
+        width: 80%;
+        max-width: 400px;
+    }
+
+    /* Ensuring the progress bar is centered inside the overlay */
+    .progress-bar {
+        height: 30px;
+    }
+
+    .loading-text {
+        color: white;
+        font-size: 18px;
+        margin-top: 10px;
+    }
+</style>
+
+
+<!-- Custom Script -->
+<script>
+    document.getElementById('loadButton').addEventListener('click', function() {
+        // Show overlay when the request starts
+        document.getElementById('loadingOverlay').style.display = 'flex';
+
+        // Initialize progress bar width
+        const progressBar = document.getElementById('progressBar');
+        let width = 0;
+        progressBar.style.width = width + '%';
+
+        // Simulate a long server request with a progress bar animation
+        const interval = setInterval(function() {
+            // Increase width of the progress bar
+            width += 5;q
+            progressBar.style.width = width + '%';
+            
+            // If the progress bar is filled, stop the animation and hide overlay
+            if (width >= 100) {
+                clearInterval(interval);
+                setTimeout(function() {
+                    // Hide overlay and reset progress bar
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    progressBar.style.width = '0%';
+                    alert('Request completed!');
+                }, 500); // Short delay to show 100% completion
+            }
+        }, 300); // Update the progress bar every 300ms
+    });
+</script>
+
+</body>
+</html>

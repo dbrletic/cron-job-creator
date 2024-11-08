@@ -1,0 +1,75 @@
+<!-- Loading Overlay -->
+    <div id="loadingOverlay" class="overlay">
+      <div class="progress-container">
+          <!-- Progress bar -->
+          <div class="progress">
+              <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0;"></div>
+          </div>
+          <div class="loading-text">Loading, please wait...</div>
+      </div>
+    </div>
+    <style>
+      /* Additional custom styling */
+      .overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 1050; /* Above other elements */
+          text-align: center;
+          justify-content: center;
+          align-items: center;
+      }
+
+      .progress-container {
+          width: 80%;
+          max-width: 400px;
+      }
+
+      /* Ensuring the progress bar is centered inside the overlay */
+      .progress-bar {
+          height: 30px;
+      }
+
+      .loading-text {
+          color: white;
+          font-size: 18px;
+          margin-top: 10px;
+      }
+</style>
+
+
+<!-- Custom Script -->
+<script>
+
+    // Get all elements with the class 'progress-name'
+    const progressElements  = document.querySelectorAll('.progress-bar');
+
+    progressElements.forEach(element => {
+        element.addEventListener('click', function() {
+        // Show overlay when the request starts
+        document.getElementById('loadingOverlay').style.display = 'flex';
+
+        // Initialize progress bar width
+        const progressBar = document.getElementById('progressBar');
+        let width = 0;
+        progressBar.style.width = width + '%';
+
+        const interval = setInterval(function() {
+            // Increase width of the progress bar
+            width += 2;
+            progressBar.style.width = width + '%';
+            
+            // If the progress bar is filled resert it to 0
+            if (width >= 100) {
+              progressBar.style.width = 0;
+            }
+        }, 500); // Update the progress bar every 500ms
+      });
+
+    });
+
+</script>
