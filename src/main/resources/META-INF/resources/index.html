@@ -1,82 +1,122 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
-    <title>FFE Cronjob Creator</title>
-  </head>
-  <body>
-  <div id="mySidenav" class="sidenav">
-      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-      <a href="/openshift/tester-pipelines/cronjobs">List FFE Selenium Cronjobs</a>
-      <a href="/openshift/tester-pipelines/gatling">List Gatling Cronjobs</a>
-      <a href="/loading.html">FFE Selenum Dashboard</a>
-      <a href="/update.html">Update FFE Selenium Cronjobs Schedule</a>
-      <a href="/gatling.html">Create Gatling Cronjob Files</a>
-      <a href="/">Create FFE CronJob Files</a>
-  </div>
-    
-    <!-- Use any element to open the sidenav -->
-    <span onclick="openNav()"><h3>Menu</h3></span>
-    <div class="container" id="main">
-      <h2>Fill out the form to create FFE Selenium Test Cronjob Template files</h2>
-      <form id="cronForum">
-        <div class="control-wrapper">
-          <label class="input-label" for="releaseBranch">Release Branch:</label>
-          <div class="input-wrapper">
-            <input
-              id="releaseBranch"
-              class="input"
-              type="text"
-            />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <nav class= "navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="/images/selenium-logo.png" alt="Selenuium" width="30" height="30">
+            </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/">Home</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Dashboards
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="/openshift/tester-pipelines/dashboard">Selenium Cronjob Results Dashboard</a></li>
+                  <li><a class="dropdown-item" href="/pipeline/tester-pipelines/listSeleniumReports/all">Selenium Saved Results Dashboard</a></li>
+                  <li><a class="dropdown-item" href="/openshift/tester-pipelines/cronjobs">Current Cronjob Schedule Dashboard</a></li>
+                </ul>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Create/Edit Cronjobs
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="/forums/create-job">Create Selenuium Cronjob</a></li>
+                  <li><a class="dropdown-item" href="/forums/update-job">Update Selenium Cronjob</a></li>
+                  <li><a class="dropdown-item" href="/forums/mass-update">Mass Update Selenium Cronjobs</a></li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/forums/start-job">Kick Off a Selenium Pipeline</a>
+              </li>
+            </ul>
           </div>
-          <!-- <input type="text" class="form-control" id="releaseBranch"> -->
         </div>
-        <div class="form-group">
-          <label for="userNameFFM">User Name:</label>
-          <input type="text" class="form-control" id="userNameFFM">
+      </nav>
+      <BR>
+      <center><h2>FFM Selenium Cronjob Reports and Utilities</h2></center>
+      <BR>
+      <div class="row row-cols-4 row-cols-md 2 g-4">
+          <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Selenium Cronjob Results Dashboard</h5>
+                        <p class="card-text">View the results of the latest Selneium Jobs kicked off by a Cronjob</p>
+                        <a href="/openshift/tester-pipelines/dashboard" class="btn btn-primary">Go to Link</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Selenium Reports Dashboard</h5>
+                        <p class="card-text">View all Reports, Logs, and Zip file of saved Selenium Runs. </p>
+                        <a href="/pipeline/tester-pipelines/listSeleniumReports/cj" class="btn btn-primary">Go to Link</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Current Cronjob Schedule Dashboard</h5>
+                        <p class="card-text">View all current Selenium CronJob schedules active on OpenShift</p>
+                        <a href="/openshift/tester-pipelines/cronjobs" class="btn btn-primary">Go to Link</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Create Selenuium Cronjob</h5>
+                        <p class="card-text">Create all the required files to add a Cronjob to kick off a Selenium Test</p>
+                        <a href="/forums/create-job" class="btn btn-primary">Go to Link</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Update Selenium Cronjob</h5>
+                        <p class="card-text">Update the Cronjob Scheduling of a Selenium Cronjob</p>
+                        <a href="/forums/update-job" class="btn btn-primary">Go to Link</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Mass Update Selenium Cronjobs</h5>
+                        <p class="card-text">Quickly update the scheduling of multiple Selenium Cronjobs</p>
+                        <a href="/forums/mass-update" class="btn btn-primary">Go to Link</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Kick Off Selenium Pipeline</h5>
+                        <p class="card-text">Launch a new Selenium Job to run on Openshift and CMS Selenium Grid. Results will be saved. </p>
+                        <a href="/forums/start-pipeline" class="btn btn-primary">Go to Link</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-          <label for="userPassword">User Password:</label>
-          <input type="text" class="form-control" id="userPassword">
-        </div>
-        <div class="form-group">
-          <label for="groups">Groups:</label>
-          <input type="text" class="form-control" id="groups">
-        </div>
-        <div class="form-group">
-          <label for="browser">Browser:</label>
-          <input type="text" class="form-control" id="browser" placeholder="Use box to connect to CMS Selenium Grid">
-        </div>
-        <div class="form-group">
-            <label for="url">Url:</label>
-            <input type="text" class="form-control" id="url" placeholder="Use name from data.properties">
-        </div>
-        <div class="form-group">
-            <label for="seleniumTestEmailList">Selenium Test EmailList:</label>
-            <input type="text" class="form-control" id="seleniumTestEmailList" placeholder="Seperate by a ,">
-        </div>
-        <div class="form-group">
-          <label for="cronJobSchedule">Cron Job Schedule:</label>
-          <input type="text" class="form-control" id="cronJobSchedule" placeholder="Use * * * * format with EST timezone">
-        </div>
-        <div style="color:#43916B" id="successMessage" hidden="true"> 
-          <p>Successfully created cronjob files. Check download folder.</p>
-        </div>
-        <div style="color:#CF4B2F" id="errorMessage"></div>
-        <div class="control-wrapper">
-          <button type="submit" class="button button-outline">Submit</button>
-        </div>
-      </form>
-    </div>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js"></script>
-  <script>
-    const validate = new window.JustValidate('#cronForum');
-  </script>
-  <script src="/js/index.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
-  <link rel="stylesheet" href="/css/index.css">
-  </body>
+      </div>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
 </html>

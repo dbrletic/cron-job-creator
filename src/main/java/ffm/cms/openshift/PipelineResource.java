@@ -27,6 +27,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,7 +89,8 @@ public class PipelineResource {
     @Path("/{namespace}/listSeleniumReports/{type}")
     public TemplateInstance  listSeleniumReports(@RestPath String namespace, @RestPath String type){
 
-        //type shold be cj, users,all
+        //type shold be cj, users,all. Defaults to all if a unknown type is added
+        Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         List<CronJobReports> reportList = new ArrayList<>();
         List<String> runNames;
         Matcher matcherEnv;
@@ -120,11 +123,13 @@ public class PipelineResource {
         // Remote the duplicate using a HashSet
         HashSet<String> hashUniqueEnvs = new HashSet<>(uniqueEnvs);
         
-        //Converting the set Back to a ArrayList
+        //Converting the set Back to a ArrayList for dispalying with Quarkus QUTE
         uniqueEnvs = new ArrayList<>(hashUniqueEnvs);
 
-
+        //Making sure the names are in order
         Collections.sort(uniqueEnvs);
+        long elapsedMs = Duration.between(start, Instant.now()).toMillis();
+        System.out.printf("listSeleniumReports took %d milliseconds to complete", elapsedMs);
         return Templates.cronJobReportHistory(reportList, uniqueEnvs);
     }
      
