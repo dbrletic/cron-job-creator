@@ -3,37 +3,44 @@ const serialize_form = form => JSON.stringify(
          .reduce((m, [ key, value ]) => Object.assign(m, { [key]: value }), {})
   );
   
-  $('#piplelineRunForm').on('submit', function(event) {
+  $('#cronForum').on('submit', function(event) {
     event.preventDefault();
     const data = {
       releaseBranch: document.getElementById('releaseBranch').value,
       userNameFFM: document.getElementById('userNameFFM').value,
       userPassword: document.getElementById('userPassword').value,
       groups: document.getElementById('groups').value,
+      browser: document.getElementById('browser').value,
       url: document.getElementById('url').value,
       seleniumTestEmailList: document.getElementById('seleniumTestEmailList').value,
-      logs: document.getElementById('logs').value,
-      mvnArgs: document.getElementById('mvnArgs').value
-      //pipelineRunName: document.getElementById('pipelineRunName').value
+      cronJobSchedule: document.getElementById('cronJobSchedule').value
     };
     const jsonData = JSON.stringify(data);
     console.log(jsonData);
     $.ajax({
       type: 'POST',
-      url: '/pipeline/tester-pipelines/startRun',
+      url: '/ffe-cronjob',
       data: jsonData,
       contentType: 'application/json',
-      success: function(data) {
-        $("#piplelineRunForm")[0].reset();
+      xhrFields:{
+        responseType: 'blob'
+      },
+      success: function(response) {
+        $("#cronForum")[0].reset();
+        var link = document.createElement('a');
+        let today = new Date().toISOString().slice(0, 10)
+        link.href = window.URL.createObjectURL(response)
+        link.download = data.groups + "-" + data.url + "-" + today + ".zip";
+        document.body.appendChild(link);
+        link.click();
+        $('#errorMessage').empty();
         $("#successMessage").show();      
-        $("#successMessage").text("Pipeline Run Created: " + data);
       },
       error: function(xhr, status, error) {
         $("#successMessage").hide();     
         console.log("Error: " + error);
-        $("#piplelineRunForm")[0].reset();
+        $("#cronForum")[0].reset();
         $("<p>Error: " + error +"</p>").appendTo('#errorMessage');
       }
     });
   });
-  
