@@ -8,28 +8,6 @@
 {#include nav.html} {/include}
 <div class="container" id="main">
     <center><h2>Current List of FFE Selenium Reports</h2></center>
-    <!-- <table id="reports" class="hover compact" width="100%" data-order="[[ 1, &quot;asc&quot; ]]">
-        <thead>
-            <tr>
-                <th>Test Name</th>
-                <th>Run Finished Date</th>
-                <th>Test HTML Report</th>
-                <th>Test ZIP</th>
-                <th>Test Log File</th>
-            </tr>
-        </thead>
-        <tbody> 
-        {#for cronJobReport in cronJobsReports}                 
-        <tr>
-            <td>{cronJobReport.name}</td>
-            <td>{cronJobReport.lastRunDate}</td>
-            <td><A href="{cronJobReport.reportUrl}">Link to Report</A></td>
-            <td><A href="{cronJobReport.zipUrl}">Link to full Zip</A></td>
-            <td><A href="{cronJobReport.logUrl}">Link to Log File</A></td>
-        </tr>
-        {/for}
-        </tbody>
-    </table> -->
     <BR>
         <center>
                 <a href="/pipeline/tester-pipelines/listSeleniumReports/all" class="btn btn-primary" target="_self" id="allCronJob">All</a>
@@ -37,60 +15,6 @@
                 <a href="/pipeline/tester-pipelines/listSeleniumReports/users" class="btn btn-success" target="_self" id="userCronjobs">Users</a>
         </center>
     </div>
-    <!--
-    {#for env in uniqueEnvs}
-        <div class="accordion" id="accordion{env}">
-            <h3>{env}</h3>
-            <table id={env} class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot; ]]">
-            <thead>
-                <tr>
-                    <th>Test Name</th>
-                    <th>Run Finished Date</th>
-                    <th>Test HTML Report</th>
-                    <th>Test ZIP</th>
-                    <th>Test Log File</th>
-                </tr>
-            </thead>
-            <tbody>
-            {#for reportDataList in cronJobReportsMasterList}
-                <tr>
-                    <div class="accordion-item"></div>
-                        <td>
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{reportDataList.runName}" aria-expanded="true" aria-controls="{reportDataList.runName}">
-                                {reportDataList.runName}
-                            </button>
-                        </td>
-                        <div id="{reportDataList.runName}" class="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordion{env}" style=""></div>
-                            <div class="accordion-body">
-                                {#for reportData in reportDataList.getReportData}
-                                    <td>{reportData.lastRunDate}</td>
-                                    <td><A href="{reportData.reportUrl}">Link to Report</A></td>
-                                    <td><A href="{reportData.zipUrl}">Link to full Zip</A></td>
-                                    <td><A href="{reportData.logUrl}">Link to Log File</A></td>
-                                {/for}
-                            </div>
-                        </div>
-                    </div>
-                </tr>
-            {/for}
-            <!-- 
-            {#for reportDataList in cronJobReportsMasterList}
-                {#if reportDataList.env == env}               
-                    <tr>
-                        <td>{cronJobReport.name}</td>
-                        <td>{cronJobReport.lastRunDate}</td>
-                        <td><A href="{cronJobReport.reportUrl}">Link to Report</A></td>
-                        <td><A href="{cronJobReport.zipUrl}">Link to full Zip</A></td>
-                        <td><A href="{cronJobReport.logUrl}">Link to Log File</A></td>
-                    </tr>
-                {/if}
-            {/for} 
-            </tbody>
-            </table>
-        </div>
-    {/for} -->
-
-
      {#for env in uniqueEnvs}
         <div class="accordion" id="accordion{env}">
             <h3>{env}</h3>
@@ -146,18 +70,6 @@
                     </tr>
                 {/if}
             {/for}
-            <!-- 
-            {#for reportDataList in cronJobReportsMasterList}
-                {#if reportDataList.env == env}               
-                    <tr>
-                        <td>{cronJobReport.name}</td>
-                        <td>{cronJobReport.lastRunDate}</td>
-                        <td><A href="{cronJobReport.reportUrl}">Link to Report</A></td>
-                        <td><A href="{cronJobReport.zipUrl}">Link to full Zip</A></td>
-                        <td><A href="{cronJobReport.logUrl}">Link to Log File</A></td>
-                    </tr>
-                {/if}
-            {/for} -->
             </tbody>
             </table>
         </div>

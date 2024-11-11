@@ -18,8 +18,6 @@ import ffm.cms.model.ScheduleJob;
 import ffm.cms.model.UpdateCronJobSchedule;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpStatus;
-
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
@@ -54,8 +52,8 @@ public class CronResource {
         System.out.println("Starting up process for " + data.getGroups() + "-" + data.getUrl()) ;
         System.out.println(data.toString());
         if(data.getReleaseBranch().length() + data.getGroups().length() + data.getUrl().length() > 52){
-            //Since ReleaseBranch, Groups, and Url are used to create names of the jobs there is so long the combo can be. 
-            return Response.status(HttpStatus.SC_BAD_REQUEST, "Release Branch, Groups, and Url are too long.").build();
+            //Since ReleaseBranch, Groups, and Url are used to create names of the jobs there is as long the combo can be. 
+            return Response.status(400, "Release Branch, Groups, and Url are too long.").build();
         }
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
