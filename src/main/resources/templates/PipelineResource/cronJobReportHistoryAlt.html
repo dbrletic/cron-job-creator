@@ -18,53 +18,52 @@
         <div class="accordion" id="accordion{env}">
             <h3>{env}</h3>
             <table id={env} class="hover compact" width="100%" data-order="[[ 0, &quot;asc&quot; ]]">
-            <thead>
-                <tr>
-                    <th>Test Name</th>
-                </tr>
-            </thead>
-            <tbody>
-            {#for reportDataList in cronJobReportsMasterList}
-                {#if reportDataList.env == env}
+                <thead>
                     <tr>
-                        <td>
-                            <div class="accordion-item"></div>
-                                
-                                    <h2 class="accordion-header" id="heading{reportDataList.runName}">
-                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{reportDataList.runName}" aria-expanded="true" aria-controls="{reportDataList.runName}">
-                                            {reportDataList.runName}
-                                        </button>
-                                    </h2>
-                                <div id="{reportDataList.runName}" class="accordion-collapse collapse show" aria-labelledby="heading{reportDataList.runName}" data-bs-parent="#accordion{env}" style=""></div>
-                                    <div class="accordion-body">
-                                        <table id="{reportDataList.runName}Table" class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Run Finished Date</th>
-                                                    <th>Test HTML Report</th>
-                                                    <th>Test ZIP</th>
-                                                    <th>Test Log File</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {#for reportData in reportDataList.getReportData}
-                                                    <tr>
-                                                        <td>{reportData.lastRunDate}</td>
-                                                        <td><A href="{reportData.reportUrl}">Link to Report</A></td>
-                                                        <td><A href="{reportData.zipUrl}">Link to full Zip</A></td>
-                                                        <td><A href="{reportData.logUrl}">Link to Log File</A></td>
-                                                    </tr>
-                                                {/for}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                         </td>
+                        <th>Test Name</th>
                     </tr>
-                {/if}
-            {/for}
-            </tbody>
+                </thead>
+                <tbody>
+                    {#for reportDataList in cronJobReportsMasterList}
+                        {#if reportDataList.env == env}
+                            <tr>
+                                <td>
+                                    <div class="accordion-item"></div>
+                                        <h2 class="accordion-header" id="heading{reportDataList.runName}">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{reportDataList.runName}" aria-expanded="true" aria-controls="{reportDataList.runName}">
+                                                {reportDataList.runName}
+                                            </button>
+                                        </h2>
+                                        <div id="{reportDataList.runName}" class="accordion-collapse collapse show" aria-labelledby="heading{reportDataList.runName}" data-bs-parent="#accordion{env}" style=""></div>
+                                            <div class="accordion-body">
+                                                <table id="{reportDataList.runName}Table" class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Run Finished Date</th>
+                                                            <th>Test HTML Report</th>
+                                                            <th>Test ZIP</th>
+                                                            <th>Test Log File</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {#for reportData in reportDataList.getReportData}
+                                                            <tr>
+                                                                <td>{reportData.lastRunDate}</td>
+                                                                <td><A href="{reportData.reportUrl}">Link to Report</A></td>
+                                                                <td><A href="{reportData.zipUrl}">Link to full Zip</A></td>
+                                                                <td><A href="{reportData.logUrl}">Link to Log File</A></td>
+                                                            </tr>
+                                                        {/for}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {/if}
+                    {/for}
+                </tbody>
             </table>
         </div>
     {/for}
