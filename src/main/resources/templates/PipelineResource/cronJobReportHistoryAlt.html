@@ -28,7 +28,7 @@
                         {#if reportDataList.env == env}
                             <tr>
                                 <td>
-                                    <div class="accordion-item"></div>
+                                    <div class="accordion-item">
                                         <h2 class="accordion-header" id="heading{reportDataList.runName}">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{reportDataList.runName}" aria-expanded="true" aria-controls="{reportDataList.runName}">
                                                 {reportDataList.runName}
@@ -57,7 +57,8 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                        </div>                                   
+                                         
+                                    </div>                                  
                                 </td>
                             </tr>
                         {/if}
