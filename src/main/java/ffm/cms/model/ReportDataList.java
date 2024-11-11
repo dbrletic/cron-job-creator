@@ -12,4 +12,10 @@ public class ReportDataList {
     public ArrayList<ReportData> reportData;
     public String runName;
     public String env;
+
+    public ReportDataList(){
+        this.reportData = new ArrayList<ReportData>();
+        this.runName="";
+        this.env="";
+    }
 }
