@@ -193,15 +193,11 @@ public class PipelineResource {
     private List<CronJobReports> createCronJobReportFromFolder(String type){
         List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
         List<CronJobReports> reportList = new ArrayList<>();
-        List<ReportDataList> reportDataMasterList = new ArrayList<>();
         for(String pipelineRunName: pipelineRunNames){
 
             //System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
-            ReportDataList currentReportDataList = new ReportDataList();
-            currentReportDataList.runName=pipelineRunName;
             for(String indivialRun:indivialRuns ){
-                ReportData currentReport = new ReportData();
                 CronJobReports cronJobReport = new CronJobReports();
                 String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipelineRunName + "/" + indivialRun; //Creating the URL to use later
                 String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
@@ -214,29 +210,15 @@ public class PipelineResource {
                 cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
                 cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
 
-                currentReport.lastRunDate=createDateFromFolderName(indivialRun);
-                currentReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
-                currentReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
-                currentReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
-
                 //Finding which env the test was run from
                 Matcher matcherEnv = patternEnv.matcher(pipelineRunName);
                 //Getting the Enviroment the code was run on
                 if(matcherEnv.find()){
                     cronJobReport.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
-                    currentReport.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
                 }    
                 reportList.add(cronJobReport);
-                currentReportDataList.reportData.add(currentReport);
             }
-            Matcher matcherEnv = patternEnv.matcher(pipelineRunName);
-            if(matcherEnv.find()){
-                currentReportDataList.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
-            }
-            reportDataMasterList.add(currentReportDataList);
         }
-        System.out.println("Report List with new format");
-        System.out.println(reportDataMasterList);
         return reportList;
 
     }
