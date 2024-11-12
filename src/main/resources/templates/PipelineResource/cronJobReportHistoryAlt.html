@@ -50,9 +50,9 @@
                                                             {#for reportData in reportDataList.getReportData}
                                                                 <tr>
                                                                     <td>{reportData.lastRunDate}</td>
-                                                                    <td><A href="{reportData.reportUrl}">Link to Report</A></td>
-                                                                    <td><A href="{reportData.zipUrl}">Link to full Zip</A></td>
-                                                                    <td><A href="{reportData.logUrl}">Link to Log File</A></td>
+                                                                    <td><A href="{reportData.reportUrl}" target="_blank" rel="noopener noreferrer">Link to Report</A></td>
+                                                                    <td><A href="{reportData.zipUrl}" target="_blank" rel="noopener noreferrer">Link to full Zip</A></td>
+                                                                    <td><A href="{reportData.logUrl}" target="_blank" rel="noopener noreferrer">Link to Log File</A></td>
                                                                 </tr>
                                                             {/for}
                                                         </tbody>
