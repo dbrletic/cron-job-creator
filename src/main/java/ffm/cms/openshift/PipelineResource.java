@@ -139,7 +139,6 @@ public class PipelineResource {
     @Produces(MediaType.TEXT_HTML)
     @Path("/{namespace}/listSeleniumReportsAlt/{type}")
     public TemplateInstance  listSeleniumReportsAlt(@RestPath String namespace, @RestPath String type){
-
         //type shold be cj, users,all. Defaults to all if a unknown type is added
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         //TODO Change this instead of a HashSet of data so unique name for the same number of tests
@@ -180,6 +179,7 @@ public class PipelineResource {
         Collections.sort(uniqueEnvs);
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("listSeleniumReports took %d milliseconds to complete", elapsedMs);
+        
         return Templates.cronJobReportHistoryAlt(reportList, uniqueEnvs);
     }
 
@@ -218,9 +218,8 @@ public class PipelineResource {
                 }    
                 reportList.add(cronJobReport);
             }
-        }
-        return reportList;
-
+        } 
+        return reportList; 
     }
 
     /**
@@ -428,6 +427,44 @@ public class PipelineResource {
         System.out.println(reportDataMasterList);
         return reportDataMasterList;
 
+    }
+
+    /**
+     * Simple method that creates data to test the page without having to actually read a PVC
+     * @return
+     */
+    public static ArrayList<ReportDataList> getReportDataListDummyData() {
+        // Create a list to hold multiple ReportDataList objects
+        ArrayList<ReportDataList> reportDataLists = new ArrayList<>();
+
+        // Create and populate ReportDataList entries
+        for (int i = 0; i < 5; i++) {
+            // Create a new ReportDataList
+            ReportDataList reportDataList = new ReportDataList();
+
+            // Set runName and env
+            reportDataList.runName = "Run" + (i + 1);
+            reportDataList.env = "test" + (i + 1);
+
+            // Create and add ReportData entries to the reportDataList
+            for (int j = 0; j < 3; j++) {
+                // Create a new ReportData entry
+                ReportData reportData = new ReportData();
+                reportData.lastRunDate = "2024-11-0" + (j + 1);
+                reportData.reportUrl = "http://example.com/report" + (j + 1);
+                reportData.zipUrl = "http://example.com/report" + (j + 1) + ".zip";
+                reportData.logUrl = "http://example.com/report" + (j + 1) + ".log";
+                reportData.env = "test" + (i + 1);
+
+                // Add the ReportData entry to the ReportDataList
+                reportDataList.reportData.add(reportData);
+            }
+
+            // Add the populated ReportDataList to the result list
+            reportDataLists.add(reportDataList);
+        }
+
+        return reportDataLists;
     }
 
     /**
