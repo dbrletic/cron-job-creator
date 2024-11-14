@@ -21,7 +21,7 @@
 
     //Setting DataTables on all the tables 
     //Have to do it the stupid way since I could not get the ' to escape correctly when creating this in java 
-    var test1Element = document.querySelector('#test1');
+    /*var test1Element = document.querySelector('#test1');
     var test2Element = document.querySelector('#test2');
     var test3Element = document.querySelector('#test3');
     var test4Element = document.querySelector('#test4');
@@ -51,7 +51,20 @@
         var test9 = new DataTable('#test9', {
           paging: false
         } );
-    }
+    }*/
+
+    $('table').each(function() {
+         
+        var tableId = $(this).attr('id');  // Get the table id
+        var options = {};
+        // Check if table ID starts with 'test'
+        if (tableId && tableId.startsWith('test')) {
+            // Disable paging if table ID starts with 'test'
+            options.paging = false;
+            // Initialize the DataTable with the appropriate options
+            $(this).DataTable(options);
+        }       
+    });    
 
     // Get the current URL
     const currentUrl = window.location.pathname;

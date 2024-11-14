@@ -142,10 +142,12 @@ public class PipelineResource {
         //type shold be cj, users,all. Defaults to all if a unknown type is added
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
         //TODO Change this instead of a HashSet of data so unique name for the same number of tests
+       
         List<ReportDataList> reportList = new ArrayList<>();
         List<String> runNames;
         Matcher matcherEnv;
         List <String> uniqueEnvs = new ArrayList<>();
+         /* 
         //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz, *.html, and *.log
         if(type.equals("cj") || type.equals("users")){
             reportList = createCronJobReportFromFolderAlt(type);
@@ -180,7 +182,12 @@ public class PipelineResource {
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("listSeleniumReports took %d milliseconds to complete", elapsedMs);
         
-        return Templates.cronJobReportHistoryAlt(reportList, uniqueEnvs);
+        return Templates.cronJobReportHistoryAlt(reportList, uniqueEnvs);*/
+        uniqueEnvs.add("test1");
+        uniqueEnvs.add("test2");
+        uniqueEnvs.add("test3");
+        uniqueEnvs.add("test4");
+        return Templates.cronJobReportHistoryAlt(getReportDataListDummyData(), uniqueEnvs);
     }
 
 
