@@ -29,6 +29,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -230,6 +234,22 @@ public class PipelineResource {
      */
     private List<String>  listSubFolders(String parentFolderLocation){
         List<String> folderNames = new ArrayList<>();
+        java.nio.file.Path parentPath = Paths.get(parentFolderLocation);
+
+        try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(parentPath)) {
+            // Iterate over each entry in the directory
+            for (java.nio.file.Path entry : stream) {
+                // Check if the entry is a directory
+                if (Files.isDirectory(entry)) {
+                    folderNames.add(entry.getFileName().toString());
+                }
+            }
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+        
+        /*
         File parentFolder = new File(parentFolderLocation);
         if (parentFolder.exists() && parentFolder.isDirectory()) {
             File[] files = parentFolder.listFiles();
@@ -240,7 +260,7 @@ public class PipelineResource {
                     }
                 }
             }
-        }
+        } */
         return folderNames;
     }
 
@@ -270,7 +290,30 @@ public class PipelineResource {
      */
     private HashMap<String, String> findFiles(String folderPath) {
         HashMap<String, String> result = new HashMap<>();
-        File folder = new File(folderPath);
+        java.nio.file.Path path = Paths.get(folderPath);
+
+        try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(path)) {
+            for (java.nio.file.Path entry : stream) {
+                String fileName = entry.getFileName().toString().toLowerCase();
+                if (fileName.endsWith(".tar.gz") && !result.containsKey("zip")) {
+                    result.put("zip", fileName);
+                } 
+                else if (fileName.endsWith(".html") && !result.containsKey("html")) {
+                    result.put("html", fileName);
+                }
+                else if(fileName.endsWith(".log") && !result.containsKey("log")){
+                    result.put("log", fileName);
+                }
+                else if (result.size() == 3) {
+                    break; //I found all three of my files I need, break out of searching the rest. 
+                }
+            }
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
+        /*File folder = new File(folderPath);
         
         if (!folder.exists() || !folder.isDirectory()) {
             throw new IllegalArgumentException("Invalid folder path");
@@ -283,21 +326,22 @@ public class PipelineResource {
                     String fileName = file.getName().toLowerCase();
                     if (fileName.endsWith(".tar.gz") && !result.containsKey("zip")) {
                         result.put("zip", fileName);
-                    } else if (fileName.endsWith(".html") && !result.containsKey("html")) {
+                    } 
+                    else if (fileName.endsWith(".html") && !result.containsKey("html")) {
                         result.put("html", fileName);
                     }
-                    if(fileName.endsWith(".log") && !result.containsKey("log")){
+                    else if(fileName.endsWith(".log") && !result.containsKey("log")){
                         result.put("log", fileName);
                     }
-                    if (result.size() == 3) {
-                        break;
+                    else if (result.size() == 3) {
+                        break; //I found all three of my files I need, break out of searching the rest. 
                     }
                 }
             }
-        }
-
+        }*/
         return result;
     }
+    
     /**
      * Creates a new pipeline from the supplied data
      * @param data The data to add to the pipeline
@@ -381,53 +425,38 @@ public class PipelineResource {
 
     private List<ReportDataList> createCronJobReportFromFolderAlt(String type){
         List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
-        List<CronJobReports> reportList = new ArrayList<>();
         List<ReportDataList> reportDataMasterList = new ArrayList<>();
         for(String pipelineRunName: pipelineRunNames){
-
+            //Finding which env the test was run from
+            Matcher matcherEnv = patternEnv.matcher(pipelineRunName);
             //System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
             ReportDataList currentReportDataList = new ReportDataList();
             currentReportDataList.runName=pipelineRunName;
             for(String indivialRun:indivialRuns ){
                 ReportData currentReport = new ReportData();
-                CronJobReports cronJobReport = new CronJobReports();
                 String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipelineRunName + "/" + indivialRun; //Creating the URL to use later
                 String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
                 //System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
                 HashMap<String, String> zipHtmlLog = findFiles(fullPath);
                 
-                cronJobReport.name=pipelineRunName;
-                cronJobReport.lastRunDate=createDateFromFolderName(indivialRun);
-                cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
-                cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
-                cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
-
                 currentReport.lastRunDate=createDateFromFolderName(indivialRun);
                 currentReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
                 currentReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
                 currentReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
-
-                //Finding which env the test was run from
-                Matcher matcherEnv = patternEnv.matcher(pipelineRunName);
                 //Getting the Enviroment the code was run on
                 if(matcherEnv.find()){
-                    cronJobReport.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
                     currentReport.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
                 }    
-                reportList.add(cronJobReport);
                 currentReportDataList.reportData.add(currentReport);
             }
-            Matcher matcherEnv = patternEnv.matcher(pipelineRunName);
+           
             if(matcherEnv.find()){
                 currentReportDataList.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
             }
             reportDataMasterList.add(currentReportDataList);
         }
-        System.out.println("Report List with new format");
-        System.out.println(reportDataMasterList);
         return reportDataMasterList;
-
     }
 
     /**
