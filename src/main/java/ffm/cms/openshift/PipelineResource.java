@@ -4,7 +4,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestPath;
 
-import ffm.cms.model.CronJobReports;
 import ffm.cms.model.FFEStartPipeline;
 import ffm.cms.model.ReportData;
 import ffm.cms.model.ReportDataList;
@@ -62,8 +61,7 @@ public class PipelineResource {
 
     @CheckedTemplate
     public static class Templates {
-        public static native TemplateInstance cronJobReportHistory(List<CronJobReports> cronJobsReports, List<String> uniqueEnvs);
-        public static native TemplateInstance cronJobReportHistoryAlt(List<ReportDataList> cronJobReportsMasterList, List<String> uniqueEnvs);
+        public static native TemplateInstance cronJobReportHistory(List<ReportDataList> cronJobReportsMasterList, List<String> uniqueEnvs);
     }
 
     /**
@@ -90,7 +88,7 @@ public class PipelineResource {
      * @param namespace Current namespace of the project
      * @param type The type of reports to get, either cronjobs (cj), users, or all. If defaults to all if anything besides cj or users
      * @return
-     */
+     
     @GET
     @Produces(MediaType.TEXT_HTML)
     @Path("/{namespace}/listSeleniumReports/{type}")
@@ -138,28 +136,36 @@ public class PipelineResource {
         System.out.printf("listSeleniumReports took %d milliseconds to complete", elapsedMs);
         return Templates.cronJobReportHistory(reportList, uniqueEnvs);
     }
+    */
 
+    /**
+     * Creates a report dashboard of a given type from the saved run PVC
+     * @param namespace Current namespace of the project
+     * @param type The type of reports to get, either cronjobs (cj), users, or all. If defaults to all if anything besides cj or users
+     * @return
+     */
     @GET
     @Produces(MediaType.TEXT_HTML)
-    @Path("/{namespace}/listSeleniumReportsAlt/{type}")
+    @Path("/{namespace}/listSeleniumReports/{type}")
     public TemplateInstance  listSeleniumReportsAlt(@RestPath String namespace, @RestPath String type){
         //type shold be cj, users,all. Defaults to all if a unknown type is added
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
-        //TODO Change this instead of a HashSet of data so unique name for the same number of tests
+      
        
         List<ReportDataList> reportList = new ArrayList<>();
         List<String> runNames;
         Matcher matcherEnv;
         List <String> uniqueEnvs = new ArrayList<>();
-        //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz, *.html, and *.log
+        HashSet<String> hashUniqueEnvs = new HashSet<>();
+        //Goes pipelinePVCMountPath/<cj or users>/indivialRunsName/date/*.tar.gz, *.html, and *.log
         if(type.equals("cj") || type.equals("users")){
-            reportList = createCronJobReportFromFolderAlt(type);
+            reportList = createCronJobReportFromFolder(type);
             runNames = listSubFolders(pipelinePVCMountPath + File.separator+ type);
 
         }else{
             //Basically just listed both cj and users reports
-            reportList = createCronJobReportFromFolderAlt("cj");
-            reportList.addAll(createCronJobReportFromFolderAlt("users"));
+            reportList = createCronJobReportFromFolder("cj");
+            reportList.addAll(createCronJobReportFromFolder("users"));
             runNames = listSubFolders(pipelinePVCMountPath + File.separator + "cj");
             runNames.addAll(listSubFolders(pipelinePVCMountPath + File.separator + "users"));
         }
@@ -170,14 +176,11 @@ public class PipelineResource {
            //Getting the Enviroment the code was run on
            if(matcherEnv.find()){
                 String env = name.substring(matcherEnv.start(), matcherEnv.end());
-                uniqueEnvs.add(env); //Getting only the Enviroment Names that I need once
+                hashUniqueEnvs.add(env); //Getting only the Enviroment Names that I need once
            }
         }
-        
-        // Remote the duplicate using a HashSet
-        HashSet<String> hashUniqueEnvs = new HashSet<>(uniqueEnvs);
-        
-        //Converting the set Back to a ArrayList for dispalying with Quarkus QUTE
+         
+        //Converting the set to a ArrayList for dispalying with Quarkus QUTE
         uniqueEnvs = new ArrayList<>(hashUniqueEnvs);
 
         //Making sure the names are in order
@@ -185,7 +188,7 @@ public class PipelineResource {
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("listSeleniumReports took %d milliseconds to complete", elapsedMs);
         
-        return Templates.cronJobReportHistoryAlt(reportList, uniqueEnvs);
+        return Templates.cronJobReportHistory(reportList, uniqueEnvs);
     }
 
 
@@ -194,7 +197,7 @@ public class PipelineResource {
      * Creates a ArrayList of cronJobReports based upon the type (cj or users). Searchs through the PVCMountPath to figure out all the subfolders that contain reports. 
      * @param type Which folder type to go into, either cj or users
      * @return
-     */
+     
     private List<CronJobReports> createCronJobReportFromFolder(String type){
         List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
         List<CronJobReports> reportList = new ArrayList<>();
@@ -226,6 +229,7 @@ public class PipelineResource {
         } 
         return reportList; 
     }
+    */    
 
     /**
      * List all the subfolders of a given parent
@@ -248,19 +252,6 @@ public class PipelineResource {
         catch (IOException e){
             e.printStackTrace();
         }
-        
-        /*
-        File parentFolder = new File(parentFolderLocation);
-        if (parentFolder.exists() && parentFolder.isDirectory()) {
-            File[] files = parentFolder.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        folderNames.add(file.getName());
-                    }
-                }
-            }
-        } */
         return folderNames;
     }
 
@@ -312,33 +303,6 @@ public class PipelineResource {
         catch (IOException e){
             e.printStackTrace();
         }
-
-        /*File folder = new File(folderPath);
-        
-        if (!folder.exists() || !folder.isDirectory()) {
-            throw new IllegalArgumentException("Invalid folder path");
-        }
-
-        File[] files = folder.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isFile()) {
-                    String fileName = file.getName().toLowerCase();
-                    if (fileName.endsWith(".tar.gz") && !result.containsKey("zip")) {
-                        result.put("zip", fileName);
-                    } 
-                    else if (fileName.endsWith(".html") && !result.containsKey("html")) {
-                        result.put("html", fileName);
-                    }
-                    else if(fileName.endsWith(".log") && !result.containsKey("log")){
-                        result.put("log", fileName);
-                    }
-                    else if (result.size() == 3) {
-                        break; //I found all three of my files I need, break out of searching the rest. 
-                    }
-                }
-            }
-        }*/
         return result;
     }
     
@@ -423,7 +387,12 @@ public class PipelineResource {
         return pipelineRun;
     }
 
-    private List<ReportDataList> createCronJobReportFromFolderAlt(String type){
+    /**
+     * Takes in a 
+     * @param type
+     * @return
+     */
+    private List<ReportDataList> createCronJobReportFromFolder(String type){
         List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
         List<ReportDataList> reportDataMasterList = new ArrayList<>();
         for(String pipelineRunName: pipelineRunNames){
@@ -496,21 +465,6 @@ public class PipelineResource {
 
         return reportDataLists;
     }
-
-    /**
-     * Creates a javascript method that loads all the tables on a page to use with DataTable.js
-     * @param headerNames The names of all the tables 
-     * @return 
-     
-    private String createDataTableLoadingJS(List<String> headerNames){
-        
-        String loadDataTables = "";
-        for(String name: headerNames){
-            loadDataTables =  loadDataTables + JS_REPEAT_AND_REPLACE.replace("REPLACE", name);
-            loadDataTables = loadDataTables + "\n";
-        }
-        return JS_START + loadDataTables + JS_END;
-    }*/
 
      //Saving this code in case I ever have to add another field to a bunch of files again. 
     /** 
