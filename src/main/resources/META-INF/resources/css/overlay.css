@@ -28,3 +28,10 @@
     font-size: 18px;
     margin-top: 10px;
 }
+
+.disabled-link {
+    color: gray; /* Gray color for the link text */
+    text-decoration: none; /* Optional: remove underline */
+    pointer-events: none; /* Disables click interactions */
+    cursor: not-allowed; /* Changes the cursor to indicate it's not clickable */
+}
