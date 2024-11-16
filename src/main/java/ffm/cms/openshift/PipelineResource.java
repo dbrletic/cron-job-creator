@@ -84,61 +84,6 @@ public class PipelineResource {
     }
 
     /**
-     * Creates a report based upon the files on the PVC
-     * @param namespace Current namespace of the project
-     * @param type The type of reports to get, either cronjobs (cj), users, or all. If defaults to all if anything besides cj or users
-     * @return
-     
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    @Path("/{namespace}/listSeleniumReports/{type}")
-    public TemplateInstance  listSeleniumReports(@RestPath String namespace, @RestPath String type){
-
-        //type shold be cj, users,all. Defaults to all if a unknown type is added
-        Instant start = Instant.now(); //Curious to see how long this takes, will take some time
-        //TODO Change this instead of a HashSet of data so unique name for the same number of tests
-        List<CronJobReports> reportList = new ArrayList<>();
-        List<String> runNames;
-        Matcher matcherEnv;
-        List <String> uniqueEnvs = new ArrayList<>();
-        //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz, *.html, and *.log
-        if(type.equals("cj") || type.equals("users")){
-            reportList = createCronJobReportFromFolder(type);
-            runNames = listSubFolders(pipelinePVCMountPath + File.separator+ type);
-
-        }else{
-            //Basically just listed both cj and users reports
-            reportList = createCronJobReportFromFolder("cj");
-            reportList.addAll(createCronJobReportFromFolder("users"));
-            runNames = listSubFolders(pipelinePVCMountPath + File.separator + "cj");
-            runNames.addAll(listSubFolders(pipelinePVCMountPath + File.separator + "users"));
-        }
-
-        //Find all the unique env names so I can create tables afterwards. 
-        for(String name: runNames){
-            matcherEnv = patternEnv.matcher(name);
-           //Getting the Enviroment the code was run on
-           if(matcherEnv.find()){
-                String env = name.substring(matcherEnv.start(), matcherEnv.end());
-                uniqueEnvs.add(env); //Getting only the Enviroment Names that I need once
-           }
-        }
-        
-        // Remote the duplicate using a HashSet
-        HashSet<String> hashUniqueEnvs = new HashSet<>(uniqueEnvs);
-        
-        //Converting the set Back to a ArrayList for dispalying with Quarkus QUTE
-        uniqueEnvs = new ArrayList<>(hashUniqueEnvs);
-
-        //Making sure the names are in order
-        Collections.sort(uniqueEnvs);
-        long elapsedMs = Duration.between(start, Instant.now()).toMillis();
-        System.out.printf("listSeleniumReports took %d milliseconds to complete", elapsedMs);
-        return Templates.cronJobReportHistory(reportList, uniqueEnvs);
-    }
-    */
-
-    /**
      * Creates a report dashboard of a given type from the saved run PVC
      * @param namespace Current namespace of the project
      * @param type The type of reports to get, either cronjobs (cj), users, or all. If defaults to all if anything besides cj or users
@@ -147,7 +92,7 @@ public class PipelineResource {
     @GET
     @Produces(MediaType.TEXT_HTML)
     @Path("/{namespace}/listSeleniumReports/{type}")
-    public TemplateInstance  listSeleniumReportsAlt(@RestPath String namespace, @RestPath String type){
+    public TemplateInstance listSeleniumReports(@RestPath String namespace, @RestPath String type){
         //type shold be cj, users,all. Defaults to all if a unknown type is added
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
       
@@ -190,46 +135,6 @@ public class PipelineResource {
         
         return Templates.cronJobReportHistory(reportList, uniqueEnvs);
     }
-
-
-     
-    /**
-     * Creates a ArrayList of cronJobReports based upon the type (cj or users). Searchs through the PVCMountPath to figure out all the subfolders that contain reports. 
-     * @param type Which folder type to go into, either cj or users
-     * @return
-     
-    private List<CronJobReports> createCronJobReportFromFolder(String type){
-        List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
-        List<CronJobReports> reportList = new ArrayList<>();
-        for(String pipelineRunName: pipelineRunNames){
-
-            //System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
-            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
-            for(String indivialRun:indivialRuns ){
-                CronJobReports cronJobReport = new CronJobReports();
-                String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipelineRunName + "/" + indivialRun; //Creating the URL to use later
-                String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
-                //System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
-                HashMap<String, String> zipHtmlLog = findFiles(fullPath);
-                
-                cronJobReport.name=pipelineRunName;
-                cronJobReport.lastRunDate=createDateFromFolderName(indivialRun);
-                cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
-                cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
-                cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
-
-                //Finding which env the test was run from
-                Matcher matcherEnv = patternEnv.matcher(pipelineRunName);
-                //Getting the Enviroment the code was run on
-                if(matcherEnv.find()){
-                    cronJobReport.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
-                }    
-                reportList.add(cronJobReport);
-            }
-        } 
-        return reportList; 
-    }
-    */    
 
     /**
      * List all the subfolders of a given parent
@@ -388,8 +293,8 @@ public class PipelineResource {
     }
 
     /**
-     * Takes in a 
-     * @param type
+     * Creates a ArrayList of cronJobReports based upon the type (cj or users). Searchs through the PVCMountPath to figure out all the subfolders that contain reports. 
+     * @param type Which folder type to go into, either cj or users
      * @return
      */
     private List<ReportDataList> createCronJobReportFromFolder(String type){
@@ -431,8 +336,8 @@ public class PipelineResource {
     /**
      * Simple method that creates data to test the page without having to actually read a PVC
      * @return
-     */
-    public static ArrayList<ReportDataList> getReportDataListDummyData() {
+    
+    private static ArrayList<ReportDataList> getReportDataListDummyData() {
         // Create a list to hold multiple ReportDataList objects
         ArrayList<ReportDataList> reportDataLists = new ArrayList<>();
 
@@ -465,7 +370,59 @@ public class PipelineResource {
 
         return reportDataLists;
     }
+        /**
+     * Creates a report based upon the files on the PVC
+     * @param namespace Current namespace of the project
+     * @param type The type of reports to get, either cronjobs (cj), users, or all. If defaults to all if anything besides cj or users
+     * @return 
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    @Path("/{namespace}/listSeleniumReports/{type}")
+    public TemplateInstance  listSeleniumReports(@RestPath String namespace, @RestPath String type){
 
+        //type shold be cj, users,all. Defaults to all if a unknown type is added
+        Instant start = Instant.now(); //Curious to see how long this takes, will take some time
+        //TODO Change this instead of a HashSet of data so unique name for the same number of tests
+        List<CronJobReports> reportList = new ArrayList<>();
+        List<String> runNames;
+        Matcher matcherEnv;
+        List <String> uniqueEnvs = new ArrayList<>();
+        //Goes pipelinePVCMountPath/<cj or users>indivialRunsName/date/*.tar.gz, *.html, and *.log
+        if(type.equals("cj") || type.equals("users")){
+            reportList = createCronJobReportFromFolder(type);
+            runNames = listSubFolders(pipelinePVCMountPath + File.separator+ type);
+
+        }else{
+            //Basically just listed both cj and users reports
+            reportList = createCronJobReportFromFolder("cj");
+            reportList.addAll(createCronJobReportFromFolder("users"));
+            runNames = listSubFolders(pipelinePVCMountPath + File.separator + "cj");
+            runNames.addAll(listSubFolders(pipelinePVCMountPath + File.separator + "users"));
+        }
+
+        //Find all the unique env names so I can create tables afterwards. 
+        for(String name: runNames){
+            matcherEnv = patternEnv.matcher(name);
+           //Getting the Enviroment the code was run on
+           if(matcherEnv.find()){
+                String env = name.substring(matcherEnv.start(), matcherEnv.end());
+                uniqueEnvs.add(env); //Getting only the Enviroment Names that I need once
+           }
+        }
+        
+        // Remote the duplicate using a HashSet
+        HashSet<String> hashUniqueEnvs = new HashSet<>(uniqueEnvs);
+        
+        //Converting the set Back to a ArrayList for dispalying with Quarkus QUTE
+        uniqueEnvs = new ArrayList<>(hashUniqueEnvs);
+
+        //Making sure the names are in order
+        Collections.sort(uniqueEnvs);
+        long elapsedMs = Duration.between(start, Instant.now()).toMillis();
+        System.out.printf("listSeleniumReports took %d milliseconds to complete", elapsedMs);
+        return Templates.cronJobReportHistory(reportList, uniqueEnvs);
+    }
+    */
      //Saving this code in case I ever have to add another field to a bunch of files again. 
     /** 
     @GET
@@ -535,4 +492,42 @@ public class PipelineResource {
 
         return updatedFile;
     }  */
+
+     /**
+     * Creates a ArrayList of cronJobReports based upon the type (cj or users). Searchs through the PVCMountPath to figure out all the subfolders that contain reports. 
+     * @param type Which folder type to go into, either cj or users
+     * @return
+     
+    private List<CronJobReports> createCronJobReportFromFolder(String type){
+        List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
+        List<CronJobReports> reportList = new ArrayList<>();
+        for(String pipelineRunName: pipelineRunNames){
+
+            //System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
+            List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
+            for(String indivialRun:indivialRuns ){
+                CronJobReports cronJobReport = new CronJobReports();
+                String fullPath = pipelinePVCMountPath + "/" + type + "/" + pipelineRunName + "/" + indivialRun; //Creating the URL to use later
+                String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
+                //System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
+                HashMap<String, String> zipHtmlLog = findFiles(fullPath);
+                
+                cronJobReport.name=pipelineRunName;
+                cronJobReport.lastRunDate=createDateFromFolderName(indivialRun);
+                cronJobReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
+                cronJobReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
+                cronJobReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
+
+                //Finding which env the test was run from
+                Matcher matcherEnv = patternEnv.matcher(pipelineRunName);
+                //Getting the Enviroment the code was run on
+                if(matcherEnv.find()){
+                    cronJobReport.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
+                }    
+                reportList.add(cronJobReport);
+            }
+        } 
+        return reportList; 
+    }
+    */    
 }
