@@ -1,4 +1,4 @@
-package ffm.cms;
+package ffm.cms.openshift;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -16,10 +16,15 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
+import jakarta.inject.Inject;
 
-public final class OpenshiftUtility {
+/**
+ * This is suppose to be a generic untilty class that holds the most used methods
+ */
+public class OpenshiftUtility {
 
-    private OpenshiftUtility(){}
+    @Inject //Generic OpenShift client
+    private OpenShiftClient openshiftClient;
 
     final private static String CRIO_MSG = "Unable to get logs. Check email for status of run.";
     final private static String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
@@ -51,13 +56,17 @@ public final class OpenshiftUtility {
     private static Pattern patternCRIOError = Pattern.compile(CRI_O_ERROR);
     private static Pattern patternNoTestRun = Pattern.compile(NO_TEST_RUN);
 
+    final private static String JS_START = "$(document).ready( function () {";
+    final private static String JS_END = " });";
+    final private static String JS_REPEAT_AND_REPLACE ="var REAPLCE = new DataTable('#REPLACE', {paging: false } );";
+
 
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
      * @param tbList
      * @return A Map that binds a cronjob name to its Trigger Binding releaseBranch value
      */
-    public static Map<String,String> bindParamsToBranch(List<TriggerBinding> tbList){
+    public Map<String,String> bindParamsToBranch(List<TriggerBinding> tbList){
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
 
         //Easier to just grab the releaseBranch all once and just map them to the name of the TriggerBinding
@@ -80,7 +89,8 @@ public final class OpenshiftUtility {
      * @param runPod
      * @return
      */
-    public static CronJobDashboardData getColorStatusAndMsg(CronJobDashboardData data, String runLogs, String namespace, String runPod, OpenShiftClient openshiftClient){
+    public CronJobDashboardData getColorStatusAndMsg(CronJobDashboardData data, String runLogs, String namespace, String runPod){
+
         /**
          * Red - job failed, no results
            Orange - job did not complete due to exception, partial results
@@ -97,16 +107,16 @@ public final class OpenshiftUtility {
         if(matcherTestRun.find() && !data.result.equals("Failed")){
             doubleCheck = runLogs.substring(matcherTestRun.start(), matcherTestRun.end());     
             if(doubleCheck.equalsIgnoreCase(RAN_BUT_FAILED) && !data.result.equals("Failed")){
-                data.msg = findPassedFailedFromZipLogs(namespace, runPod,true, openshiftClient);
+                data.msg = findPassedFailedFromZipLogs(namespace, runPod,true);
                 data.color = ORANGE; //Orange Didn't pass but didn't totally fail
                 data.failedTests = getFailedTests(runLogs);
             }
             else if(doubleCheck.contains("Failures: 0")){
-                data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false, openshiftClient);
+                data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = GREEN;
             }
             else{
-                data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false, openshiftClient);
+                data.msg =  findPassedFailedFromZipLogs(namespace, runPod,false);
                 data.color = YELLOW;
                 data.failedTests = getFailedTests(runLogs);
             }        
@@ -148,7 +158,7 @@ public final class OpenshiftUtility {
      * @param date The date to be converted
      * @return A easer to read date
      */
-    public static String createReadableDate(String date){
+    public String createReadableDate(String date){
 
         //Just in case the cronjob has not run yet and the last Transaction time is null or empty/blank. 
         if(date == null || date.isBlank())
@@ -170,7 +180,7 @@ public final class OpenshiftUtility {
      * @param taskRuns A array of all the TaskRuns 
      * @return A Hashmap that is maps the pod that a given PipelineRun was executed on 
      */
-    public static HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
+    public HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
         HashMap<String, String> podToRunTask = new HashMap<String, String>();
         System.out.print("Starting map to TaskRun");
         for(TaskRun taskRun : taskRuns){
@@ -192,7 +202,7 @@ public final class OpenshiftUtility {
      * @param exceptionFound
      * @return
      */
-    public static String findPassedFailedFromZipLogs(String namespace, String runPod, boolean exceptionFound, OpenShiftClient openshiftClient){
+    public String findPassedFailedFromZipLogs(String namespace, String runPod, boolean exceptionFound){
         //Abusing the fact that zip displays the files its zipping to find the number of Pass/Failed images generated
         String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);
         int passedCount = StringUtils.countMatches(zipLogs, PASSED);
@@ -209,7 +219,7 @@ public final class OpenshiftUtility {
      * @param runLogs
      * @return
      */
-    public static String getFailedTests(String runLogs){
+    public String getFailedTests(String runLogs){
 
         int failureStart = runLogs.indexOf(TEST_FAILURE_START);
         if(failureStart > 0){
@@ -226,6 +236,33 @@ public final class OpenshiftUtility {
         }
         return "";
 
+    }
+
+    /**
+     * Gets the release branch (to be used for sorting) from the name of the cronjob
+     * @param cronjobName
+     * @return
+     */
+    public String getReleaseBranchFromName(String cronjobName){
+
+        //Since all cronjob names follow the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH we know everything after test<number>- is the release branch name
+        int startPosition = cronjobName.indexOf("test") + 6;
+        return cronjobName.substring(startPosition, cronjobName.length());
+    }
+
+    /**
+     * Creates a javascript method that loads all the tables on a page to use with DataTable.js
+     * @param headerNames The names of all the tables 
+     * @return 
+     */
+    public String createDataTableLoadingJS(List<String> headerNames){
+        
+        String loadDataTables = "";
+        for(String name: headerNames){
+            loadDataTables =  loadDataTables + JS_REPEAT_AND_REPLACE.replace("REPLACE", name);
+            loadDataTables = loadDataTables + "\n";
+        }
+        return JS_START + loadDataTables + JS_END;
     }
     
 }

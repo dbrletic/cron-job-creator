@@ -1,4 +1,4 @@
-package ffm.cms;
+package ffm.cms.openshift;
 
 import ffm.cms.model.CronJobDashboardData;
 import ffm.cms.model.CronJobData;
@@ -43,10 +43,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
 
 /**
  * Handles getting information from OpenShift like Cronjob Schedules, logs, etc
@@ -58,8 +62,9 @@ import java.util.regex.Pattern;
 public class OpenshiftResource {
 
     @Inject //Generic OpenShift client
-    private OpenShiftClient openshiftClient; //Make sure to add a ServiceAccount to the deployment that has access to the namespace that has the pipeline runs. 
+    private OpenShiftClient openshiftClient; //Make sure to add a ServiceAccount to the deployment that has access to the namespace that has the pipeline runs.  This will automatticaly add in the kubeconfig file that gives the client the needed permissions. 
     
+    //All the private Static String
     final private static String CRIO_MSG = "Unable to get logs. Check email for status of run.";
     final private static String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
     final private static String BUILD_FAILURE = "Compliation error. Check logs for errors.";
@@ -86,8 +91,7 @@ public class OpenshiftResource {
     final private static String GRAY = "#f6f6f6"; //Gray
     final private static String ORANGE = "#F0C476"; //Orange
 
-
-
+    //All the Pattern Matching 
     private Pattern patternTestRun = Pattern.compile("Tests run: \\d+, Failures: \\d+, Errors: \\d+, Skipped: \\d+");
     private Pattern patternBuildFailed = Pattern.compile("COMPILATION ERROR");
     private Pattern patternTimeStart = Pattern.compile("Total time:");
@@ -98,13 +102,13 @@ public class OpenshiftResource {
     //Sorts CronJobDashboardData by their names
     Comparator<CronJobDashboardData> nameSorter = (a, b) -> a.name.compareToIgnoreCase(b.name);
     //Sorts CronJobDashboardData by their release brance
-    Comparator<CronJobDashboardData> releaseBranchSorter = (a, b) -> a.releaseBranch.compareToIgnoreCase(b.releaseBranch);
+    Comparator<CronJobDashboardData> releaseBranchSorter = (a, b) -> a.name.compareToIgnoreCase(b.releaseBranch);
 
     @CheckedTemplate
     public static class Templates {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
-        public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs);
+        public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs, List<String> uniqueEnvs);
     }
 
     @GET()
@@ -158,8 +162,6 @@ public class OpenshiftResource {
            if(matcherEnv.find()){
                 currentJob.env = currentJob.name.substring(matcherEnv.start(), matcherEnv.end());
            }
-
-
             cronJobs.add(currentJob);
         }
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
@@ -213,7 +215,7 @@ public class OpenshiftResource {
             if(currentJob.name.startsWith("gatling"))
                 cronJobs.add(currentJob);
         }
-        return Templates.gatlingCronJobData(cronJobs);
+        return Templates.gatlingCronJobData(cronJobs); //Add in the data 
     }
 
     @GET
@@ -243,6 +245,7 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
+        Set <String> uniqueEnvsList = new HashSet<>();
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         int cronjobCounter = 0; //Count how many CronJob pipelines were displayeds
         HashMap<String, String> pipelineRunToPod;
@@ -304,6 +307,7 @@ public class OpenshiftResource {
             //Getting the Enviroment the code was run on
             if(matcherEnv.find()){
                 data.env = data.name.substring(matcherEnv.start(), matcherEnv.end());
+                uniqueEnvsList.add(data.env); //Getting only the Enviroment Names that I need once
             }
        
              //Setting the type of Pipeline that was run. It always the text before the first -
@@ -331,13 +335,20 @@ public class OpenshiftResource {
             data = getColorStatusAndMsg(data, runLogs, namespace, runPod); 
             cronjobCounter++;
             dashboardData.add(data);
+
+            //TODO Create a ArrayList of all the unique env, pass that to the Template instance, and use that to only have to create one
+            //Like it will be a for loop of unique array list, but then under it will if env == headername write out
+            //Would take out extra HTML loops. Need to Dynamically write the DataTable.js javascript
         }
-       
+        List<String> uniqueEnvs = new ArrayList<>(uniqueEnvsList);
+        Collections.sort(dashboardData, nameSorter); //Sorting everything by name 
+        Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
+        Collections.sort(uniqueEnvs); 
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
         System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
         
-        return  Templates.cronJobDashboard(dashboardData);
+        return  Templates.cronJobDashboard(dashboardData, uniqueEnvs);
     }
 
     @GET
@@ -364,8 +375,9 @@ public class OpenshiftResource {
                         .build();       
     }  
 
-    //TODO Move the following methods to their own helper class to clean up code
 
+  
+    //TODO Move the following methods to their own helper class to clean up code
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
      * @param tbList
@@ -487,7 +499,7 @@ public class OpenshiftResource {
      */
     private HashMap<String, String> mapPodToRun(List <TaskRun> taskRuns){
         HashMap<String, String> podToRunTask = new HashMap<String, String>();
-        System.out.print("Starting map to TaskRun");
+        //System.out.println("Starting map to TaskRun");
         for(TaskRun taskRun : taskRuns){
             String key = taskRun.getMetadata().getLabels().get("tekton.dev/pipelineRun");
             String value = taskRun.getStatus().getPodName();    
@@ -551,8 +563,7 @@ public class OpenshiftResource {
     private String getReleaseBranchFromName(String cronjobName){
 
         //Since all cronjob names follow the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH we know everything after test<number>- is the release branch name
-        int startPosition = cronjobName.indexOf("test") + 6; //Basically taking out test<number>- to get the name
+        int startPosition = cronjobName.indexOf("test") + 6;
         return cronjobName.substring(startPosition, cronjobName.length());
     }
-
 }

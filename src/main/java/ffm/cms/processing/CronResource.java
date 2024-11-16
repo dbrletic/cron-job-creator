@@ -1,4 +1,4 @@
-package ffm.cms;
+package ffm.cms.processing;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,10 +14,10 @@ import java.util.zip.ZipOutputStream;
 
 import ffm.cms.model.FFEData;
 import ffm.cms.model.FFEGatlingData;
+import ffm.cms.model.ScheduleJob;
 import ffm.cms.model.UpdateCronJobSchedule;
 
 import org.apache.commons.io.FileUtils;
-
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
@@ -51,6 +51,10 @@ public class CronResource {
     public Response createFiles(@Valid FFEData data) throws IOException, ParseException{
         System.out.println("Starting up process for " + data.getGroups() + "-" + data.getUrl()) ;
         System.out.println(data.toString());
+        if(data.getReleaseBranch().length() + data.getGroups().length() + data.getUrl().length() > 52){
+            //Since ReleaseBranch, Groups, and Url are used to create names of the jobs there is as long the combo can be. 
+            return Response.status(400, "Release Branch, Groups, and Url are too long.").build();
+        }
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
         String zipFileLocation = projectDir + File.separator + data.getGroups() + "-" + data.getUrl() + ".zip";
@@ -138,7 +142,7 @@ public class CronResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
     @Path("/update")
- public Response updateCronJobs(@Valid UpdateCronJobSchedule update) throws IOException{
+    public Response updateCronJobs(@Valid UpdateCronJobSchedule update) throws IOException{
         Map<String,String> cronJobsToUpdate = update.getPairs();
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
@@ -193,6 +197,42 @@ public class CronResource {
         
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/mass-update")
+    public Response massUpdate(ScheduleJob[] jobs){
+        List<String> newFilesLocation = new ArrayList<String>();
+        String projectDir = System.getProperty("user.dir");
+        String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
+        String updates="";
+        for(ScheduleJob job: jobs){
+            
+            System.out.println("Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule());
+            updates = updates + "\n" + "Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule();
+            try{
+                newFilesLocation.add(cronjobHandler.updateCronJOb(job.getJobName(),  job.getSchedule()));
+            } catch (IOException | ParseException e){
+                
+                System.out.println(e.getMessage());
+                System.out.println(e.getStackTrace());
+                return Response.serverError().status(500).entity("Parsing Error of files").build();
+            }
+        }
+        File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
+        System.out.println("Add to response: " + zipFileLocation);
+        System.out.println("Zip is made: " + downloadZip.isFile());
+
+        try {
+            return Response
+                .ok(FileUtils.readFileToByteArray(downloadZip))
+                .type("application/zip")
+                .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
+                .build();
+        } catch (IOException e) {
+            return Response.serverError().status(500).build();
+        }
+    }
+
     /**
      * Helper method that zips up a bunch of files, delete the zipped file, and returns the location of the newly created zip
      * @param newFilesLocation Array of location of the files to be zipped
@@ -245,6 +285,7 @@ public class CronResource {
         String uuidString = uuid.toString().replace("-", "");
         return uuidString.substring(0, 5);
     }
+
 
 
 }

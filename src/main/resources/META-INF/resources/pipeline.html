@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>FFE Selenium Pipeline Runner</title>
+  </head>
+  <body>
+  <div id="mySidenav" class="sidenav">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <a href="/openshift/tester-pipelines/cronjobs">List FFE Selenium Cronjobs</a>
+      <a href="/openshift/tester-pipelines/gatling">List Gatling Cronjobs</a>
+      <a href="/loading.html">FFE Selenum Dashboard</a>
+      <a href="/update.html">Update FFE Selenium Cronjobs Schedule</a>
+      <a href="/gatling.html">Create Gatling Cronjob Files</a>
+      <a href="/">Create FFE CronJob Files</a>
+  </div>
+    
+    <!-- Use any element to open the sidenav -->
+    <span onclick="openNav()"><h3>Menu</h3></span>
+    <div class="container" id="main">
+      <h2>Fill out the form to start a new Selenium Test Pipeline Run</h2>
+      <form id="piplelineRunForm">
+        <div class="control-wrapper">
+          <label class="input-label" for="releaseBranch">Release Branch:</label>
+          <div class="input-wrapper">
+            <input
+              id="releaseBranch"
+              class="input"
+              type="text"
+            />
+          </div>
+          <!-- <input type="text" class="form-control" id="releaseBranch"> -->
+        </div>
+        <div class="form-group">
+          <label for="userNameFFM">User Name:</label>
+          <input type="text" class="form-control" id="userNameFFM">
+        </div>
+        <div class="form-group">
+          <label for="userPassword">User Password:</label>
+          <input type="text" class="form-control" id="userPassword">
+        </div>
+        <div class="form-group">
+          <label for="groups">Groups:</label>
+          <input type="text" class="form-control" id="groups">
+        </div>
+        <div class="form-group">
+            <label for="url">Url:</label>
+            <input type="text" class="form-control" id="url" placeholder="Use name from data.properties">
+        </div>
+        <div class="form-group">
+            <label for="seleniumTestEmailList">Selenium Test EmailList:</label>
+            <input type="text" class="form-control" id="seleniumTestEmailList" placeholder="Seperate by a ,">
+        </div>
+        <div class="form-group">
+            <label for="logs">Logs</label>
+            <input type="text" class="form-control" id="logs" value="*">
+        </div>
+        <div class="form-group">
+            <label for="mvnArgs">Maven Args</label>
+            <input type="text" class="form-control" id="mvnArgs" value="--no-transfer-progress">
+        </div>
+        <!-- <div class="form-group">
+            <label for="pipelineRunName">Pipeline Run Name</label>
+            <input type="text" class="form-control" id="pipelineRunName" placeholder="Name of the run to find later">
+        </div> -->
+        <div style="color:#CF4B2F" id="errorMessage"></div>
+        <div class="control-wrapper">
+          <button type="submit" class="button button-outline">Submit</button>
+        </div>
+      </form>
+    </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js"></script>
+  <script>
+    const validate = new window.JustValidate('#piplelineRunForm');
+  </script>
+  <script src="/js/pipeline.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+  <link rel="stylesheet" href="/css/index.css">
+  </body>
+</html>

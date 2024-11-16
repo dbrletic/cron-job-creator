@@ -1,0 +1,37 @@
+  /* Additional custom styling */
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1050; /* Above other elements */
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-container {
+    width: 80%;
+    max-width: 400px;
+}
+
+/* Ensuring the progress bar is centered inside the overlay */
+.progress-bar {
+    height: 30px;
+}
+
+.loading-text {
+    color: white;
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+.disabled-link {
+    color: gray; /* Gray color for the link text */
+    text-decoration: none; /* Optional: remove underline */
+    pointer-events: none; /* Disables click interactions */
+    cursor: not-allowed; /* Changes the cursor to indicate it's not clickable */
+}

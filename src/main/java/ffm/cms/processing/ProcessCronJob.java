@@ -1,4 +1,4 @@
-package ffm.cms;
+package ffm.cms.processing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +22,17 @@ public class ProcessCronJob{
 
     private static String CLEAN_GROUPS_URL_CLEAN_RELEASE_BRANCH = "CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH";
 
+    /**
+     * 
+     * @param schedule
+     * @param groups
+     * @param url
+     * @param cleanReleaseBranch
+     * @param cleanGroup
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
     public String processCronjob(String schedule, String groups, String url, String cleanReleaseBranch, String cleanGroup) throws IOException, ParseException {
 
         InputStream inputStream = getClass().getResourceAsStream("/cronjob-selenium-master.yml");
@@ -52,6 +63,14 @@ public class ProcessCronJob{
         return outputFile.toFile().getPath();
     }
 
+    /**
+     * Updates a cronjob with a new schedule
+     * @param allVars Basically the name of the cronjob that is in the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj
+     * @param schedule The new Schedule
+     * @return
+     * @throws ParseException
+     * @throws IOException
+     */
     public String updateCronJOb(String allVars, String schedule) throws ParseException, IOException{
 
         String cleanVars = allVars.replace("-cj","");
@@ -79,6 +98,15 @@ public class ProcessCronJob{
 
     }
 
+    /**
+     * 
+     * @param groups
+     * @param url
+     * @param cleanReleaseBranch
+     * @param cleanGroup
+     * @return
+     * @throws IOException
+     */
     public String processEventListener(String groups, String url, String cleanReleaseBranch, String cleanGroup) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/eventlistener-master.yml");
       
@@ -103,6 +131,20 @@ public class ProcessCronJob{
         return outputFile.toFile().getPath();
     }
 
+    /**
+     * 
+     * @param groups
+     * @param url
+     * @param releaseBranch
+     * @param userName
+     * @param userPassword
+     * @param browser
+     * @param seleniumTestEmailList
+     * @param cleanReleaseBranch
+     * @param cleanGroup
+     * @return
+     * @throws IOException
+     */
     public String processTriggerBinding(String groups, String url, String releaseBranch, String userName, String userPassword, String browser, String seleniumTestEmailList, String cleanReleaseBranch, String cleanGroup) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-binding-master.yml");
       
@@ -146,6 +188,15 @@ public class ProcessCronJob{
         return outputFile.toFile().getPath();
     }
 
+    /**
+     * 
+     * @param groups
+     * @param url
+     * @param cleanReleaseBranch
+     * @param cleanGroup
+     * @return
+     * @throws IOException
+     */
      public String processTriggerTemplate(String groups, String url, String cleanReleaseBranch, String cleanGroup) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-template-master.yml");
       
@@ -170,6 +221,16 @@ public class ProcessCronJob{
         return outputFile.toFile().getPath();
     }
 
+    /**
+     * 
+     * @param schedule
+     * @param url
+     * @param cleanReleaseBranch
+     * @param type
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
     public String processGatlingCronjob(String schedule, String url, String cleanReleaseBranch, String type) throws IOException, ParseException {
 
         InputStream inputStream = getClass().getResourceAsStream("/cronjob-gatling-master.yml");
@@ -197,6 +258,14 @@ public class ProcessCronJob{
         return outputFile.toFile().getPath();
     }
 
+    /**
+     * 
+     * @param url
+     * @param cleanReleaseBranch
+     * @param type
+     * @return
+     * @throws IOException
+     */
     public String processGatlingEventListener(String url, String cleanReleaseBranch, String type) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/eventlistener-gatling-master.yml");
       
@@ -218,6 +287,14 @@ public class ProcessCronJob{
         return outputFile.toFile().getPath();
     }
 
+    /**
+     * 
+     * @param url
+     * @param cleanReleaseBranch
+     * @param type
+     * @return
+     * @throws IOException
+     */
     public String processGatlingTriggerTemplate(String url, String cleanReleaseBranch, String type) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-template-gatling-master.yml");
       
@@ -238,6 +315,16 @@ public class ProcessCronJob{
         return outputFile.toFile().getPath();
     }
 
+    /**
+     * 
+     * @param url
+     * @param releaseBranch
+     * @param type
+     * @param gatlingTestEmailList
+     * @param cleanReleaseBranch
+     * @return
+     * @throws IOException
+     */
     public String processGatlingTriggerBinding(String url, String releaseBranch, String type, String gatlingTestEmailList, String cleanReleaseBranch) throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/trigger-binding-gatling-master.yml");
       
