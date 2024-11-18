@@ -107,7 +107,7 @@ public class OpenshiftResource {
     @CheckedTemplate
     public static class Templates {
         public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
-        public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
+        //public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs, List<String> uniqueEnvs);
     }
 
@@ -169,6 +169,7 @@ public class OpenshiftResource {
         return Templates.cronJobData(cronJobs);
     }
 
+    /*
     @GET()
     @Path("/{namespace}/gatling")
     @Produces(MediaType.TEXT_HTML)
@@ -216,7 +217,7 @@ public class OpenshiftResource {
                 cronJobs.add(currentJob);
         }
         return Templates.gatlingCronJobData(cronJobs); //Add in the data 
-    }
+    } */
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
