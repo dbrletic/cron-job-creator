@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Stream;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -32,6 +34,11 @@ public class CleanUpBean {
     @ConfigProperty(name = "quarkus.openshift.mounts.pipeline-storage.path")
     String pipelineMountPath;
 
+    @Inject
+    @ConfigProperty(name = "selenium.age.threshold.days")
+    long AGE_THRESHOLD_DAYS; 
+    
+
     @Scheduled(every="30s")     
     void cleanUpZipsAndTxts() {
         String projectDir = System.getProperty("user.dir");
@@ -51,10 +58,16 @@ public class CleanUpBean {
         }
     }
 
-    @Scheduled(cron = "0 6 * * 1 ?", timeZone = "America/New_York") //Runs every morning at 6 am EDT 
+    @Scheduled(cron = "0 6 * * 1 ?", timeZone = "America/New_York") //Runs every monday  at 6 am EDT 
     void cleanUpOldPipelineRuns(){
+        // Get current date and time
+        LocalDateTime now = LocalDateTime.now();
+        // Define the desired format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm:HH:ss dd/MM/yyyy");
+        // Format the current date and time
+        String formattedDate = now.format(formatter);
         try {
-            System.out.println("Starting Cleanup of files older then 7 days.");
+            System.out.println("Starting Cleanup of files older then "+ AGE_THRESHOLD_DAYS + " days on " + formattedDate) ;
             cleanOldFilesAndFolders(Paths.get(pipelineMountPath));
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -69,7 +82,7 @@ public class CleanUpBean {
      * @throws IOException
      */
     private void cleanOldFilesAndFolders(Path parentFolder) throws IOException {
-        Instant cutoffTime = Instant.now().minus(7, ChronoUnit.DAYS);
+        Instant cutoffTime = Instant.now().minus(AGE_THRESHOLD_DAYS, ChronoUnit.DAYS);
 
         Files.walkFileTree(parentFolder, new SimpleFileVisitor<Path>() {
             @Override
@@ -97,5 +110,7 @@ public class CleanUpBean {
             }
         });
     }
+
+
 
 }

@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 public class PipelineResource {
     
     @Inject
-    @ConfigProperty(name = "ffe.selenium.pipeline.name")
+    @ConfigProperty(name = "selenium.pipeline.name")
     private String openshiftSeleniumPipelineName; //The name of the pipeline to kick off 
 
     @Inject
