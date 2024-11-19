@@ -34,13 +34,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @RegisterRestClient
@@ -58,6 +63,9 @@ public class PipelineResource {
     private final static String SELENIUM_GRID_BROWSER = "box";
 
     private Pattern patternEnv = Pattern.compile("test\\d+");
+
+    // Define a custom DateTimeFormatter for the format `%M-%H-%d-%m-%Y`
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm-HH-dd-MM-yyyy");
 
     @CheckedTemplate
     public static class Templates {
@@ -303,6 +311,10 @@ public class PipelineResource {
         for(String pipelineRunName: pipelineRunNames){
             //Finding which env the test was run from
             Matcher matcherEnv = patternEnv.matcher(pipelineRunName);
+            String currentEnv="";
+            if(matcherEnv.find()){ //This should always ben found but just making sure. 
+                currentEnv = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
+            }
             //System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
             ReportDataList currentReportDataList = new ReportDataList();
@@ -313,26 +325,35 @@ public class PipelineResource {
                 String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
                 //System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
                 HashMap<String, String> zipHtmlLog = findFiles(fullPath);
-                
-                currentReport.lastRunDate=createDateFromFolderName(indivialRun);
+                //Getting a decent format for the date
+                LocalDateTime dateTime = LocalDateTime.parse(indivialRun, formatter);
+                currentReport.lastRunDate=dateTime.toString();
                 currentReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
                 currentReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
                 currentReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
+                currentReport.env = currentEnv;
                 //Getting the Enviroment the code was run on
-                if(matcherEnv.find()){
-                    currentReport.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
-                }    
                 currentReportDataList.reportData.add(currentReport);
             }
-           
-            if(matcherEnv.find()){
-                currentReportDataList.env = pipelineRunName.substring(matcherEnv.start(), matcherEnv.end());
-            }
+            currentReportDataList.env = currentEnv;
+            currentReportDataList.reportData = sortReportsByDate(currentReportDataList.reportData);
             reportDataMasterList.add(currentReportDataList);
         }
         return reportDataMasterList;
     }
 
+    public static ArrayList<ReportData> sortReportsByDate(ArrayList<ReportData> jobRuns) {
+        return (ArrayList<ReportData>) jobRuns.stream()
+                .map(jobRun -> {
+                    // Convert the lastRunDate string to LocalDateTime
+                    LocalDateTime dateTime = LocalDateTime.parse(jobRun.getLastRunDate(), formatter);
+                    // Pair the LocalDateTime with the JobRun object
+                    return new AbstractMap.SimpleEntry<>(dateTime, jobRun);
+                })
+                .sorted(Map.Entry.comparingByKey()) // Sort by the LocalDateTime object
+                .map(Map.Entry::getValue) // Extract the sorted JobRun object
+                .collect(Collectors.toList());
+    }
     /**
      * Simple method that creates data to test the page without having to actually read a PVC
      * @return
