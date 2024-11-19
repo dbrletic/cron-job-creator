@@ -359,12 +359,12 @@ public class OpenshiftResource {
         String testName = testNamePodName[0];
         String podName = testNamePodName[1];
         String projectDir = System.getProperty("user.dir");
+        String runLogs;
 
         File fileLocationAndFolder = new File(projectDir + File.separator + testName + "-logs.txt");
         //Getting the runLogs for that Seleniun Build Step of of that test
-        String runLogs = openshiftClient.pods().inNamespace(namespace).withName(podName).inContainer(STEP_CONTAINER).getLog(true);
-        java.nio.file.Path fileLocation = Paths.get(projectDir, testName + "-logs.txt");
-        
+        runLogs = openshiftClient.pods().inNamespace(namespace).withName(podName).inContainer(STEP_CONTAINER).getLog(true);
+        java.nio.file.Path fileLocation = Paths.get(projectDir, testName + "-logs.txt");     
         try {
             Files.write(fileLocation, runLogs.getBytes());
         } catch (IOException e) {

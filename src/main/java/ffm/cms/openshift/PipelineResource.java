@@ -34,18 +34,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 @RegisterRestClient
@@ -63,9 +58,6 @@ public class PipelineResource {
     private final static String SELENIUM_GRID_BROWSER = "box";
 
     private Pattern patternEnv = Pattern.compile("test\\d+");
-
-    // Define a custom DateTimeFormatter for the format `%M-%H-%d-%m-%Y`
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm-HH-dd-MM-yyyy");
 
     @CheckedTemplate
     public static class Templates {
@@ -325,9 +317,8 @@ public class PipelineResource {
                 String urlPath = "/reports" + "/"  + type + "/" + pipelineRunName + "/" + indivialRun;
                 //System.out.println("Finding files in: " + pipelinePVCMountPath + "/"  + type + "/" + pipelineRunName + "/" + indivialRun);
                 HashMap<String, String> zipHtmlLog = findFiles(fullPath);
-                //Getting a decent format for the date
-                LocalDateTime dateTime = LocalDateTime.parse(indivialRun, formatter);
-                currentReport.lastRunDate=dateTime.toString();
+                //Getting a decent format for the date to display
+                currentReport.lastRunDate=createDateFromFolderName(indivialRun);
                 currentReport.reportUrl=urlPath + "/" + "html/" + zipHtmlLog.get("html");
                 currentReport.zipUrl=urlPath + "/" + "zip/" + zipHtmlLog.get("zip");
                 currentReport.logUrl=urlPath + "/" + "log/" + zipHtmlLog.get("log");
@@ -336,23 +327,10 @@ public class PipelineResource {
                 currentReportDataList.reportData.add(currentReport);
             }
             currentReportDataList.env = currentEnv;
-            currentReportDataList.reportData = sortReportsByDate(currentReportDataList.reportData);
+            //currentReportDataList.reportData = sortReportsByDate(currentReportDataList.reportData);
             reportDataMasterList.add(currentReportDataList);
         }
         return reportDataMasterList;
-    }
-
-    public static ArrayList<ReportData> sortReportsByDate(ArrayList<ReportData> jobRuns) {
-        return (ArrayList<ReportData>) jobRuns.stream()
-                .map(jobRun -> {
-                    // Convert the lastRunDate string to LocalDateTime
-                    LocalDateTime dateTime = LocalDateTime.parse(jobRun.getLastRunDate(), formatter);
-                    // Pair the LocalDateTime with the JobRun object
-                    return new AbstractMap.SimpleEntry<>(dateTime, jobRun);
-                })
-                .sorted(Map.Entry.comparingByKey()) // Sort by the LocalDateTime object
-                .map(Map.Entry::getValue) // Extract the sorted JobRun object
-                .collect(Collectors.toList());
     }
     /**
      * Simple method that creates data to test the page without having to actually read a PVC
