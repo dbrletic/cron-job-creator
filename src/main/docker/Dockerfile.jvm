@@ -31,6 +31,8 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
     && microdnf update \
     # && microdnf install -y tar \ Add this is you need to rysnc into and out of the pod
+    && microdnf install -y tar \
+    && microdnf install -y vim-minimal \
     && microdnf clean all \
     && mkdir /deployments \
     && chown 1001 /deployments \

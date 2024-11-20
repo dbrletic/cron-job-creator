@@ -90,10 +90,10 @@ public class ForumsResource {
     @Blocking
     @Consumes(MediaType.APPLICATION_JSON) // Expecting JSON data
     public Response submitForm(Map<String, String> formData) {
-        String projectDir = System.getProperty("user.dir");
+        //String projectDir = System.getProperty("user.dir");
         //File seleniumTagFilePath = new File(pipelinePVCMountPath + File.separator + seleniumTagsFileName);
-        //String seleniumTagPath = pipelinePVCMountPath + File.separator + seleniumTagsFileName;
-        String seleniumTagPath = projectDir + File.separator + seleniumTagsFileName;
+        String seleniumTagPath = pipelinePVCMountPath + File.separator + seleniumTagsFileName;
+        //String seleniumTagPath = projectDir + File.separator + seleniumTagsFileName;
         System.out.println("Writing to file: " + seleniumTagPath);
         
         for(Map.Entry<String, String> entry : formData.entrySet()) {
