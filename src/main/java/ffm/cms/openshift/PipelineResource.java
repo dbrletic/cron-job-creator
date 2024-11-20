@@ -18,7 +18,6 @@ import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRunBuilder;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -39,6 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,13 +47,14 @@ import java.util.regex.Pattern;
 @Path("/pipeline")
 public class PipelineResource {
     
-    @Inject
     @ConfigProperty(name = "selenium.pipeline.name")
     private String openshiftSeleniumPipelineName; //The name of the pipeline to kick off 
 
-    @Inject
     @ConfigProperty(name = "quarkus.openshift.mounts.pipeline-storage.path")
     private String pipelinePVCMountPath;
+
+    @ConfigProperty(name = "selenium.tags.file.name")
+    private String seleniumTagsFileName;
 
     private final static String SELENIUM_GRID_BROWSER = "box";
 
@@ -102,15 +103,16 @@ public class PipelineResource {
         Matcher matcherEnv;
         List <String> uniqueEnvs = new ArrayList<>();
         HashSet<String> hashUniqueEnvs = new HashSet<>();
+        TreeMap<String,String> seleniumTags = readSeleniumTagFile();
         //Goes pipelinePVCMountPath/<cj or users>/indivialRunsName/date/*.tar.gz, *.html, and *.log
         if(type.equals("cj") || type.equals("users")){
-            reportList = createCronJobReportFromFolder(type);
+            reportList = createCronJobReportFromFolder(type,seleniumTags);
             runNames = listSubFolders(pipelinePVCMountPath + File.separator+ type);
 
         }else{
             //Basically just listed both cj and users reports
-            reportList = createCronJobReportFromFolder("cj");
-            reportList.addAll(createCronJobReportFromFolder("users"));
+            reportList = createCronJobReportFromFolder("cj", seleniumTags);
+            reportList.addAll(createCronJobReportFromFolder("users", seleniumTags));
             runNames = listSubFolders(pipelinePVCMountPath + File.separator + "cj");
             runNames.addAll(listSubFolders(pipelinePVCMountPath + File.separator + "users"));
         }
@@ -297,7 +299,7 @@ public class PipelineResource {
      * @param type Which folder type to go into, either cj or users
      * @return
      */
-    private List<ReportDataList> createCronJobReportFromFolder(String type){
+    private List<ReportDataList> createCronJobReportFromFolder(String type, TreeMap<String, String> seleniumTags){
         List<String> pipelineRunNames = listSubFolders(pipelinePVCMountPath + "/" + type);
         List<ReportDataList> reportDataMasterList = new ArrayList<>();
         for(String pipelineRunName: pipelineRunNames){
@@ -310,6 +312,14 @@ public class PipelineResource {
             //System.out.println("Searching for subfolders of: " + pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);
             List<String> indivialRuns = listSubFolders(pipelinePVCMountPath + "/" + type + "/" + pipelineRunName);//Each pipelineRunName is a folder with the date being the subfolder that contains all the information. 
             ReportDataList currentReportDataList = new ReportDataList();
+            //Setting the Display name, if not found defaults to the pipeline run name
+            if(seleniumTags.containsKey(pipelineRunName)){
+                if(seleniumTags.get(pipelineRunName).isBlank())
+                    currentReportDataList.displayName = pipelineRunName; //There is a scenario where the key  is in place but the value is blank
+                else
+                    currentReportDataList.displayName = seleniumTags.get(pipelineRunName);
+            }else
+                currentReportDataList.displayName = pipelineRunName;
             currentReportDataList.runName=pipelineRunName;
             for(String indivialRun:indivialRuns ){
                 ReportData currentReport = new ReportData();
@@ -331,6 +341,34 @@ public class PipelineResource {
             reportDataMasterList.add(currentReportDataList);
         }
         return reportDataMasterList;
+    }
+
+    private TreeMap<String, String> readSeleniumTagFile(){
+        TreeMap<String, String> seleniumTagPairs =  new TreeMap<>();
+
+        String seleniumTagPath = pipelinePVCMountPath + File.separator + seleniumTagsFileName;
+        //String seleniumTagPath = projectDir + File.separator + seleniumTagsFileName;
+        // Path to the file
+        java.nio.file.Path filePath = java.nio.file.Path.of(seleniumTagPath);
+
+         // Read all lines from the file
+        try{
+            List<String> lines = Files.readAllLines(filePath);
+            // Process each line to extract key-value pairs
+            for (String line : lines) {
+                if (line.contains(":")) {
+                    String[] parts = line.split(":", 2);
+                    String key = parts[0].trim();
+                    String value = parts[1];
+                    seleniumTagPairs.put(key, value);
+                }
+            }
+            return seleniumTagPairs;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Should only return a blank map if gotten here
+        return seleniumTagPairs;
     }
     /**
      * Simple method that creates data to test the page without having to actually read a PVC
