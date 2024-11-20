@@ -376,6 +376,7 @@ public class OpenshiftResource {
                         .build();       
     }  
 
+    
 
   
     //TODO Move the following methods to their own helper class to clean up code

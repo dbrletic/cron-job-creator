@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selenium Tags</title>
+</head>
+<body>
+   {#include nav.html} {/include}
+  <div class="container mt-5">
+    <h2 class="text-center">And and Remove Selenium Key/Value Pairs</h2>
+    <BR>
+    <form id="keyValueForm">
+      <div id="keyValuePairs" class="mb-3">
+        <!-- Key-value pairs will be dynamically added here -->
+        {#for seleniumTag in seleniumTags}
+            <div class="mb-3" id="pair-${seleniumTag_count}">
+                <div class="input-group">
+                    <input type="text" class="form-control bg-light" name="key-{seleniumTag_count}" value="{seleniumTag.key}" readonly="readonly" required >
+                    <input type="text" class="form-control" name="value-{seleniumTag_count}" value="{seleniumTag.value}" required>
+                    <button type="button" class="btn btn-danger" onclick="removePair({seleniumTag_count})">Remove</button>
+                </div>
+            </div>
+        {/for}
+      </div>
+      <button type="button" class="btn btn-primary" id="addPairBtn">Add Key/Value Pair</button>
+      <br><br>
+      <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+    <div style="color:#43916B" id="successMessage" class="d-none">
+        <BR> 
+        <p>Successfully updated Selenium Tags. Reload page to verify updates.</p>
+    </div>
+    <div style="color:#CF4B2F" id="errorMessage"></div>
+  </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+   <script src="/js/seleniumTags.js"></script>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {#include progress-bar.html} {/include} 
+</body>
+</html>
