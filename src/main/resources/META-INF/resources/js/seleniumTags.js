@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Add initial key-value pair on load
-    addKeyValuePair();
+    //addKeyValuePair();
 
     // Event listener to add a new pair when button is clicked
     document.getElementById('addPairBtn').addEventListener('click', addKeyValuePair);
