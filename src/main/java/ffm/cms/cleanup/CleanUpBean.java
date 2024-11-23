@@ -70,7 +70,6 @@ public class CleanUpBean {
             System.out.println("Starting Cleanup of files older then "+ AGE_THRESHOLD_DAYS + " days on " + formattedDate) ;
             cleanOldFilesAndFolders(Paths.get(pipelineMountPath));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

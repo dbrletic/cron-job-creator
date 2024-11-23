@@ -27,7 +27,7 @@
         {#for cronJob in cronJobs}
             {#if cronJob.env == env}               
                 <tr>
-                    <td class="cronjobName">{cronJob.name}</td>
+                    <td class="cronjobName">{cronJob.displayName}</td>
                     <td bgcolor="{cronJob.color}">{cronJob.result}</td>
                     <td>{cronJob.msg}</td>
                     <td class="reveal-cell">{cronJob.failedTests}</td>

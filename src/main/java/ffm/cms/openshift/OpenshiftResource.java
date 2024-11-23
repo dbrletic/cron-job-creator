@@ -28,6 +28,7 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.triggers.v1beta1.Param;
 import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestPath;
 import java.io.File;
@@ -47,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,6 +66,12 @@ public class OpenshiftResource {
     @Inject //Generic OpenShift client
     private OpenShiftClient openshiftClient; //Make sure to add a ServiceAccount to the deployment that has access to the namespace that has the pipeline runs.  This will automatticaly add in the kubeconfig file that gives the client the needed permissions. 
     
+    @ConfigProperty(name = "quarkus.openshift.mounts.pipeline-storage.path")
+    private String pipelinePVCMountPath;
+
+    @ConfigProperty(name = "selenium.tags.file.name")
+    private String seleniumTagsFileName;
+
     //All the private Static String
     final private static String CRIO_MSG = "Unable to get logs. Check email for status of run.";
     final private static String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
@@ -246,6 +254,7 @@ public class OpenshiftResource {
     @Blocking //Due to the OpenShiftClient need to make this blocking
     public TemplateInstance getCronJobDashBoard(@RestPath String namespace){
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
+        TreeMap<String,String> seleniumTags = readSeleniumTagFile();
         Set <String> uniqueEnvsList = new HashSet<>();
         List<CronJobDashboardData> dashboardData = new ArrayList<>();
         int cronjobCounter = 0; //Count how many CronJob pipelines were displayeds
@@ -334,12 +343,17 @@ public class OpenshiftResource {
            
             //Setting the color and message
             data = getColorStatusAndMsg(data, runLogs, namespace, runPod); 
+           //Setting the Display name, if not found defaults to the pipeline run name
+           if(seleniumTags.containsKey(data.name)){
+            if(seleniumTags.get(data.name).isBlank())
+                data.displayName = data.name; //There is a scenario where the key  is in place but the value is blank
+            else
+                data.displayName = seleniumTags.get(data.name);
+            }else
+                data.displayName = data.name;
+            
             cronjobCounter++;
             dashboardData.add(data);
-
-            //TODO Create a ArrayList of all the unique env, pass that to the Template instance, and use that to only have to create one
-            //Like it will be a for loop of unique array list, but then under it will if env == headername write out
-            //Would take out extra HTML loops. Need to Dynamically write the DataTable.js javascript
         }
         List<String> uniqueEnvs = new ArrayList<>(uniqueEnvsList);
         Collections.sort(dashboardData, nameSorter); //Sorting everything by name 
@@ -400,6 +414,33 @@ public class OpenshiftResource {
         return bindingParamsToBranch;
     }
    
+    private TreeMap<String, String> readSeleniumTagFile(){
+        TreeMap<String, String> seleniumTagPairs =  new TreeMap<>();
+
+        String seleniumTagPath = pipelinePVCMountPath + File.separator + seleniumTagsFileName;
+        //String seleniumTagPath = projectDir + File.separator + seleniumTagsFileName;
+        // Path to the file
+        java.nio.file.Path filePath = java.nio.file.Path.of(seleniumTagPath);
+
+         // Read all lines from the file
+        try{
+            List<String> lines = Files.readAllLines(filePath);
+            // Process each line to extract key-value pairs
+            for (String line : lines) {
+                if (line.contains(":")) {
+                    String[] parts = line.split(":", 2);
+                    String key = parts[0].trim();
+                    String value = parts[1];
+                    seleniumTagPairs.put(key, value);
+                }
+            }
+            return seleniumTagPairs;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Should only return a blank map if gotten here
+        return seleniumTagPairs;
+    }
     /**
      * Figures out what to color the Pipeline Run and what message to display
      * @param data 

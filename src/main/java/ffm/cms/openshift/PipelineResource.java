@@ -419,7 +419,6 @@ public class PipelineResource {
 
         //type shold be cj, users,all. Defaults to all if a unknown type is added
         Instant start = Instant.now(); //Curious to see how long this takes, will take some time
-        //TODO Change this instead of a HashSet of data so unique name for the same number of tests
         List<CronJobReports> reportList = new ArrayList<>();
         List<String> runNames;
         Matcher matcherEnv;
