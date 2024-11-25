@@ -30,6 +30,7 @@ import io.fabric8.tekton.triggers.v1beta1.TriggerBinding;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestPath;
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +73,8 @@ public class OpenshiftResource {
     @ConfigProperty(name = "selenium.tags.file.name")
     private String seleniumTagsFileName;
 
+    private static final Logger LOGGER = Logger.getLogger(OpenshiftResource.class);
+    
     //All the private Static String
     final private static String CRIO_MSG = "Unable to get logs. Check email for status of run.";
     final private static String CRITICAL_FAILURE = "Critical Failure. Selenium test did not run or had exception.";
@@ -173,7 +176,7 @@ public class OpenshiftResource {
             cronJobs.add(currentJob);
         }
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
-        System.out.println("getCurrentCronJobs took " + elapsedMs + " milliseconds to complete");
+        LOGGER.info("getCurrentCronJobs took " + elapsedMs + " milliseconds to complete");
         return Templates.cronJobData(cronJobs);
     }
 
@@ -232,7 +235,7 @@ public class OpenshiftResource {
     @Path("/{namespace}/verify/{cronJobName}")
     public String getCronJobSchedule(@RestPath String namespace, @RestPath String cronJobName){
         
-        System.out.println("Verify Schedule for Namepace: " + namespace  +" Cronjob: " + cronJobName);
+        LOGGER.info("Verify Schedule for Namepace: " + namespace  +" Cronjob: " + cronJobName);
                 
         //Checking to see if the given CronJob is in the system. Catching it nicely since the client will just throw a NullPointerException
         try{
@@ -273,7 +276,7 @@ public class OpenshiftResource {
         //Getting all the pipelineRuns from the PipeLineRunList
         List <PipelineRun> pipleRunList = list.getItems();
 
-        System.out.println("Getting " + pipleRunList.size() + " pipeline runs and data on OpenShift for namespace: " + namespace);
+        LOGGER.info("Getting " + pipleRunList.size() + " pipeline runs and data on OpenShift for namespace: " + namespace);
         //Mapping the pod a given TaskRun was exeucted on 
         pipelineRunToPod = mapPodToRun(taskRuns);
     
@@ -286,7 +289,7 @@ public class OpenshiftResource {
                
             runPod = pipelineRunToPod.get(pipleLineRun.getMetadata().getName());
             if (runPod == null){
-                System.out.println(pipleLineRun.getMetadata().getName() + " was not found."); 
+                LOGGER.info(pipleLineRun.getMetadata().getName() + " was not found."); 
                 continue; 
             }
                 
@@ -298,7 +301,7 @@ public class OpenshiftResource {
             try{ //If a test gets cancelled the pod instantly goes away and no logs causing a null pointer error. 
                 runLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_CONTAINER).getLog(true);
             } catch (KubernetesClientException e){
-                System.out.println("Could not get logs for pod: " + runPod + " for cronjob: "+ pipleLineRun.getMetadata().getName());
+                LOGGER.warn("Could not get logs for pod: " + runPod + " for cronjob: "+ pipleLineRun.getMetadata().getName());
                 //Catching the Exception but still want to display it
                 runLogs="";
             }
@@ -361,7 +364,7 @@ public class OpenshiftResource {
         Collections.sort(uniqueEnvs); 
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
-        System.out.println(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
+        LOGGER.info(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
         
         return  Templates.cronJobDashboard(dashboardData, uniqueEnvs);
     }

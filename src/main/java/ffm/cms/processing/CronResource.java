@@ -18,6 +18,8 @@ import ffm.cms.model.ScheduleJob;
 import ffm.cms.model.UpdateCronJobSchedule;
 
 import org.apache.commons.io.FileUtils;
+import org.jboss.logging.Logger;
+
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
@@ -45,12 +47,14 @@ public class CronResource {
     @Inject
     private ProcessCronJob cronjobHandler;
 
+    private static final Logger LOGGER = Logger.getLogger(CronResource.class);
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
     public Response createFiles(@Valid FFEData data) throws IOException, ParseException{
-        System.out.println("Starting up process for " + data.getGroups() + "-" + data.getUrl()) ;
-        System.out.println(data.toString());
+        LOGGER.info("Starting up process for " + data.getGroups() + "-" + data.getUrl()) ;
+        LOGGER.debug(data.toString());
         if(data.getReleaseBranch().length() + data.getGroups().length() + data.getUrl().length() > 52){
             //Since ReleaseBranch, Groups, and Url are used to create names of the jobs there is as long the combo can be. 
             return Response.status(400, "Release Branch, Groups, and Url are too long.").build();
@@ -77,15 +81,15 @@ public class CronResource {
             newFilesLocation.add(cronjobHandler.processTriggerBinding(data.getGroups(), data.getUrl(), data.getReleaseBranch(), data.getUserNameFFM(), data.getUserPassword(), data.getBrowser(), data.getSeleniumTestEmailList(), cleanReleaseBranch,cleanGroup));
             newFilesLocation.add(cronjobHandler.processTriggerTemplate(data.getGroups(), data.getUrl(), cleanReleaseBranch,cleanGroup));
         } catch (IOException e){
-            System.out.println(e.getMessage());
-            System.out.println(e.getStackTrace());
+            LOGGER.error(e.getMessage());
+            LOGGER.error(e.getStackTrace());
         }
 
         //Zipping up files
         File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
         
-        System.out.println("Add to response: " + zipFileLocation);
-        System.out.println("Zip is made: " + downloadZip.isFile());
+        LOGGER.info("Add to response: " + zipFileLocation);
+        LOGGER.info("Zip is made: " + downloadZip.isFile());
 
         return Response
             .ok(FileUtils.readFileToByteArray(downloadZip))
@@ -99,8 +103,8 @@ public class CronResource {
     @Blocking
     @Path("gatling")
     public Response createGatlingFiles(FFEGatlingData data) throws IOException, ParseException{
-        System.out.println("Starting up Gatling process for " + data.getUrl() + "-" + data.getReleaseBranch()) ;
-        System.out.println(data.toString());
+        LOGGER.info("Starting up Gatling process for " + data.getUrl() + "-" + data.getReleaseBranch()) ;
+        LOGGER.debug(data.toString());
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
         String zipFileLocation = projectDir + File.separator + "gatling-" + data.getUrl() + ".zip";
@@ -121,15 +125,15 @@ public class CronResource {
             newFilesLocation.add(cronjobHandler.processGatlingTriggerBinding(data.getUrl(), data.getReleaseBranch(), data.getType(), data.getGatlingTestEmailList(), cleanReleaseBranch));
             newFilesLocation.add(cronjobHandler.processGatlingTriggerTemplate(data.getUrl(), cleanReleaseBranch, data.getType()));
         } catch (IOException e){
-            System.out.println(e.getMessage());
-            System.out.println(e.getStackTrace());
+            LOGGER.error(e.getMessage());
+            LOGGER.error(e.getStackTrace());
         }
 
          //Zipping up files
         File downloadZip = zipUpFiles(newFilesLocation, zipFileLocation);
        
-        System.out.println("Add to response: " + zipFileLocation);
-        System.out.println("Zip is made: " + downloadZip.isFile());
+        LOGGER.info("Add to response: " + zipFileLocation);
+        LOGGER.info("Zip is made: " + downloadZip.isFile());
 
         return Response
             .ok(FileUtils.readFileToByteArray(downloadZip))
@@ -158,32 +162,32 @@ public class CronResource {
                 currentCron = cronParser.parse(entry.getValue());
                 currentCron.validate();//This is dumb, why does it not just say true or false? At least it gives a reason the cron expression is invalid
             } catch(java.lang.IllegalArgumentException  e){
-                System.out.println(entry.getKey() +":" + e.getMessage());
+                LOGGER.info(entry.getKey() +":" + e.getMessage());
                 invalidCronMsg = invalidCronMsg + "\n" + entry.getKey() + ": " + e.getMessage();
             }
         }
 
         if(!invalidCronMsg.isBlank()){
-            System.out.println(invalidCronMsg);
+            LOGGER.info(invalidCronMsg);
             return Response.ok().status(400, invalidCronMsg).entity(invalidCronMsg).header("errorMsg", invalidCronMsg).build();       
         } 
             
 
         for(Map.Entry<String, String> entry : cronJobsToUpdate.entrySet()){
-            System.out.println("Cronjob: " + entry.getKey() + " New Schedule: " + entry.getValue()); 
+            LOGGER.info("Cronjob: " + entry.getKey() + " New Schedule: " + entry.getValue()); 
             try{
                 newFilesLocation.add(cronjobHandler.updateCronJOb(entry.getKey(),  entry.getValue()));
             } catch (IOException | ParseException e){
-                System.out.println(e.getMessage());
-                System.out.println(e.getStackTrace());
+                LOGGER.error(e.getMessage());
+                LOGGER.error(e.getStackTrace());
             }
             
             
         }
       
         File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
-        System.out.println("Add to response: " + zipFileLocation);
-        System.out.println("Zip is made: " + downloadZip.isFile());
+        LOGGER.info("Add to response: " + zipFileLocation);
+        LOGGER.info("Zip is made: " + downloadZip.isFile());
 
         try {
             return Response
@@ -207,20 +211,20 @@ public class CronResource {
         String updates="";
         for(ScheduleJob job: jobs){
             
-            System.out.println("Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule());
+            LOGGER.info("Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule());
             updates = updates + "\n" + "Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule();
             try{
                 newFilesLocation.add(cronjobHandler.updateCronJOb(job.getJobName(),  job.getSchedule()));
             } catch (IOException | ParseException e){
                 
-                System.out.println(e.getMessage());
-                System.out.println(e.getStackTrace());
+                LOGGER.error(e.getMessage());
+                LOGGER.error(e.getStackTrace());
                 return Response.serverError().status(500).entity("Parsing Error of files").build();
             }
         }
         File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
-        System.out.println("Add to response: " + zipFileLocation);
-        System.out.println("Zip is made: " + downloadZip.isFile());
+        LOGGER.info("Add to response: " + zipFileLocation);
+        LOGGER.info("Zip is made: " + downloadZip.isFile());
 
         try {
             return Response
@@ -243,12 +247,12 @@ public class CronResource {
         FileOutputStream fos;
         ZipOutputStream zipOut;
         try {
-            System.out.println("Creating zip file: " + zipFileLocation);
+            LOGGER.info("Creating zip file: " + zipFileLocation);
             fos = new FileOutputStream(zipFileLocation);
             zipOut = new ZipOutputStream(fos);
 
             for (String srcFile : newFilesLocation) {
-                System.out.println("Zipping file: " + srcFile);
+                LOGGER.info("Zipping file: " + srcFile);
                 File fileToZip = new File(srcFile);
                 FileInputStream fis = new FileInputStream(fileToZip);
                 ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
@@ -272,7 +276,7 @@ public class CronResource {
         }
 
         // Remove the files in the zip from local file system
-        System.out.println("Removing files that have been zipped");
+        LOGGER.info("Removing files that have been zipped");
         for(String scrFile: newFilesLocation){
             File fileToDelete = FileUtils.getFile(scrFile);
             FileUtils.deleteQuietly(fileToDelete);

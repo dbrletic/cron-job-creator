@@ -15,6 +15,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
 
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -38,6 +39,7 @@ public class CleanUpBean {
     @ConfigProperty(name = "selenium.age.threshold.days")
     long AGE_THRESHOLD_DAYS; 
     
+    private static final Logger LOGGER = Logger.getLogger(CleanUpBean.class);
 
     @Scheduled(every="30s")     
     void cleanUpZipsAndTxts() {
@@ -49,9 +51,9 @@ public class CleanUpBean {
             for (File file : files) {
                 if (file.getName().endsWith(".zip") || file.getName().endsWith(".txt")) {
                     if (file.delete()) {
-                        System.out.println(file.getName() + " is deleted!");
+                        LOGGER.info(file.getName() + " is deleted!");
                     } else {
-                        System.out.println("Failed to delete " + file.getName());
+                        LOGGER.info("Failed to delete " + file.getName());
                     }
                 }
             }
@@ -67,10 +69,10 @@ public class CleanUpBean {
         // Format the current date and time
         String formattedDate = now.format(formatter);
         try {
-            System.out.println("Starting Cleanup of files older then "+ AGE_THRESHOLD_DAYS + " days on " + formattedDate) ;
+            LOGGER.info("Starting Cleanup of files older then "+ AGE_THRESHOLD_DAYS + " days on " + formattedDate) ;
             cleanOldFilesAndFolders(Paths.get(pipelineMountPath));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
         }
     }
 
@@ -87,7 +89,7 @@ public class CleanUpBean {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 if (attrs.lastModifiedTime().toInstant().isBefore(cutoffTime)) {
-                    System.out.println("Deleting file: " +  file.toAbsolutePath());
+                   LOGGER.info("Deleting file: " +  file.toAbsolutePath());
                     Files.delete(file); // Delete the file
                 }
                 return FileVisitResult.CONTINUE;
@@ -96,7 +98,7 @@ public class CleanUpBean {
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 if (isEmptyDirectory(dir)) {
-                    System.out.println("Deleting directory: " + dir);
+                    LOGGER.info("Deleting directory: " + dir);
                     Files.delete(dir); // Delete the directory if empty
                 }
                 return FileVisitResult.CONTINUE;

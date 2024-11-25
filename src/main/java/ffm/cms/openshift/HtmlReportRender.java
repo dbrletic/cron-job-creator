@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestPath;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,6 +30,7 @@ public class HtmlReportRender {
     @ConfigProperty(name = "quarkus.openshift.mounts.pipeline-storage.path")
     private String pipelinePVCMountPath;
     
+    private static final Logger LOGGER = Logger.getLogger(HtmlReportRender.class);
      /**
      * Find the given HTML file or jpeg file on the PVC Mount
      * What happens is that the HTML file is loaded first and then reaches out for the associated jpegs to complete the report
@@ -82,6 +84,7 @@ public class HtmlReportRender {
                                .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
                                .build();
             } catch (IOException e) {
+                LOGGER.error(e.getMessage());
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                                .entity("File read error").build();
             }

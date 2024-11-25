@@ -2,6 +2,7 @@ package ffm.cms.openshift;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestPath;
 
 import ffm.cms.model.FFEStartPipeline;
@@ -57,8 +58,9 @@ public class PipelineResource {
     private String seleniumTagsFileName;
 
     private final static String SELENIUM_GRID_BROWSER = "box";
-
     private Pattern patternEnv = Pattern.compile("test\\d+");
+
+    private static final Logger LOGGER = Logger.getLogger(PipelineResource.class);
 
     @CheckedTemplate
     public static class Templates {
@@ -80,7 +82,7 @@ public class PipelineResource {
         TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
         //PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).create(createPipelineRun(data,namespace)); 
         PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).resource(createPipelineRun(data,namespace)).create();
-        System.out.println("Kicking off new pipeline " + createdPipelineRun.getMetadata().getName() + " in namespace " + namespace  + "based upon " + openshiftSeleniumPipelineName);
+        LOGGER.info("Kicking off new pipeline " + createdPipelineRun.getMetadata().getName() + " in namespace " + namespace  + "based upon " + openshiftSeleniumPipelineName);
         return createdPipelineRun.getMetadata().getName();
     }
 

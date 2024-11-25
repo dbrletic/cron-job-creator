@@ -10,6 +10,7 @@ import java.util.TreeMap;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.logging.Logger;
 
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -39,6 +40,7 @@ public class ForumsResource {
     @ConfigProperty(name = "selenium.tags.file.name")
     private String seleniumTagsFileName;
 
+    private static final Logger LOGGER = Logger.getLogger(ForumsResource.class);
 
     @CheckedTemplate
     public static class Templates {
@@ -94,10 +96,10 @@ public class ForumsResource {
         //File seleniumTagFilePath = new File(pipelinePVCMountPath + File.separator + seleniumTagsFileName);
         String seleniumTagPath = pipelinePVCMountPath + File.separator + seleniumTagsFileName;
         //String seleniumTagPath = projectDir + File.separator + seleniumTagsFileName;
-        System.out.println("Writing to file: " + seleniumTagPath);
+        LOGGER.info("Writing to file: " + seleniumTagPath);
         
         for(Map.Entry<String, String> entry : formData.entrySet()) {
-            System.out.println("Key: " + entry.getKey() + " - Value: " + entry.getValue());
+            LOGGER.info("Key: " + entry.getKey() + " - Value: " + entry.getValue());
         }    
         try (FileWriter writer = new FileWriter(seleniumTagPath, false)) {
             for (Map.Entry<String, String> entry : formData.entrySet()) {
@@ -106,7 +108,7 @@ public class ForumsResource {
             writer.close();
             return Response.ok("Data saved successfully!").build();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
             return Response.status(500).entity("Error saving data").build();
         }
     }
@@ -133,7 +135,7 @@ public class ForumsResource {
             }
             return seleniumTagPairs;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
         }
         //Should only return a blank map if gotten here
         return seleniumTagPairs;
