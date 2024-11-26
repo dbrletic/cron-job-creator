@@ -117,7 +117,7 @@ public class OpenshiftResource {
 
     @CheckedTemplate
     public static class Templates {
-        public static native TemplateInstance cronJobData(List<CronJobData> cronJobs);
+        public static native TemplateInstance cronJobData(List<CronJobData> cronJobs, List<String> uniqueEnvs);
         //public static native TemplateInstance gatlingCronJobData(List<CronJobData> cronJobs);
         public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs, List<String> uniqueEnvs);
     }
@@ -142,6 +142,7 @@ public class OpenshiftResource {
         
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
+        Set <String> uniqueEnvsList = new HashSet<>();
 
         //Getting all of the DisplayName Tags
         TreeMap<String,String> seleniumTags = readSeleniumTagFile();
@@ -175,6 +176,7 @@ public class OpenshiftResource {
            Matcher matcherEnv = patternEnv.matcher(currentJob.name);
            if(matcherEnv.find()){
                 currentJob.env = currentJob.name.substring(matcherEnv.start(), matcherEnv.end());
+                uniqueEnvsList.add(currentJob.env); //Getting only the Enviroment Names that I need once
            }
            //Getting the DisplayName
            if(seleniumTags.containsKey(currentJob.name)){
@@ -187,9 +189,10 @@ public class OpenshiftResource {
 
             cronJobs.add(currentJob);
         }
+        List<String> uniqueEnvs = new ArrayList<>(uniqueEnvsList);
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         LOGGER.info("getCurrentCronJobs took " + elapsedMs + " milliseconds to complete");
-        return Templates.cronJobData(cronJobs);
+        return Templates.cronJobData(cronJobs,uniqueEnvs);
     }
 
     /*
