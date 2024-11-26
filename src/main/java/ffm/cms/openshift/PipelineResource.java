@@ -159,7 +159,7 @@ public class PipelineResource {
             }
         }
         catch (IOException e){
-            e.printStackTrace();
+            LOGGER.error(e);
         }
         return folderNames;
     }
@@ -210,7 +210,7 @@ public class PipelineResource {
             }
         }
         catch (IOException e){
-            e.printStackTrace();
+            LOGGER.error(e);
         }
         return result;
     }
@@ -367,7 +367,7 @@ public class PipelineResource {
             }
             return seleniumTagPairs;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
         }
         //Should only return a blank map if gotten here
         return seleniumTagPairs;

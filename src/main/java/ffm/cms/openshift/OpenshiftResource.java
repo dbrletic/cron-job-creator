@@ -364,8 +364,8 @@ public class OpenshiftResource {
         Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
         Collections.sort(uniqueEnvs); 
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
-        LOGGER.info("getCronJobDashBoard took " + elapsedMs +  "milliseconds to complete");
-        LOGGER.info(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
+        LOGGER.info("getCronJobDashBoard took " + elapsedMs +  " milliseconds to complete");
+        LOGGER.info("Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
         
         return  Templates.cronJobDashboard(dashboardData, uniqueEnvs);
     }
@@ -386,7 +386,7 @@ public class OpenshiftResource {
         try {
             Files.write(fileLocation, runLogs.getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
         }
         
         return Response.ok(fileLocationAndFolder, MediaType.APPLICATION_OCTET_STREAM)

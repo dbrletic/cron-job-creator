@@ -77,7 +77,7 @@ public class HtmlReportRender {
         String FILE_BASE_PATH = pipelinePVCMountPath + "/" + type + "/" + pipeLineRunName + "/" + indivialRun;
         java.nio.file.Path filePath = Paths.get(FILE_BASE_PATH, filename);
 
-        System.out.println("Looking for zip at " + filePath);
+        LOGGER.info("Looking for zip at " + filePath);
         if (Files.exists(filePath) && Files.isRegularFile(filePath)) {
             try {
                 return Response.ok(Files.readAllBytes(filePath), MediaType.APPLICATION_OCTET_STREAM)
@@ -109,7 +109,7 @@ public class HtmlReportRender {
         String FILE_BASE_PATH = pipelinePVCMountPath + "/" + type + "/" + pipeLineRunName + "/" + indivialRun;
         java.nio.file.Path filePath = Paths.get(FILE_BASE_PATH, filename);
 
-        System.out.println("Looking for log at " + filePath);
+        LOGGER.info("Looking for log at " + filePath);
         if (Files.exists(filePath) && Files.isRegularFile(filePath)) {
             try {
                 String logContent = Files.readString(filePath);
