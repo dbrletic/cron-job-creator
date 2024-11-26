@@ -1,8 +1,10 @@
 package ffm.cms.model;
 
 import io.quarkus.qute.TemplateData;
+import lombok.Data;
 
 @TemplateData
+@Data
 public class CronJobData {
 
     public String name;
@@ -12,15 +14,5 @@ public class CronJobData {
     public String branch;
     public String type;
     public String env;
-
-    public String toString() {
-        return "[" +
-                "name='" + name + '\'' +
-                ", schedule='" + schedule + '\'' +
-                ", cluster='" + cluster + '\'' +
-                ", humanReadableMsg='" + humanReadableMsg + '\'' +
-                ", branch='" + branch + '\'' +
-                ", type='" + type + '\'' +
-                ']';
-    }
+    public String displayName;
 }

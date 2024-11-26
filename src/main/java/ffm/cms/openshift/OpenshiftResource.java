@@ -143,6 +143,9 @@ public class OpenshiftResource {
         Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
         List<CronJobData> cronJobs = new ArrayList<>();
 
+        //Getting all of the DisplayName Tags
+        TreeMap<String,String> seleniumTags = readSeleniumTagFile();
+
         //Listing the current OpenShift user
 
         //So there is no duplicate code between Selenium and Gatling
@@ -173,6 +176,15 @@ public class OpenshiftResource {
            if(matcherEnv.find()){
                 currentJob.env = currentJob.name.substring(matcherEnv.start(), matcherEnv.end());
            }
+           //Getting the DisplayName
+           if(seleniumTags.containsKey(currentJob.name)){
+            if(seleniumTags.get(currentJob.name + "-cj").isBlank())
+            currentJob.displayName = currentJob.name; //There is a scenario where the key  is in place but the value is blank
+            else
+                currentJob.displayName = seleniumTags.get(currentJob.name);
+            }else
+                currentJob.displayName = currentJob.name;
+
             cronJobs.add(currentJob);
         }
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
