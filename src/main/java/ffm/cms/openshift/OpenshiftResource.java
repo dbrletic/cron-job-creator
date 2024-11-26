@@ -180,16 +180,17 @@ public class OpenshiftResource {
            }
            //Getting the DisplayName
            if(seleniumTags.containsKey(currentJob.name)){
-            if(seleniumTags.get(currentJob.name + "-cj").isBlank())
-            currentJob.displayName = currentJob.name; //There is a scenario where the key  is in place but the value is blank
+            if(seleniumTags.get(currentJob.name).isBlank())
+                currentJob.displayName = ""; //There is a scenario where the key  is in place but the value is blank
             else
                 currentJob.displayName = seleniumTags.get(currentJob.name);
             }else
-                currentJob.displayName = currentJob.name;
+                currentJob.displayName = "";
 
             cronJobs.add(currentJob);
         }
         List<String> uniqueEnvs = new ArrayList<>(uniqueEnvsList);
+        Collections.sort(uniqueEnvs); 
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         LOGGER.info("getCurrentCronJobs took " + elapsedMs + " milliseconds to complete");
         return Templates.cronJobData(cronJobs,uniqueEnvs);

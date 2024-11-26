@@ -135,7 +135,7 @@ public class PipelineResource {
         //Making sure the names are in order
         Collections.sort(uniqueEnvs);
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
-        System.out.printf("listSeleniumReports took %d milliseconds to complete \n", elapsedMs);
+        LOGGER.info("listSeleniumReports took " + elapsedMs + "milliseconds to complete");
         
         return Templates.cronJobReportHistory(reportList, uniqueEnvs);
     }
