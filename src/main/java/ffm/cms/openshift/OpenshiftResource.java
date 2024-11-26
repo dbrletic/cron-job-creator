@@ -347,11 +347,12 @@ public class OpenshiftResource {
             //Setting the color and message
             data = getColorStatusAndMsg(data, runLogs, namespace, runPod); 
            //Setting the Display name, if not found defaults to the pipeline run name
-           if(seleniumTags.containsKey(data.name)){
-            if(seleniumTags.get(data.name).isBlank())
+           //Adding on -cj to line up with other places
+           if(seleniumTags.containsKey(data.name + "-cj")){
+            if(seleniumTags.get(data.name + "-cj").isBlank())
                 data.displayName = data.name; //There is a scenario where the key  is in place but the value is blank
             else
-                data.displayName = seleniumTags.get(data.name);
+                data.displayName = seleniumTags.get(data.name + "-cj");
             }else
                 data.displayName = data.name;
             
@@ -363,7 +364,7 @@ public class OpenshiftResource {
         Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
         Collections.sort(uniqueEnvs); 
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
-        System.out.printf("getCronJobDashBoard took %d milliseconds to complete", elapsedMs);
+        LOGGER.info("getCronJobDashBoard took " + elapsedMs +  "milliseconds to complete");
         LOGGER.info(" Rendering Dashboard with " + cronjobCounter + " Selenium Test Run Results.");
         
         return  Templates.cronJobDashboard(dashboardData, uniqueEnvs);
