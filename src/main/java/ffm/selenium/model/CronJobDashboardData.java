@@ -1,4 +1,4 @@
-package ffm.cms.model;
+package ffm.selenium.model;
 
 import io.quarkus.qute.TemplateData;
 import lombok.Data;

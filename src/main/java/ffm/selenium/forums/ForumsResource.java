@@ -1,4 +1,4 @@
-package ffm.cms.forums;
+package ffm.selenium.forums;
 
 import java.io.File;
 import java.io.FileWriter;

@@ -1,13 +1,13 @@
-package ffm.cms.openshift;
+package ffm.selenium.openshift;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestPath;
 
-import ffm.cms.model.FFEStartPipeline;
-import ffm.cms.model.ReportData;
-import ffm.cms.model.ReportDataList;
+import ffm.selenium.model.FFEStartPipeline;
+import ffm.selenium.model.ReportData;
+import ffm.selenium.model.ReportDataList;
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.tekton.client.TektonClient;

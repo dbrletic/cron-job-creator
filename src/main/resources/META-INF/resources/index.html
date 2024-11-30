@@ -7,46 +7,49 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
-    <nav class= "navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="/images/selenium-logo.png" alt="Selenuium" width="30" height="30">
+  <nav class= "navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="/images/selenium-logo.png" alt="Selenuium" width="30" height="30">
+        </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Dashboards
             </a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/">Home</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Dashboards
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <li><a class="dropdown-item progress-bar-link" href="/openshift/tester-pipelines/dashboard">Selenium Cronjob Results Dashboard</a></li>
-                  <li><a class="dropdown-item progress-bar-link" href="/pipeline/tester-pipelines/listSeleniumReports/cj">Selenium Saved Results Dashboard</a></li>
-                  <li><a class="dropdown-item progress-bar-link" href="/openshift/tester-pipelines/cronjobs">Current Cronjob Schedule Dashboard</a></li>
-                </ul>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Create/Edit Cronjobs
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <li><a class="dropdown-item" href="/forums/create-job">Create Selenuium Cronjob</a></li>
-                  <li><a class="dropdown-item" href="/forums/update-job">Update Selenium Cronjob</a></li>
-                  <li><a class="dropdown-item" href="/forums/mass-update">Mass Update Selenium Cronjobs</a></li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/forums/start-job">Kick Off a Selenium Pipeline</a>
-              </li>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item progress-bar-link" href="/openshift/tester-pipelines/dashboard">Selenium Cronjob Results Dashboard</a></li>
+              <li><a class="dropdown-item progress-bar-link" href="/pipeline/tester-pipelines/listSeleniumReports/cj">Selenium Saved Results Dashboard</a></li>
+              <li><a class="dropdown-item progress-bar-link" href="/openshift/tester-pipelines/cronjobs">Current Cronjob Schedule Dashboard</a></li>
             </ul>
-          </div>
-        </div>
-      </nav>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Create/Edit Cronjobs
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/forums/create-job">Create Selenuium Cronjob</a></li>
+              <li><a class="dropdown-item" href="/forums/update-job">Update Selenium Cronjob</a></li>
+              <li><a class="dropdown-item" href="/forums/mass-update">Mass Update Selenium Cronjobs</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/forums/selenium-cj-tags">Add/Edit Selenium Tags</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/forums/start-pipeline">Kick Off a Selenium Pipeline</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
       <BR>
       <center><h2>FFM Selenium Cronjob Reports and Utilities</h2></center>
       <BR>

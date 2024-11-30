@@ -1,4 +1,4 @@
-package ffm.cms.openshift;
+package ffm.selenium.openshift;
 
 import java.io.IOException;
 import java.nio.file.Files;

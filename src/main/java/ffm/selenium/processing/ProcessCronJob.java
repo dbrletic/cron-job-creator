@@ -1,4 +1,4 @@
-package ffm.cms.processing;
+package ffm.selenium.processing;
 
 import java.io.BufferedReader;
 import java.io.IOException;

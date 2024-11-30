@@ -1,4 +1,4 @@
-package ffm.cms.processing;
+package ffm.selenium.processing;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,11 +12,6 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import ffm.cms.model.FFEData;
-import ffm.cms.model.FFEGatlingData;
-import ffm.cms.model.ScheduleJob;
-import ffm.cms.model.UpdateCronJobSchedule;
-
 import org.apache.commons.io.FileUtils;
 import org.jboss.logging.Logger;
 
@@ -24,6 +19,12 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
+
+import ffm.selenium.model.FFEData;
+import ffm.selenium.model.FFEGatlingData;
+import ffm.selenium.model.ScheduleJob;
+import ffm.selenium.model.UpdateCronJobSchedule;
+
 import com.cronutils.model.Cron;
 
 import io.smallrye.common.annotation.Blocking;

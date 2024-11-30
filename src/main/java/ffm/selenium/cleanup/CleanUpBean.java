@@ -1,4 +1,4 @@
-package ffm.cms.cleanup;
+package ffm.selenium.cleanup;
 
 import java.io.File;
 import java.io.IOException;

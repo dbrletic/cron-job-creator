@@ -1,4 +1,4 @@
-package ffm.cms.model;
+package ffm.selenium.model;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

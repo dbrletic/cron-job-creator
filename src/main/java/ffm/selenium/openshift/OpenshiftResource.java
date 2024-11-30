@@ -1,7 +1,5 @@
-package ffm.cms.openshift;
+package ffm.selenium.openshift;
 
-import ffm.cms.model.CronJobDashboardData;
-import ffm.cms.model.CronJobData;
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
@@ -32,6 +30,10 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestPath;
+
+import ffm.selenium.model.CronJobDashboardData;
+import ffm.selenium.model.CronJobData;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
