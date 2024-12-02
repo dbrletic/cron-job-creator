@@ -72,9 +72,9 @@ public class CronResource {
         cleanReleaseBranch = cleanReleaseBranch.replace("_", "-");
 
         //Also have to remove any . since that is not allowed in the meta name of a cronjob file
-        cleanReleaseBranch = cleanReleaseBranch.replace(".", "-");
+        cleanReleaseBranch = cleanReleaseBranch.replace(".", "-").toLowerCase();
 
-        String cleanGroup = data.getGroups().replace("_", "-");
+        String cleanGroup = data.getGroups().replace("_", "-").toLowerCase();
         
         try{
             newFilesLocation.add(cronjobHandler.processCronjob(data.getCronJobSchedule(),data.getGroups(), data.getUrl(), cleanReleaseBranch, cleanGroup));
