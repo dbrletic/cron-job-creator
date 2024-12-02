@@ -86,6 +86,7 @@
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
+      <version>5.5.0</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -100,6 +101,7 @@
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>tekton-client</artifactId>
+      <version>6.13.4</version>
     </dependency>
     <dependency>
       <groupId>com.cronutils</groupId>
@@ -109,6 +111,7 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-validator</artifactId>
+      <version>${quarkus.platform.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
