@@ -62,6 +62,13 @@ After logging in with the oc cli and being in the right namespace run:
 ```shell script
 ./mvnw clean package -Dquarkus.container-image.build=true
 ```
+
+To use a DeployentConfig (Depericated in OpenShift  >= 4.14) run:
+
+```shell script
+./mvnw clean package -Dquarkus.kubernetes.deploy=true
+```
+
 Read the Quarkus Deployment Guide for more information
 
 [Related guide section...](https://quarkus.io/guides/deploying-to-openshift)
