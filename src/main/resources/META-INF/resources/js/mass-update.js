@@ -1,8 +1,14 @@
 document.getElementById('regressionForm').addEventListener('submit', function(event) {
     event.preventDefault();
 
+    /*
     const scheduleData = document.getElementById('scheduleData').value;
-    const lines = scheduleData.trim().split('\n').filter(line => line.trim() !== '');
+    const lines = scheduleData.trim().split('\n').filter(line => line.trim() !== ''); */
+    const textarea = document.getElementById('scheduleData').value;
+     // Remove lines that are only carriage returns, newlines, or empty
+    const lines = textarea
+     .split('\n') // Split into lines
+     .filter(line => line.trim() !== ''); // Keep non-empty lines
     const jobs = [];
 
     for (let i = 0; i < lines.length; i += 2) {

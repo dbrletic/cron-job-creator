@@ -26,6 +26,7 @@ import ffm.selenium.model.ScheduleJob;
 import ffm.selenium.model.UpdateCronJobSchedule;
 
 import com.cronutils.model.Cron;
+import org.quartz.CronExpression;
 
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -209,18 +210,22 @@ public class CronResource {
         List<String> newFilesLocation = new ArrayList<String>();
         String projectDir = System.getProperty("user.dir");
         String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
-        String updates="";
+        String failedScheduledJobs="";
         for(ScheduleJob job: jobs){
-            
+        
             LOGGER.info("Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule());
-            updates = updates + "\n" + "Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule();
-            try{
-                newFilesLocation.add(cronjobHandler.updateCronJOb(job.getJobName(),  job.getSchedule()));
-            } catch (IOException | ParseException e){
-                
-                LOGGER.error(e.getMessage());
-                LOGGER.error(e.getStackTrace());
-                return Response.serverError().status(500).entity("Parsing Error of files").build();
+            if(isValidCronExpression(job.getSchedule())){        
+                try{
+                    newFilesLocation.add(cronjobHandler.updateCronJOb(job.getJobName(),  job.getSchedule()));
+                } catch (IOException | ParseException e){
+                    
+                    LOGGER.error(e.getMessage());
+                    LOGGER.error(e.getStackTrace());
+                    return Response.serverError().status(500).entity("Parsing Error of files").build();
+                }
+            }
+            else{
+                failedScheduledJobs = failedScheduledJobs + "Schedule: " + job.getJobName() + " cron-schedule: " + job.getSchedule() + " is invalid \\n";
             }
         }
         File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
@@ -291,6 +296,10 @@ public class CronResource {
         return uuidString.substring(0, 5);
     }
 
-
-
+    public static boolean isValidCronExpression(String cron) {
+        if (cron == null || cron.isEmpty()) {
+            return false;
+        }
+        return CronExpression.isValidExpression(cron);
+    }
 }
