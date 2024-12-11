@@ -21,6 +21,47 @@ document.getElementById('regressionForm').addEventListener('submit', function(ev
         }
     }
 
+
+    fetch('/ffe-cronjob/mass-update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jobs)
+    })
+    .then(response => {
+        if (!response.ok) {
+            $("<p>Error: " + response +"</p>").appendTo('#errorMessage');
+        }
+        return response.json();
+    })
+    .then(data => {
+       console.log(data.failedJobs);
+       const failedJobs = data.failedJobs;
+       failedJobs.forEach(job => {
+        $("<p>" + job +"</p>").appendTo('#errorMessage');
+       });
+        const zipFileContent = atob(data.zipFile);
+        const binaryData = new Uint8Array(zipFileContent.length);
+        for (let i = 0; i < zipFileContent.length; i++) {
+            binaryData[i] = zipFileContent.charCodeAt(i);
+        }
+
+        // Create a Blob and trigger the download
+        const blob = new Blob([binaryData], { type: 'application/zip' });
+        const url = URL.createObjectURL(blob);
+
+        // Create a link element to trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'file.zip';
+        document.body.appendChild(link);
+        link.click();
+    })
+    .catch(error => {
+        console.error('There was an error:', error);
+    });    
+    /*
     // Send the jobs data to the Quarkus API
     fetch('/ffe-cronjob/mass-update', {
         method: 'POST',
@@ -53,5 +94,5 @@ document.getElementById('regressionForm').addEventListener('submit', function(ev
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
-     });
+     }); */
  });

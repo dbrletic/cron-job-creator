@@ -1,9 +1,12 @@
 package ffm.selenium.processing;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,8 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
+import com.cronutils.validation.CronValidator;
+import static com.cronutils.model.CronType.UNIX;
 
 import ffm.selenium.model.FFEData;
 import ffm.selenium.model.FFEGatlingData;
@@ -27,6 +32,8 @@ import ffm.selenium.model.UpdateCronJobSchedule;
 
 import com.cronutils.model.Cron;
 import org.quartz.CronExpression;
+import java.util.Base64;
+import java.util.HashMap;
 
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +42,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -205,16 +213,17 @@ public class CronResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json")
     @Path("/mass-update")
     public Response massUpdate(ScheduleJob[] jobs){
         List<String> newFilesLocation = new ArrayList<String>();
-        String projectDir = System.getProperty("user.dir");
-        String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
-        String failedScheduledJobs="";
+        List<String> failedCronExpressions = new ArrayList<String>();
+        ///String projectDir = System.getProperty("user.dir");
+        //String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
         for(ScheduleJob job: jobs){
         
             LOGGER.info("Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule());
-            if(isValidCronExpression(job.getSchedule())){        
+            if(isValidCronExpression(job.getSchedule().trim())){        
                 try{
                     newFilesLocation.add(cronjobHandler.updateCronJOb(job.getJobName(),  job.getSchedule()));
                 } catch (IOException | ParseException e){
@@ -225,13 +234,27 @@ public class CronResource {
                 }
             }
             else{
-                failedScheduledJobs = failedScheduledJobs + "Schedule: " + job.getJobName() + " cron-schedule: " + job.getSchedule() + " is invalid \\n";
+                LOGGER.info("Schedule: " + job.getJobName() + " cron-schedule: " + job.getSchedule() + " is invalid");
+                failedCronExpressions.add(job.getJobName() + " schedule (" + job.getSchedule() + ") is invalid");
             }
         }
-        File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
-        LOGGER.info("Add to response: " + zipFileLocation);
-        LOGGER.info("Zip is made: " + downloadZip.isFile());
+        //File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
+        String base64Zip="";
+        try {
+            base64Zip = zipInMemory(newFilesLocation);
+        } catch (IOException e) {
+            LOGGER.error(e.getStackTrace());
+            return Response.serverError().status(500).build();
+        }
+        //LOGGER.info("Add to response: " + zipFileLocation);
+        //LOGGER.info("Zip is made: " + downloadZip.isFile());
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("failedJobs", failedCronExpressions);
+        response.put("zipFile", base64Zip);
+
+        return Response.ok(response).build();
+        /*
         try {
             return Response
                 .ok(FileUtils.readFileToByteArray(downloadZip))
@@ -240,7 +263,7 @@ public class CronResource {
                 .build();
         } catch (IOException e) {
             return Response.serverError().status(500).build();
-        }
+        } */
     }
 
     /**
@@ -278,7 +301,7 @@ public class CronResource {
             fos.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getStackTrace());
         }
 
         // Remove the files in the zip from local file system
@@ -290,16 +313,53 @@ public class CronResource {
         return new File(zipFileLocation);        
     }
 
+    private String zipInMemory(List<String> newFilesLocation) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream  = new ByteArrayOutputStream();
+        ZipOutputStream zipOutputStream  = new ZipOutputStream(byteArrayOutputStream );
+
+        for(String srcFile: newFilesLocation){
+            
+            LOGGER.info("Zipping file: " + srcFile);
+            java.nio.file.Path filePath = Paths.get(srcFile);
+            String content = Files.readString(filePath);
+            ZipEntry entry = new ZipEntry(srcFile);
+            zipOutputStream.putNextEntry(entry);
+            zipOutputStream.write(content.getBytes());
+            zipOutputStream.closeEntry();
+        }
+        zipOutputStream.close();
+        // Remove the files in the zip from local file system
+        LOGGER.info("Removing files that have been zipped");
+        for(String scrFile: newFilesLocation){
+            File fileToDelete = FileUtils.getFile(scrFile);
+            FileUtils.deleteQuietly(fileToDelete);
+        }
+
+        return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
+    }
+
      private static String generateFiveCharUUID() {
         UUID uuid = UUID.randomUUID();
         String uuidString = uuid.toString().replace("-", "");
         return uuidString.substring(0, 5);
     }
 
-    public static boolean isValidCronExpression(String cron) {
-        if (cron == null || cron.isEmpty()) {
+    public static boolean isValidCronExpression(String cronExpression) {
+        try {
+            // Define the cron type (e.g., QUARTZ or UNIX)
+            CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(UNIX);
+
+            // Create a parser based on the definition
+            CronParser parser = new CronParser(cronDefinition);
+
+            // Parse and validate the cron expression
+            Cron cron = parser.parse(cronExpression);
+            cron.validate(); // Throws an exception if invalid
+
+            return true; // Cron expression is valid
+        } catch (Exception e) {
+            // Cron expression is invalid
             return false;
         }
-        return CronExpression.isValidExpression(cron);
     }
 }
