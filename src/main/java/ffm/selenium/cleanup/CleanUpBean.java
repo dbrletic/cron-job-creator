@@ -38,6 +38,10 @@ public class CleanUpBean {
     @Inject
     @ConfigProperty(name = "selenium.age.threshold.days")
     long AGE_THRESHOLD_DAYS; 
+
+    @Inject
+    @ConfigProperty(name = "selenium.tags.file.name")
+    String selenumTagsFileName;
     
     private static final Logger LOGGER = Logger.getLogger(CleanUpBean.class);
 
@@ -60,7 +64,7 @@ public class CleanUpBean {
         }
     }
 
-    @Scheduled(cron = "0 6 * * 1 ?", timeZone = "America/New_York") //Runs every monday  at 6 am EDT 
+    @Scheduled(cron = "0 6 * * 1 ?") //Runs every monday  at 6 am
     void cleanUpOldPipelineRuns(){
         // Get current date and time
         LocalDateTime now = LocalDateTime.now();
@@ -77,7 +81,7 @@ public class CleanUpBean {
     }
 
     /**
-     * Takes a parentFolder and deletes all files and folders older then 7 days. 
+     * Takes a parentFolder and deletes all files and folders older then AGE_THRESHOLD_DAYS days. 
      * TODO Move to Utility Class
      * @param parentFolder
      * @throws IOException
@@ -89,8 +93,11 @@ public class CleanUpBean {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 if (attrs.lastModifiedTime().toInstant().isBefore(cutoffTime)) {
-                   LOGGER.info("Deleting file: " +  file.toAbsolutePath());
-                    Files.delete(file); // Delete the file
+                    //Making sure I do not delete the seleniumTags File
+                    if(!file.getFileName().toString().equals(selenumTagsFileName)){
+                        LOGGER.info("Deleting file: " +  file.toAbsolutePath());
+                        Files.delete(file); // Delete the file
+                    }              
                 }
                 return FileVisitResult.CONTINUE;
             }
