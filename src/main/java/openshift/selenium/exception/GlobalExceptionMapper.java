@@ -1,4 +1,4 @@
-package ffm.selenium.exception;
+package openshift.selenium.exception;
 
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;

@@ -1,4 +1,4 @@
-package ffm.selenium.forums;
+package openshift.selenium.forums;
 
 import java.io.File;
 import java.io.FileWriter;

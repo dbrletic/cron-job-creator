@@ -1,4 +1,4 @@
-package ffm.selenium.processing;
+package openshift.selenium.processing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,11 +24,6 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import static com.cronutils.model.CronType.UNIX;
 
-import ffm.selenium.model.FFEData;
-import ffm.selenium.model.FFEGatlingData;
-import ffm.selenium.model.ScheduleJob;
-import ffm.selenium.model.UpdateCronJobSchedule;
-
 import com.cronutils.model.Cron;
 import java.util.Base64;
 import java.util.HashMap;
@@ -43,6 +38,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import openshift.selenium.model.FFEData;
+import openshift.selenium.model.FFEGatlingData;
+import openshift.selenium.model.ScheduleJob;
+import openshift.selenium.model.UpdateCronJobSchedule;
 
 /**
  * Handles receiving request to create new cronjob files

@@ -1,4 +1,4 @@
-package ffm.selenium.model;
+package openshift.selenium.model;
 
 
 public class FFEGatlingData {

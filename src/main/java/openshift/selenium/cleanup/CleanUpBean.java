@@ -1,4 +1,4 @@
-package ffm.selenium.cleanup;
+package openshift.selenium.cleanup;
 
 import java.io.File;
 import java.io.IOException;

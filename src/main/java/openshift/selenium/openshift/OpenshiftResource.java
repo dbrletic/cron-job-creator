@@ -1,4 +1,4 @@
-package ffm.selenium.openshift;
+package openshift.selenium.openshift;
 
 import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
@@ -18,6 +18,8 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.redhogs.cronparser.CronExpressionDescriptor;
+import openshift.selenium.model.CronJobDashboardData;
+import openshift.selenium.model.CronJobData;
 import io.fabric8.tekton.client.*;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunList;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
@@ -30,9 +32,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestPath;
-
-import ffm.selenium.model.CronJobDashboardData;
-import ffm.selenium.model.CronJobData;
 
 import java.io.File;
 import java.io.IOException;

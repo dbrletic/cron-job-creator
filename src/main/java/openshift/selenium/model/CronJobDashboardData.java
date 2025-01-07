@@ -1,4 +1,4 @@
-package ffm.selenium.model;
+package openshift.selenium.model;
 
 import io.quarkus.qute.TemplateData;
 import lombok.Data;

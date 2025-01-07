@@ -1,13 +1,10 @@
-package ffm.selenium.openshift;
+package openshift.selenium.openshift;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestPath;
 
-import ffm.selenium.model.FFEStartPipeline;
-import ffm.selenium.model.ReportData;
-import ffm.selenium.model.ReportDataList;
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.tekton.client.TektonClient;
@@ -26,6 +23,9 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import openshift.selenium.model.FFEStartPipeline;
+import openshift.selenium.model.ReportData;
+import openshift.selenium.model.ReportDataList;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package ffm.selenium.processing;
+package openshift.selenium.processing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
