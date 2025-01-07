@@ -22,7 +22,6 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
-import com.cronutils.validation.CronValidator;
 import static com.cronutils.model.CronType.UNIX;
 
 import ffm.selenium.model.FFEData;
@@ -31,7 +30,6 @@ import ffm.selenium.model.ScheduleJob;
 import ffm.selenium.model.UpdateCronJobSchedule;
 
 import com.cronutils.model.Cron;
-import org.quartz.CronExpression;
 import java.util.Base64;
 import java.util.HashMap;
 
