@@ -323,7 +323,7 @@ public class PipelineResource {
             .addNewParam()
                 .withName("pipelineRunName")
                 .withNewValue(pipelineRunName)  
-        .endParam()
+            .endParam()
         .withWorkspaces(Collections.singletonList(configWorkspace))
         .endSpec()
         .build(); 
