@@ -43,6 +43,11 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 @ApplicationScoped
 @RegisterRestClient
 @Path("/pipeline")
@@ -59,6 +64,10 @@ public class PipelineResource {
 
     private final static String SELENIUM_GRID_BROWSER = "box";
     private Pattern patternEnv = Pattern.compile("test\\d+");
+
+    // Define the formatter for the UTC input format and ET ouput format
+    private DateTimeFormatter inputUTCFormatter = DateTimeFormatter.ofPattern("mm-HH-dd-MM-yyyy");
+    private DateTimeFormatter outputETFormatter = DateTimeFormatter.ofPattern("HH:mm MM-dd-yyyy z");
 
     private static final Logger LOGGER = Logger.getLogger(PipelineResource.class);
 
@@ -180,7 +189,33 @@ public class PipelineResource {
          int convertedHour = (hours % 12 == 0) ? 12 : hours % 12;
 
         String formattedDate = String.format("%d:%02d %s", convertedHour, minutes, period) + " " + splitFolderName[3] + "/" + splitFolderName[2] + "/" + splitFolderName[4];
+        System.out.println("Convert from: " + formattedDate + " to " + createDateFromFolderNameAndConvertToET(folderName));
         return formattedDate;
+    }
+
+    private String createDateFromFolderNameAndConvertToET(String folderName){
+        String utcDateString="";
+        //Format of folder name is %M-%H-%d-%m-%Y""
+        //ex: 10-09-28-10-2024
+        System.out.println("Convert " + folderName + " to ET");
+        String[] splitFolderName = folderName.split("-");
+        for(String part: splitFolderName){
+            utcDateString = utcDateString + part + "-";
+        }
+        utcDateString = utcDateString.substring(0, utcDateString.length()-1);
+        // Parse the UTC date string to LocalDateTime
+        LocalDateTime utcDateTime = LocalDateTime.parse(utcDateString, inputUTCFormatter);
+
+        // Convert UTC LocalDateTime to ZonedDateTime in UTC
+        ZonedDateTime utcZonedDateTime = utcDateTime.atZone(ZoneId.of("UTC"));
+        
+        // Convert UTC ZonedDateTime to Eastern Time (ET)
+        ZonedDateTime etZonedDateTime = utcZonedDateTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+
+        // Format the ET ZonedDateTime
+        String etDateString = etZonedDateTime.format(outputETFormatter);
+
+        return etDateString;
     }
 
     /**
