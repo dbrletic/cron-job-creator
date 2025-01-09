@@ -69,7 +69,7 @@ public class CleanUpBean {
         // Get current date and time
         LocalDateTime now = LocalDateTime.now();
         // Define the desired format
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm:HH:ss dd/MM/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm:HH:ss MM/dd/yyyy");
         // Format the current date and time
         String formattedDate = now.format(formatter);
         try {
