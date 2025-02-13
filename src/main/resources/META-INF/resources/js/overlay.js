@@ -13,7 +13,7 @@
 
      const interval = setInterval(function() {
          // Increase width of the progress bar
-         width += 2;
+         width += 1.5;
          progressBar.style.width = width + '%';
          
          // If the progress bar is filled resert it to 0
