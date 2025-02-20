@@ -49,6 +49,7 @@ public class ForumsResource {
         public static native TemplateInstance massUpdate();
         public static native TemplateInstance startPipeline();
         public static native TemplateInstance seleniumTags(TreeMap<String, String> seleniumTags);
+        public static native TemplateInstance massCreate();
     }
     
     @GET
@@ -70,6 +71,13 @@ public class ForumsResource {
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance massUpdate(){
         return Templates.massUpdate();
+    }
+
+    @GET
+    @Path("/mass-create")
+    @Produces(MediaType.TEXT_HTML)
+    public TemplateInstance masseCreate(){
+        return Templates.massCreate();
     }
 
     @GET

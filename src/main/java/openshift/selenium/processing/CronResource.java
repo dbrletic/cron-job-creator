@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -14,8 +15,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jboss.logging.Logger;
 
 import com.cronutils.model.CronType;
@@ -33,11 +40,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import openshift.selenium.model.ExcelUploadForm;
 import openshift.selenium.model.FFEData;
 import openshift.selenium.model.FFEGatlingData;
 import openshift.selenium.model.ScheduleJob;
@@ -55,6 +64,21 @@ public class CronResource {
     private ProcessCronJob cronjobHandler;
 
     private static final Logger LOGGER = Logger.getLogger(CronResource.class);
+    private static final String EXCEL_EXAMPLE_FILE_NAME = "massCreateFormatExample.xlsx"; // Name of the example Mass Create Excel file
+
+    @GET
+    @Path("/excel-example")
+    @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") // MIME type for .xlsx
+    public Response downloadFile() {
+        InputStream fileStream = Thread.currentThread()
+        .getContextClassLoader()
+        .getResourceAsStream(EXCEL_EXAMPLE_FILE_NAME);
+
+        return Response.ok(fileStream)
+                .header("Content-Disposition", "attachment; filename=\"massCreateFormatExample.xlsx\"")
+                .build();
+
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -215,8 +239,6 @@ public class CronResource {
     public Response massUpdate(ScheduleJob[] jobs){
         List<String> newFilesLocation = new ArrayList<String>();
         List<String> failedCronExpressions = new ArrayList<String>();
-        ///String projectDir = System.getProperty("user.dir");
-        //String zipFileLocation = projectDir + File.separator + "update-" + generateFiveCharUUID() + ".zip";
         for(ScheduleJob job: jobs){
         
             LOGGER.info("Updating: " + job.getJobName() + " with new schedule: " + job.getSchedule());
@@ -235,7 +257,6 @@ public class CronResource {
                 failedCronExpressions.add(job.getJobName() + " schedule (" + job.getSchedule() + ") is invalid");
             }
         }
-        //File downloadZip = zipUpFiles(newFilesLocation,zipFileLocation);
         String base64Zip="";
         try {
             base64Zip = zipInMemory(newFilesLocation);
@@ -262,6 +283,94 @@ public class CronResource {
             return Response.serverError().status(500).build();
         } */
     }
+
+    @POST
+    @Path("/mass-create")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Blocking
+    public Response uploadExcelFile(ExcelUploadForm form) throws IOException, ParseException{
+        LOGGER.info("Creating new schedules from file: " + form.fileName);
+        List<String> newFilesLocation = new ArrayList<String>();
+        List<FFEData> cronjobSchedules = new ArrayList<>();
+        List<String> failedCronExpressions = new ArrayList<String>();
+        try (InputStream inputStream = form.file) {
+            Workbook workbook = WorkbookFactory.create(inputStream);
+            Sheet sheet = workbook.getSheetAt(0); // Read the first sheet
+            Iterator<Row> rowIterator = sheet.iterator();
+            
+            rowIterator.next(); // Skip the header row
+
+            //Reading all the data
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                cronjobSchedules.add(new FFEData(
+                    getCellValue(row.getCell(0)),  // Release Branch
+                    getCellValue(row.getCell(1)),  // User Name
+                    getCellValue(row.getCell(2)),  // User Password
+                    getCellValue(row.getCell(3)),  // Groups
+                    getCellValue(row.getCell(4)),  // Browser
+                    getCellValue(row.getCell(5)),  // Url
+                    getCellValue(row.getCell(6)),  // Selenium Test EmailList
+                    getCellValue(row.getCell(7))   // Cron Job Schedule
+                ));
+            }
+            workbook.close();
+        } catch (Exception e) {
+            List<String> error = new ArrayList<>();
+            error.add("Error: " + e.getMessage());
+            return Response.serverError().build();
+        }
+        for(FFEData data: cronjobSchedules){
+
+            //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
+            String cleanReleaseBranch = data.getReleaseBranch().replace("/", "-");
+            cleanReleaseBranch = cleanReleaseBranch.replace("\\", "-");
+
+            //Also have to remove any _ since that is not allowed in the name of a cronjob file
+            cleanReleaseBranch = cleanReleaseBranch.replace("_", "-");
+
+            //Also have to remove any . since that is not allowed in the meta name of a cronjob file
+            cleanReleaseBranch = cleanReleaseBranch.replace(".", "-");
+
+            String cleanGroup = data.getGroups().replace("_", "-").toLowerCase();
+
+            String openShiftJobName = cleanGroup + "-" + data.getUrl() + "-" + cleanReleaseBranch + "-cj";
+
+            if(isValidCronExpression(data.getCronJobSchedule().trim())){        
+                try{
+                    newFilesLocation.add(cronjobHandler.processCronjob(data.getCronJobSchedule(),data.getGroups(), data.getUrl(), cleanReleaseBranch, cleanGroup));
+                    newFilesLocation.add(cronjobHandler.processEventListener(data.getGroups(), data.getUrl(), cleanReleaseBranch,cleanGroup));
+                    newFilesLocation.add(cronjobHandler.processTriggerBinding(data.getGroups(), data.getUrl(), data.getReleaseBranch(), data.getUserNameFFM(), data.getUserPassword(), data.getBrowser(), data.getSeleniumTestEmailList(), cleanReleaseBranch,cleanGroup));
+                    newFilesLocation.add(cronjobHandler.processTriggerTemplate(data.getGroups(), data.getUrl(), cleanReleaseBranch,cleanGroup));
+                } catch (IOException | ParseException e){
+                    LOGGER.error(e.getMessage());
+                    LOGGER.error(e.getStackTrace());
+                }
+            }
+            else{
+                LOGGER.info("Name: " + openShiftJobName + " cron-schedule: " +  data.getCronJobSchedule() + " is invalid");
+                failedCronExpressions.add(openShiftJobName + " schedule (" + data.getCronJobSchedule()+ ") is invalid");
+            }
+
+
+        }
+
+        String base64Zip="";
+        try {
+            base64Zip = zipInMemory(newFilesLocation);
+        } catch (IOException e) {
+            LOGGER.error(e.getStackTrace());
+            return Response.serverError().status(500).build();
+        }
+       
+        Map<String, Object> response = new HashMap<>();
+        response.put("failedJobs", failedCronExpressions);
+        response.put("zipFile", base64Zip);
+
+        return Response.ok(response).build();
+    }
+
 
     /**
      * Helper method that zips up a bunch of files, delete the zipped file, and returns the location of the newly created zip
@@ -310,6 +419,12 @@ public class CronResource {
         return new File(zipFileLocation);        
     }
 
+    /**
+     * Creates a zip file in Memory and returns it as a Base64 Encoded
+     * @param newFilesLocation A list of all the file locations to be zip
+     * @return A base64 Encoded version of the zip file
+     * @throws IOException
+     */
     private String zipInMemory(List<String> newFilesLocation) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream  = new ByteArrayOutputStream();
         ZipOutputStream zipOutputStream  = new ZipOutputStream(byteArrayOutputStream );
@@ -335,12 +450,37 @@ public class CronResource {
         return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
     }
 
-     private static String generateFiveCharUUID() {
+    /**
+     * Generates a five characer UUID value
+     * @return
+     */
+    private static String generateFiveCharUUID() {
         UUID uuid = UUID.randomUUID();
         String uuidString = uuid.toString().replace("-", "");
         return uuidString.substring(0, 5);
     }
 
+   /**
+    * Returns the value inside of a Excel file
+    * @param cell
+    * @return
+    */
+    private String getCellValue(Cell cell) {
+        if (cell == null) return "";
+        System.out.println("Cell: " + cell.getStringCellValue().trim()); //TODO
+        switch (cell.getCellType()) {
+            case STRING: return cell.getStringCellValue().trim();
+            case NUMERIC: return String.valueOf((int) cell.getNumericCellValue());
+            case BOOLEAN: return String.valueOf(cell.getBooleanCellValue());
+            default: return "";
+        }
+    }
+
+    /**
+     * Checks if a Cron Expression is valid
+     * @param cronExpression
+     * @return
+     */
     public static boolean isValidCronExpression(String cronExpression) {
         try {
             // Define the cron type (e.g., QUARTZ or UNIX)

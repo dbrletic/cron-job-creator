@@ -1,0 +1,40 @@
+<!-- src/main/resources/templates/upload.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass Create with Excel Upload</title>
+</head>
+<body>
+    {#include nav.html} {/include}
+    <div class="container mt-5">
+        <h1 class="mb-4">Upload a Excel File to Mass Create Cronjob Schedules</h1>
+         <!-- Upload Form -->
+        <form id="uploadForm" class="mb-4">
+            <div class="mb-3">
+                <label for="fileInput" class="form-label">Select Excel File</label>
+                <input type="file" class="form-control" id="fileInput" accept=".xls,.xlsx" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+         <!-- Results Section -->
+         <div style="color:#43916B" id="successMessage" hidden="true"> 
+            <p>Successfully Created Cronjob Schedules</p>
+        </div>
+        <div style="color:#CF4B2F" id="errorMessage"></div>
+
+        <div>
+            <h2>Download Sample Fromatted Excel</h2>
+            <p>Click the button below to download the Sample Format Excel file with the correct column headers.</p>
+            <a href="/ffe-cronjob/excel-example" class="btn btn-primary">
+                <i class="bi bi-download"></i> Download Excel File
+            </a>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/js/bootstrap.5.3.3.bundle.min.js"></script>
+    <script src="/js/mass-create.js"></script>
+</body>
+</html>
