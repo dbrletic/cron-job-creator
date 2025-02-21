@@ -264,24 +264,12 @@ public class CronResource {
             LOGGER.error(e.getStackTrace());
             return Response.serverError().status(500).build();
         }
-        //LOGGER.info("Add to response: " + zipFileLocation);
-        //LOGGER.info("Zip is made: " + downloadZip.isFile());
 
         Map<String, Object> response = new HashMap<>();
         response.put("failedJobs", failedCronExpressions);
         response.put("zipFile", base64Zip);
 
         return Response.ok(response).build();
-        /*
-        try {
-            return Response
-                .ok(FileUtils.readFileToByteArray(downloadZip))
-                .type("application/zip")
-                .header("Content-Disposition", "attachment; filename=\"filename.zip\"")
-                .build();
-        } catch (IOException e) {
-            return Response.serverError().status(500).build();
-        } */
     }
 
     @POST
@@ -290,7 +278,7 @@ public class CronResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Blocking
     public Response uploadExcelFile(ExcelUploadForm form) throws IOException, ParseException{
-        LOGGER.info("Creating new schedules from file: " + form.fileName);
+        LOGGER.info("Creating new schedules from uploaded excel file.");
         List<String> newFilesLocation = new ArrayList<String>();
         List<FFEData> cronjobSchedules = new ArrayList<>();
         List<String> failedCronExpressions = new ArrayList<String>();
@@ -363,7 +351,7 @@ public class CronResource {
             LOGGER.error(e.getStackTrace());
             return Response.serverError().status(500).build();
         }
-       
+        LOGGER.info("Created " + newFilesLocation.size() + " files. ");
         Map<String, Object> response = new HashMap<>();
         response.put("failedJobs", failedCronExpressions);
         response.put("zipFile", base64Zip);
@@ -467,7 +455,6 @@ public class CronResource {
     */
     private String getCellValue(Cell cell) {
         if (cell == null) return "";
-        System.out.println("Cell: " + cell.getStringCellValue().trim()); //TODO
         switch (cell.getCellType()) {
             case STRING: return cell.getStringCellValue().trim();
             case NUMERIC: return String.valueOf((int) cell.getNumericCellValue());

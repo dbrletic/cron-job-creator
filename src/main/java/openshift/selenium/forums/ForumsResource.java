@@ -107,7 +107,7 @@ public class ForumsResource {
         LOGGER.info("Writing to file: " + seleniumTagPath);
         
         for(Map.Entry<String, String> entry : formData.entrySet()) {
-            LOGGER.info("Key: " + entry.getKey() + " - Value: " + entry.getValue());
+            LOGGER.debug("Key: " + entry.getKey() + " - Value: " + entry.getValue());
         }    
         try (FileWriter writer = new FileWriter(seleniumTagPath, false)) {
             for (Map.Entry<String, String> entry : formData.entrySet()) {

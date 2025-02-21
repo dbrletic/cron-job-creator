@@ -189,7 +189,7 @@ public class PipelineResource {
          int convertedHour = (hours % 12 == 0) ? 12 : hours % 12;
 
         String formattedDate = String.format("%d:%02d %s", convertedHour, minutes, period) + " " + splitFolderName[3] + "/" + splitFolderName[2] + "/" + splitFolderName[4];
-        System.out.println("Convert from: " + formattedDate + " to " + createDateFromFolderNameAndConvertToET(folderName));
+        LOGGER.debug("Convert from: " + formattedDate + " to " + createDateFromFolderNameAndConvertToET(folderName));
         return formattedDate;
     }
 
@@ -197,7 +197,7 @@ public class PipelineResource {
         String utcDateString="";
         //Format of folder name is %M-%H-%d-%m-%Y""
         //ex: 10-09-28-10-2024
-        System.out.println("Convert " + folderName + " to ET");
+        LOGGER.debug("Convert " + folderName + " to ET");
         String[] splitFolderName = folderName.split("-");
         for(String part: splitFolderName){
             utcDateString = utcDateString + part + "-";
