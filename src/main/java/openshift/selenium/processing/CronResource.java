@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -279,6 +280,8 @@ public class CronResource {
     @Blocking
     public Response uploadExcelFile(ExcelUploadForm form) throws IOException, ParseException{
         LOGGER.info("Creating new schedules from uploaded excel file.");
+        String projectDir = System.getProperty("user.dir");
+        String zipFileLocation = projectDir + File.separator + "mass-create-" + generateFiveCharUUID() + ".zip";
         List<String> newFilesLocation = new ArrayList<String>();
         List<FFEData> cronjobSchedules = new ArrayList<>();
         List<String> failedCronExpressions = new ArrayList<String>();
@@ -340,14 +343,14 @@ public class CronResource {
                 LOGGER.info("Name: " + openShiftJobName + " cron-schedule: " +  data.getCronJobSchedule() + " is invalid");
                 failedCronExpressions.add(openShiftJobName + " schedule (" + data.getCronJobSchedule()+ ") is invalid");
             }
-
-
         }
 
+        LOGGER.info("Zipping up " + newFilesLocation.size() + " files.");
         String base64Zip="";
         try {
             base64Zip = zipInMemory(newFilesLocation);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            e.printStackTrace(); // Prints the full stack trace
             LOGGER.error(e.getStackTrace());
             return Response.serverError().status(500).build();
         }
@@ -416,24 +419,25 @@ public class CronResource {
     private String zipInMemory(List<String> newFilesLocation) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream  = new ByteArrayOutputStream();
         ZipOutputStream zipOutputStream  = new ZipOutputStream(byteArrayOutputStream );
+        newFilesLocation = new ArrayList<>(new LinkedHashSet<>(newFilesLocation)); //This remove duplicates which breaks the zipping
 
-        for(String srcFile: newFilesLocation){
-            
-            LOGGER.info("Zipping file: " + srcFile);
-            java.nio.file.Path filePath = Paths.get(srcFile);
-            String content = Files.readString(filePath);
-            ZipEntry entry = new ZipEntry(srcFile);
-            zipOutputStream.putNextEntry(entry);
-            zipOutputStream.write(content.getBytes());
-            zipOutputStream.closeEntry();
-        }
-        zipOutputStream.close();
-        // Remove the files in the zip from local file system
-        LOGGER.info("Removing files that have been zipped");
-        for(String scrFile: newFilesLocation){
-            File fileToDelete = FileUtils.getFile(scrFile);
-            FileUtils.deleteQuietly(fileToDelete);
-        }
+            for(String srcFile: newFilesLocation){
+                
+                LOGGER.debug("Zipping file: " + srcFile);
+                java.nio.file.Path filePath = Paths.get(srcFile);
+                String content = Files.readString(filePath);
+                ZipEntry entry = new ZipEntry(srcFile);
+                zipOutputStream.putNextEntry(entry);
+                zipOutputStream.write(content.getBytes());
+                zipOutputStream.closeEntry();
+            }
+            zipOutputStream.close();
+            // Remove the files in the zip from local file system
+            LOGGER.info("Removing " + newFilesLocation.size() +" files that have been zipped");
+            for(String scrFile: newFilesLocation){
+                File fileToDelete = FileUtils.getFile(scrFile);
+                FileUtils.deleteQuietly(fileToDelete);
+            }
 
         return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
     }
