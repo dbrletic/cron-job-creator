@@ -280,8 +280,6 @@ public class CronResource {
     @Blocking
     public Response uploadExcelFile(ExcelUploadForm form) throws IOException, ParseException{
         LOGGER.info("Creating new schedules from uploaded excel file.");
-        String projectDir = System.getProperty("user.dir");
-        String zipFileLocation = projectDir + File.separator + "mass-create-" + generateFiveCharUUID() + ".zip";
         List<String> newFilesLocation = new ArrayList<String>();
         List<FFEData> cronjobSchedules = new ArrayList<>();
         List<String> failedCronExpressions = new ArrayList<String>();
