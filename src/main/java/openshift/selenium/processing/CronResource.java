@@ -24,6 +24,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import com.cronutils.model.CronType;
@@ -64,13 +65,16 @@ public class CronResource {
     @Inject
     private ProcessCronJob cronjobHandler;
 
+    @Inject
+    @ConfigProperty(name = "selenium.excel.example.file")
+    private String EXCEL_EXAMPLE_FILE_NAME;
+
     private static final Logger LOGGER = Logger.getLogger(CronResource.class);
-    private static final String EXCEL_EXAMPLE_FILE_NAME = "massCreateFormatExample.xlsx"; // Name of the example Mass Create Excel file
 
     @GET
     @Path("/excel-example")
     @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") // MIME type for .xlsx
-    public Response downloadFile() {
+    public Response downloadExcelFile() {
         InputStream fileStream = Thread.currentThread()
         .getContextClassLoader()
         .getResourceAsStream(EXCEL_EXAMPLE_FILE_NAME);

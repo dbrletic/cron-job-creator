@@ -435,6 +435,10 @@ public class OpenshiftResource {
         return bindingParamsToBranch;
     }
    
+    /**
+     * Reads the  selenium Tag fiel and creates a name to value mapping
+     * @return Returns a TreeMap of cronjob name to descripive 
+     */
     private TreeMap<String, String> readSeleniumTagFile(){
         TreeMap<String, String> seleniumTagPairs =  new TreeMap<>();
 

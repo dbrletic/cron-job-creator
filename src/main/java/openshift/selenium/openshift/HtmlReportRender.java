@@ -123,6 +123,11 @@ public class HtmlReportRender {
         }
     }
 
+    /**
+     * Escapes the html code so the report.html can be rendered in the Webapp
+     * @param str
+     * @return
+     */
     private String escapeHtml(String str) {
         return str.replace("&", "&amp;")
                   .replace("<", "&lt;")
