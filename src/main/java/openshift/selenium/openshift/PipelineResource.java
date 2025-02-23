@@ -84,6 +84,7 @@ public class PipelineResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN) 
     @Blocking
     @Path("{namespace}/startRun")
     public String startPipelineRun(@RestPath String namespace, @Valid FFEStartPipeline data) {

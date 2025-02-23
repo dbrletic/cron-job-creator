@@ -17,7 +17,6 @@ const serialize_form = form => JSON.stringify(
       //pipelineRunName: document.getElementById('pipelineRunName').value
     };
     const jsonData = JSON.stringify(data);
-    console.log(jsonData);
     $.ajax({
       type: 'POST',
       url: '/pipeline/tester-pipelines/startRun',
