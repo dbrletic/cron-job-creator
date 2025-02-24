@@ -17,6 +17,8 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         TemplateInstance instance = Templates.generalException(exception); 
+        System.out.println("Encountered error rendering page: " + exception.getLocalizedMessage());
+        System.out.println(exception.getStackTrace());
         String renderedPage = instance.render(); // Render template into a string
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR) //Has to return a response so turning the qute template into a string for the response
             .entity(renderedPage)
