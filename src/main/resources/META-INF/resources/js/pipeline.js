@@ -24,8 +24,7 @@ const serialize_form = form => JSON.stringify(
       contentType: 'application/json',
       success: function(data, textStatus, jqXHR) {
         $("#piplelineRunForm")[0].reset();
-        $("#successMessage").show();
-        $("<p>Pipeline Run Created: " + data + "</p>").appendTo('#successMessage');
+        $("#successMessage").text("Pipeline Run Created: " + data);
       },
       error: function(xhr, status, error) {
         $("#successMessage").hide();     
