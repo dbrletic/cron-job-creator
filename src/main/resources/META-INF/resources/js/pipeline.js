@@ -23,8 +23,6 @@ const serialize_form = form => JSON.stringify(
       data: jsonData,
       contentType: 'application/json',
       success: function(data, textStatus, jqXHR) {
-        console.log("Raw Response:", data);
-        console.log("Content-Type:", jqXHR.getResponseHeader("Content-Type"));
         $("#piplelineRunForm")[0].reset();
         $("#successMessage").show();      
         $("#successMessage").text("Pipeline Run Created: " + data);
