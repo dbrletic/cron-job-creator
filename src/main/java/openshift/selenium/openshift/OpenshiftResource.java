@@ -378,7 +378,7 @@ public class OpenshiftResource {
         }
         List<String> uniqueEnvs = new ArrayList<>(uniqueEnvsList);
         Collections.sort(dashboardData, nameSorter); //Sorting everything by name 
-        Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
+        //Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
         Collections.sort(uniqueEnvs); 
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         LOGGER.info("getCronJobDashBoard took " + elapsedMs +  " milliseconds to complete");
