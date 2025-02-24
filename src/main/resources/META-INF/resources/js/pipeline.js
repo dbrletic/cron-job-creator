@@ -30,7 +30,7 @@ const serialize_form = form => JSON.stringify(
         $("#successMessage").hide();     
         console.log("Error: " + error);
         $("#piplelineRunForm")[0].reset();
-        $("<p>Error: " + error +"</p>").appendTo('#errorMessage');
+        $("#errorMessage").text("Error: " + error);
       }
     });
   });
