@@ -23,7 +23,7 @@ public class ProcessCronJob{
     private static String CLEAN_GROUPS_URL_CLEAN_RELEASE_BRANCH = "CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH";
 
     /**
-     * 
+     * Creates a OpenShift Cronjob yaml from the supplied values for a Selenium run. 
      * @param schedule
      * @param groups
      * @param url
@@ -64,7 +64,7 @@ public class ProcessCronJob{
     }
 
     /**
-     * Updates a cronjob with a new schedule
+     * Updates a cronjob with a new schedule for a Selenium run. 
      * @param allVars Basically the name of the cronjob that is in the format of CLEAN_GROUPS-URL-CLEAN_RELEASE_BRANCH-cj
      * @param schedule The new Schedule
      * @return
@@ -99,7 +99,7 @@ public class ProcessCronJob{
     }
 
     /**
-     * 
+     * Creates the EventListern yaml from the supplied files for a Selenium run. 
      * @param groups
      * @param url
      * @param cleanReleaseBranch
@@ -132,7 +132,7 @@ public class ProcessCronJob{
     }
 
     /**
-     * 
+     * Creates the TriggerBinding from the supplied values for a Selenium run. 
      * @param groups
      * @param url
      * @param releaseBranch
@@ -189,7 +189,7 @@ public class ProcessCronJob{
     }
 
     /**
-     * 
+     * Cretes the TriggerTemplate from the supplied yaml file  for a Selenium run. 
      * @param groups
      * @param url
      * @param cleanReleaseBranch
@@ -222,7 +222,7 @@ public class ProcessCronJob{
     }
 
     /**
-     * 
+     * Creates the yaml file for a gatling Cronjob
      * @param schedule
      * @param url
      * @param cleanReleaseBranch

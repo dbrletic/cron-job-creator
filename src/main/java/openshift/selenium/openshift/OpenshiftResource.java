@@ -123,6 +123,13 @@ public class OpenshiftResource {
         public static native TemplateInstance cronJobDashboard(List<CronJobDashboardData> cronJobs, List<String> uniqueEnvs);
     }
 
+    /**
+     * List all the current cronjobs on the given name. 
+     * @param namespace Find all the Cronjobs at this namespace. 
+     * @return
+     * @throws ParseException
+     * @throws Exception
+     */
     @GET()
     @Path("/{namespace}/cronjobs")
     @Produces(MediaType.TEXT_HTML)
@@ -197,6 +204,12 @@ public class OpenshiftResource {
         return Templates.cronJobData(cronJobs,uniqueEnvs);
     }
 
+    /**
+     * Verify the supplied cronjob is valid in the namespace. Used to make sure a Cronjob is valid before updating it. 
+     * @param namespace The namespace to look in. 
+     * @param cronJobName Name of the Cronjob
+     * @return
+     */
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/{namespace}/verify/{cronJobName}")
@@ -214,10 +227,14 @@ public class OpenshiftResource {
        
         return openshiftClient.batch().v1().cronjobs().inNamespace(namespace).withName(cronJobName)
                               .get().getSpec().getSchedule();
-       
-    
     }
 
+    /**
+     * Creates a Dashboard by connecting to the OpenShift cluster, reading all the PipelineRuns in the supplied namespace, and reading the 
+     * logs to create a Dashboard about status and results of a Selenium Pipeline Runs. 
+     * @param namespace The namespace to look in. 
+     * @return
+     */
     @GET
     @Path("/{namespace}/dashboard")
     @Produces(MediaType.TEXT_HTML)
@@ -337,6 +354,12 @@ public class OpenshiftResource {
         return  Templates.cronJobDashboard(dashboardData, uniqueEnvs);
     }
 
+    /**
+     * Gets the logs from the pod. 
+     * @param namespace The namespace to look in. 
+     * @param testNameWithPodName The podname with testname in it. 
+     * @return
+     */
     @GET
     @Path("/{namespace}/download/{testNameWithPodName}")
     public Response downloadLogsFromPod(@RestPath String namespace, @RestPath String testNameWithPodName){
@@ -347,7 +370,7 @@ public class OpenshiftResource {
         String runLogs;
 
         File fileLocationAndFolder = new File(projectDir + File.separator + testName + "-logs.txt");
-        //Getting the runLogs for that Seleniun Build Step of of that test
+        //Getting the runLogs for that Seleniun Build Step of of that test. This is a specific container on the pod. 
         runLogs = openshiftClient.pods().inNamespace(namespace).withName(podName).inContainer(STEP_CONTAINER).getLog(true);
         java.nio.file.Path fileLocation = Paths.get(projectDir, testName + "-logs.txt");     
         try {
@@ -360,14 +383,11 @@ public class OpenshiftResource {
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"+ " + testName +"-logs.txt\"")
                         .build();       
     }  
-
-    
-
   
     //TODO Move the following methods to their own helper class to clean up code
     /**
      * Searches through the TriggerBindings to find the release Branch associated with the given CronJob
-     * @param tbList
+     * @param tbList 
      * @return A Map that binds a cronjob name to its Trigger Binding releaseBranch value
      */
     private Map<String,String> bindParamsToBranch(List<TriggerBinding> tbList){
@@ -386,7 +406,7 @@ public class OpenshiftResource {
     }
    
     /**
-     * Reads the  selenium Tag fiel and creates a name to value mapping
+     * Reads the  selenium Tag file  and creates a name to value mapping
      * @return Returns a TreeMap of cronjob name to descripive 
      */
     private TreeMap<String, String> readSeleniumTagFile(){
@@ -418,14 +438,13 @@ public class OpenshiftResource {
     }
     /**
      * Figures out what to color the Pipeline Run and what message to display
-     * @param data 
-     * @param runLogs 
-     * @param namespace
-     * @param runPod
+     * @param data A collection of Data for the CronJobDashboard 
+     * @param runLogs The logs of the pipeline run
+     * @param namespace The namespace the pipeline was run in
+     * @param runPod The pod that test was run on
      * @return
      */
     private CronJobDashboardData getColorStatusAndMsg(CronJobDashboardData data, String runLogs, String namespace, String runPod){
-
         /**
          * Red - job failed, no results
            Orange - job did not complete due to exception, partial results

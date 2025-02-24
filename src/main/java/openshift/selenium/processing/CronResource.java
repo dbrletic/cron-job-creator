@@ -71,6 +71,10 @@ public class CronResource {
 
     private static final Logger LOGGER = Logger.getLogger(CronResource.class);
 
+    /**
+     * Returns the excel-example hosted on the system to make creating a mass create file easier. 
+     * @return
+     */
     @GET
     @Path("/excel-example")
     @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") // MIME type for .xlsx
@@ -85,6 +89,13 @@ public class CronResource {
 
     }
 
+    /**
+     * Creates the yaml files required to add a Selenium Pipeline kicked off by a OpenShift Cronjob. 
+     * @param data
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
@@ -134,6 +145,13 @@ public class CronResource {
             .build();
     }
 
+    /**
+     * Creates the yaml files to kick off a Gatling Pipeline run from a OpenShift Cronjob.  
+     * @param data
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
@@ -178,6 +196,12 @@ public class CronResource {
             .build();
     }
 
+    /**
+     * Creates the files to update a single CronJob Schedule
+     * @param update
+     * @return
+     * @throws IOException
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Blocking
@@ -237,6 +261,12 @@ public class CronResource {
         
     }
 
+    /**
+     * Creates all the yaml files to update the CronJob Schedule for a massive amount of jobs. Since the system is controlled by ArgoCD it is 
+     * between to just recreate the Cronjob Schedule yaml then update it directly from the system. 
+     * @param jobs All the jobs to update
+     * @return
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json")
@@ -277,6 +307,13 @@ public class CronResource {
         return Response.ok(response).build();
     }
 
+    /**
+     * Mass creates the EventLister, TriggerBinding, TriggerTemplate, and CronJob yamls for each row in the upload Excel File. 
+     * @param form The file to create all the files from. 
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
     @POST
     @Path("/mass-create")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -314,6 +351,7 @@ public class CronResource {
             error.add("Error: " + e.getMessage());
             return Response.serverError().build();
         }
+        //Creating all the files for each from the upload Excel sheet. 
         for(FFEData data: cronjobSchedules){
 
             //Have to add the release branch to the name, making sure that there are not any slash that could mess up the file name. 
@@ -421,7 +459,7 @@ public class CronResource {
     private String zipInMemory(List<String> newFilesLocation) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream  = new ByteArrayOutputStream();
         ZipOutputStream zipOutputStream  = new ZipOutputStream(byteArrayOutputStream );
-        newFilesLocation = new ArrayList<>(new LinkedHashSet<>(newFilesLocation)); //This remove duplicates which breaks the zipping
+        newFilesLocation = new ArrayList<>(new LinkedHashSet<>(newFilesLocation)); //This remove duplicates which breaks the zipping. 
 
             for(String srcFile: newFilesLocation){
                 
