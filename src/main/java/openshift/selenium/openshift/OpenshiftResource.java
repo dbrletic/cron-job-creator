@@ -197,56 +197,6 @@ public class OpenshiftResource {
         return Templates.cronJobData(cronJobs,uniqueEnvs);
     }
 
-    /*
-    @GET()
-    @Path("/{namespace}/gatling")
-    @Produces(MediaType.TEXT_HTML)
-    @Blocking //Due to the OpenShiftClient need to make this blocking
-    public TemplateInstance getCurrentGatlingCronJobs(@RestPath String namespace) throws ParseException, Exception{
-
-        // Helpful openShiftClient / kubernetes cheatsheet
-        //https://github.com/fabric8io/kubernetes-client/blob/main/doc/CHEATSHEET.md#cronjob
-        
-        //Have to use TektonClient for anything related to pipelines
-        TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
-       
-        //Getting all the CronJobs
-        List<CronJob> cronJobList = openshiftClient.batch().v1().cronjobs().inNamespace(namespace).list().getItems();
-
-        //Getting all the TriggerBindings
-        List<TriggerBinding> tbList =  tknClient.v1beta1().triggerBindings().inNamespace(namespace).list().getItems();
-            
-        Map<String, String> bindingParamsToBranch = new HashMap<String, String>();
-        List<CronJobData> cronJobs = new ArrayList<>();
-
-        //So there is no duplicate code
-        bindingParamsToBranch = bindParamsToBranch(tbList);
-
-        //Listing the current OpenShift user
-        //System.out.println("Current User: " + openshiftClient.currentUser());
-
-        //Filling out the values for the linked template.
-        for(CronJob job : cronJobList){
-            CronJobData currentJob = new CronJobData();
-            currentJob.name = job.getMetadata().getName();
-            currentJob.schedule = job.getSpec().getSchedule();
-            currentJob.humanReadableMsg = CronExpressionDescriptor.getDescription(currentJob.schedule);
-            String bindingName = currentJob.name + "-binding";
-            currentJob.branch = bindingParamsToBranch.get(bindingName);
-
-            //Had to change newer cronjobs to end in cj instead of cronjob. Should clean up 
-            if(currentJob.branch == "" || currentJob.branch == null || currentJob.branch.isBlank() || currentJob.branch.isEmpty()){
-                //Changing the name back to the old style
-                bindingName = currentJob.name.replaceAll("cj", "cronjob") + "-binding";
-                currentJob.branch = bindingParamsToBranch.get(bindingName); 
-            }
-            //Only using Cronjob that start with Gatling
-            if(currentJob.name.startsWith("gatling"))
-                cronJobs.add(currentJob);
-        }
-        return Templates.gatlingCronJobData(cronJobs); //Add in the data 
-    } */
-
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/{namespace}/verify/{cronJobName}")
@@ -378,7 +328,7 @@ public class OpenshiftResource {
         }
         List<String> uniqueEnvs = new ArrayList<>(uniqueEnvsList);
         Collections.sort(dashboardData, nameSorter); //Sorting everything by name 
-        //Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch
+        //Collections.sort(dashboardData, releaseBranchSorter); //Sorting everything by  name of the release branch. Had to take this out since it was causing a Comparison method violates its general contract error. 
         Collections.sort(uniqueEnvs); 
         long elapsedMs = Duration.between(start, Instant.now()).toMillis();
         LOGGER.info("getCronJobDashBoard took " + elapsedMs +  " milliseconds to complete");
@@ -580,7 +530,7 @@ public class OpenshiftResource {
 
     /**
      * What is basically happening here is that the mvn test ran but hit a exception at some point after running a bunch of test.  Instead of show any test that actually ran before the exception mvn just bails out and shows 0 across the board
-     * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs
+     * So grabbing the logs of the next step from the pod and finding how many actually ran, passed, and failed using the zip logs. These log are in a seperate contrainer on the pod so another pod called is needed. 
      * Turns out this result string is more useful then the straight Selenium Test Result because it does not show how many test passed only how many Ran, Failed, or Skipped
      * @param namespace
      * @param runPod
@@ -589,7 +539,7 @@ public class OpenshiftResource {
      */
     private String findPassedFailedFromZipLogs(String namespace, String runPod, boolean exceptionFound){
         //Abusing the fact that zip displays the files its zipping to find the number of Pass/Failed images generated
-        String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);
+        String zipLogs = openshiftClient.pods().inNamespace(namespace).withName(runPod).inContainer(STEP_ZIP_FILES).getLog(true);//Getting the logs from the zipping up report/images step of the pipeline. 
         int passedCount = StringUtils.countMatches(zipLogs, PASSED);
         int failedCount = StringUtils.countMatches(zipLogs, FAILED);
         if(exceptionFound)
