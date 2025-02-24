@@ -89,8 +89,7 @@ public class PipelineResource {
     @Path("{namespace}/startRun")
     public String startPipelineRun(@RestPath String namespace, @Valid FFEStartPipeline data) {
        
-        TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class);
-        //PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).create(createPipelineRun(data,namespace)); 
+        TektonClient tknClient = new KubernetesClientBuilder().build().adapt(TektonClient.class); //Uses the Kubeconfig file to set this. Make sure to have the right ServiceAccount in the Deployment!
         PipelineRun createdPipelineRun = tknClient.v1beta1().pipelineRuns().inNamespace(namespace).resource(createPipelineRun(data,namespace)).create();
         LOGGER.info("Kicking off new pipeline " + createdPipelineRun.getMetadata().getName() + " in namespace " + namespace  + "based upon " + openshiftSeleniumPipelineName);
         return createdPipelineRun.getMetadata().getName();
@@ -280,7 +279,7 @@ public class PipelineResource {
 
         PipelineRun pipelineRun = new PipelineRunBuilder()
         .withNewMetadata()
-            .withGenerateName(openshiftSeleniumPipelineName + "-")
+            .withGenerateName(openshiftSeleniumPipelineName + "-")//Will add in the random characters after the -
             .withNamespace(namespace)
         .endMetadata()
         .withNewSpec()
@@ -412,6 +411,7 @@ public class PipelineResource {
      * Simple method that creates data to test the page without having to actually read a PVC
      * @return
     
+     //Leaving this here to help create dummy data. 
     private static ArrayList<ReportDataList> getReportDataListDummyData() {
         // Create a list to hold multiple ReportDataList objects
         ArrayList<ReportDataList> reportDataLists = new ArrayList<>();
@@ -548,7 +548,7 @@ public class PipelineResource {
     private String updateTB(java.nio.file.Path file  ){
         String currentFile = "";
         String valueStart = "- name: seleniumTestEmailList\r\n" + //
-                        "      value: FFE.MPMS.Leads@afs.com,FFE.MPMS.Test@afs.com";
+                        "      value: MPMS.Leads@test.com,MPMS.Test@test.com";
         try {
             currentFile = Files.readString(file);
         } catch (IOException e) {
