@@ -41,7 +41,7 @@
         });
       }
       if(test9ElementExpand){
-        var test4Expand = document.getElementById('test9'); 
+        var test9Expand = document.getElementById('test9'); 
         test9Expand.addEventListener('click', function(e) {
           if (e.target.classList.contains('reveal-cell')){ 
              e.target.classList.toggle('expanded'); 
