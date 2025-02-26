@@ -33,7 +33,8 @@ public class HtmlReportRender {
     private static final Logger LOGGER = Logger.getLogger(HtmlReportRender.class);
      /**
      * Find the given HTML file or jpeg file on the PVC Mount
-     * What happens is that the HTML file is loaded first and then reaches out for the associated jpegs to complete the report
+     * What happens is that the HTML file is loaded first and then reaches out for the associated jpegs to complete the report through the same url. 
+     * Luckly the report.html has all the css/js built into it nad only reach out to this URL to get html & images. 
      * @param pipeLineRunName The name of the pipeline run
      * @param indivialRun The individual run, in the format of its completed time stamp
      * @param html The name of the file to look for
@@ -48,7 +49,7 @@ public class HtmlReportRender {
         java.nio.file.Path path = Paths.get(htmlLookup);
         try {
             
-            if(html.contains(".jpeg")){
+            if(html.contains(".jpeg")){ //If the report has something besides jpegs 
                 return Response.ok(path.toFile()).build();
             }
             else {
@@ -96,6 +97,7 @@ public class HtmlReportRender {
 
      /**
      * Finds and returns a given log file of a report on the PVC Mount. Due to trying to render it with all the spacing in the browser had to slightly change rendering the file
+     * and escape some characters. 
     * @param pipeLineRunName The name of the pipeline run
      * @param indivialRun The individual run, in the format of its completed time stamp
      * @param filename The log file name to look for

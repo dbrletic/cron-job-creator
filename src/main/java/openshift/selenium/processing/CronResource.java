@@ -220,7 +220,7 @@ public class CronResource {
     }
 
     /**
-     * Creates the files to update a single CronJob Schedule
+     * Creates the yaml files to update a single CronJob Schedule
      * @param update
      * @return
      * @throws IOException
@@ -287,7 +287,8 @@ public class CronResource {
 
     /**
      * Creates all the yaml files to update the CronJob Schedule for a massive amount of jobs. Since the system is controlled by ArgoCD it is 
-     * between to just recreate the Cronjob Schedule yaml then update it directly from the system. 
+     * between to just recreate the Cronjob Schedule yaml then update it directly from the system. This section of the mass update is dead code, 
+     * replaced by uploadUpdateExcelFile 
      * @param jobs All the jobs to update
      * @return
      */
@@ -332,6 +333,13 @@ public class CronResource {
     }
 
 
+    /**
+     * Takes in a excel file (make sure it is the sample provide to keep format) and creates OpenShift Cronjob schedule yaml files
+     * @param form The excel file with the cronjob names and new schedule
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
     @POST
     @Path("/mass-update-from-excel")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -586,7 +594,7 @@ public class CronResource {
     }
 
    /**
-    * Returns the value inside of a Excel file
+    * Returns the value inside of a single cell of a Excel file
     * @param cell
     * @return
     */
