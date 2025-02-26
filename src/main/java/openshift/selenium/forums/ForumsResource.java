@@ -50,6 +50,7 @@ public class ForumsResource {
         public static native TemplateInstance startPipeline();
         public static native TemplateInstance seleniumTags(TreeMap<String, String> seleniumTags);
         public static native TemplateInstance massCreate();
+        public static native TemplateInstance massExcelUpdate();
     }
     
     @GET
@@ -71,6 +72,13 @@ public class ForumsResource {
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance massUpdate(){
         return Templates.massUpdate();
+    }
+
+    @GET
+    @Path("/mass-excel-update")
+    @Produces(MediaType.TEXT_HTML)
+    public TemplateInstance massExcelUpdate(){
+        return Templates.massExcelUpdate();
     }
 
     @GET

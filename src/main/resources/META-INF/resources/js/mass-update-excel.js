@@ -13,7 +13,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(event)
     formData.append('file', file);
 
     // AJAX request
-    fetch('/ffe-cronjob/mass-create', {
+    fetch('/ffe-cronjob/mass-update-from-excel', {
         method: 'POST',
         body: formData
     })
@@ -35,17 +35,17 @@ document.getElementById('uploadForm').addEventListener('submit', function(event)
             binaryData[i] = zipFileContent.charCodeAt(i);
         }
 
-         //Creating the curren date to give the zip file a better name
-         let currentDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-
         // Create a Blob and trigger the download
         const blob = new Blob([binaryData], { type: 'application/zip' });
         const url = URL.createObjectURL(blob);
 
+        //Creating the curren date to give the zip file a better name
+        let currentDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+
         // Create a link element to trigger download
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'massCronJobCreate-' + currentDate + '.zip';
+        link.download = 'massCronJobScheduleUpdate-' + currentDate + '.zip';
         document.body.appendChild(link);
         link.click();
     })

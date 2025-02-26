@@ -24,4 +24,9 @@ public class CronJobUpdate {
     public String getCronJobSchedule(){
         return cronJobSchedule;
     }
+
+    public CronJobUpdate(String cronJobName, String cronJobSchedule){
+        this.cronJobName = cronJobName;
+        this.cronJobSchedule = cronJobSchedule;
+    }
 }

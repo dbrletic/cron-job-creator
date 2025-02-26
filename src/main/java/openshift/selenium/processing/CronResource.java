@@ -48,6 +48,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import openshift.selenium.model.CronJobUpdate;
 import openshift.selenium.model.ExcelUploadForm;
 import openshift.selenium.model.FFEData;
 import openshift.selenium.model.FFEGatlingData;
@@ -66,8 +67,12 @@ public class CronResource {
     private ProcessCronJob cronjobHandler;
 
     @Inject
-    @ConfigProperty(name = "selenium.excel.example.file")
-    private String EXCEL_EXAMPLE_FILE_NAME;
+    @ConfigProperty(name = "selenium.mass.create.excel.example.file")
+    private String MASS_CREATE_EXCEL_EXAMPLE_FILE_NAME;
+
+    @Inject
+    @ConfigProperty(name = "selenium.mass.update.excel.example.file")
+    private String MASS_UPDATE_EXCEL_EXAMPLE_FILE_NAME;
 
     private static final Logger LOGGER = Logger.getLogger(CronResource.class);
 
@@ -78,13 +83,31 @@ public class CronResource {
     @GET
     @Path("/excel-example")
     @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") // MIME type for .xlsx
-    public Response downloadExcelFile() {
+    public Response downloadMassCreateExcelFile() {
         InputStream fileStream = Thread.currentThread()
         .getContextClassLoader()
-        .getResourceAsStream(EXCEL_EXAMPLE_FILE_NAME);
+        .getResourceAsStream(MASS_CREATE_EXCEL_EXAMPLE_FILE_NAME);
 
         return Response.ok(fileStream)
                 .header("Content-Disposition", "attachment; filename=\"massCreateFormatExample.xlsx\"")
+                .build();
+
+    }
+
+     /**
+     * Returns the excel-example hosted on the system to make creating a mass update file easier. 
+     * @return
+     */
+    @GET
+    @Path("/update-excel-example")
+    @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") // MIME type for .xlsx
+    public Response downloadMassUpdateExcelFile() {
+        InputStream fileStream = Thread.currentThread()
+        .getContextClassLoader()
+        .getResourceAsStream(MASS_UPDATE_EXCEL_EXAMPLE_FILE_NAME);
+
+        return Response.ok(fileStream)
+                .header("Content-Disposition", "attachment; filename=\"massUpdateScheduleFormatExample.xls\"")
                 .build();
 
     }
@@ -261,6 +284,7 @@ public class CronResource {
         
     }
 
+
     /**
      * Creates all the yaml files to update the CronJob Schedule for a massive amount of jobs. Since the system is controlled by ArgoCD it is 
      * between to just recreate the Cronjob Schedule yaml then update it directly from the system. 
@@ -307,6 +331,75 @@ public class CronResource {
         return Response.ok(response).build();
     }
 
+
+    @POST
+    @Path("/mass-update-from-excel")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Blocking
+    public Response uploadUpdateExcelFile(ExcelUploadForm form) throws IOException, ParseException{
+        LOGGER.info("Creating updated schedules from uploaded excel file.");
+        List<String> newFilesLocation = new ArrayList<String>();
+        List<CronJobUpdate> cronjobSchedules = new ArrayList<>();
+        List<String> failedCronExpressions = new ArrayList<String>();
+        try (InputStream inputStream = form.file) {
+            Workbook workbook = WorkbookFactory.create(inputStream);
+            Sheet sheet = workbook.getSheetAt(0); // Read the first sheet
+            Iterator<Row> rowIterator = sheet.iterator();
+            
+            rowIterator.next(); // Skip the header row
+
+            //Reading all the data
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                cronjobSchedules.add(new CronJobUpdate(
+                    getCellValue(row.getCell(0)),  // Cronjob Name Name
+                    getCellValue(row.getCell(1))  // Update Cronjob  Schedule
+                ));
+            }
+            workbook.close();
+        } catch (Exception e) {
+            List<String> error = new ArrayList<>();
+            error.add("Error: " + e.getMessage());
+            return Response.serverError().build();
+        }
+        //Creating all the new update Cronjob Schedules OpenShift yaml files
+        for(CronJobUpdate update: cronjobSchedules){
+            LOGGER.info("Updating: " + update.getCronJobName() + " with new schedule: " + update.getCronJobSchedule());
+            if(isValidCronExpression(update.getCronJobSchedule().trim())){        
+                try{
+                    newFilesLocation.add(cronjobHandler.updateCronJOb(update.getCronJobName(),   update.getCronJobSchedule()));
+                } catch (IOException | ParseException e){
+                    
+                    LOGGER.error(e.getMessage());
+                    LOGGER.error(e.getStackTrace());
+                    return Response.serverError().status(500).entity("Parsing Error of files").build();
+                }
+            }
+            else{
+                LOGGER.info("Schedule: " + update.getCronJobName() + " cron-schedule: " +update.getCronJobSchedule() + " is invalid");
+                failedCronExpressions.add(update.getCronJobName() + " schedule (" +update.getCronJobSchedule() + ") is invalid");
+            }
+        }
+        //Creating the zip file
+        String base64Zip="";
+        try {
+            base64Zip = zipInMemory(newFilesLocation);
+        } catch (IOException e) {
+            LOGGER.error(e.getStackTrace());
+            return Response.serverError().status(500).build();
+        }
+
+        //Creating the Response
+        Map<String, Object> response = new HashMap<>();
+        response.put("failedJobs", failedCronExpressions);
+        response.put("zipFile", base64Zip);
+
+        return Response.ok(response).build();
+
+
+    }
+
     /**
      * Mass creates the EventLister, TriggerBinding, TriggerTemplate, and CronJob yamls for each row in the upload Excel File. 
      * @param form The file to create all the files from. 
@@ -319,7 +412,7 @@ public class CronResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Blocking
-    public Response uploadExcelFile(ExcelUploadForm form) throws IOException, ParseException{
+    public Response uploadCreateExcelFile(ExcelUploadForm form) throws IOException, ParseException{
         LOGGER.info("Creating new schedules from uploaded excel file.");
         List<String> newFilesLocation = new ArrayList<String>();
         List<FFEData> cronjobSchedules = new ArrayList<>();
