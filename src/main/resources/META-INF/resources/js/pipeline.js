@@ -17,22 +17,20 @@ const serialize_form = form => JSON.stringify(
       //pipelineRunName: document.getElementById('pipelineRunName').value
     };
     const jsonData = JSON.stringify(data);
-    console.log(jsonData);
     $.ajax({
       type: 'POST',
       url: '/pipeline/tester-pipelines/startRun',
       data: jsonData,
       contentType: 'application/json',
-      success: function(data) {
+      success: function(data, textStatus, jqXHR) {
         $("#piplelineRunForm")[0].reset();
-        $("#successMessage").show();      
         $("#successMessage").text("Pipeline Run Created: " + data);
       },
       error: function(xhr, status, error) {
         $("#successMessage").hide();     
         console.log("Error: " + error);
         $("#piplelineRunForm")[0].reset();
-        $("<p>Error: " + error +"</p>").appendTo('#errorMessage');
+        $("#errorMessage").text("Error: " + error);
       }
     });
   });

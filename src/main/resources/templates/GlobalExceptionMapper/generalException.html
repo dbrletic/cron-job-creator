@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>FFE Selenium CronJob Exception</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/selenium-logo.png">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+{#include nav.html} {/include}
+<div class="full-screen" id="main">
+    <BR>
+    <center><h2 class="text-primary">Oops! Something went wrong.</h2></center>
+    <BR>
+    <center>
+        <div class="card border-warning mb-3" style="max-width: 70rem;">
+            <div class="card-header"><b>Error Message</b></div>
+                <div class="card-body">
+                    <p class="card-text">{exception.getLocalizedMessage}</p>
+                </div>
+            </div>
+        </div>
+    </center>
+<script src="/js/bootstrap.5.3.3.bundle.min.js"></script>
+{#include progress-bar.html} {/include}
+</body>
+</html>

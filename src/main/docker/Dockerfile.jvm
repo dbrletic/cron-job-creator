@@ -23,7 +23,7 @@
 ###
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.4 
 
-ARG JAVA_PACKAGE=java-11-openjdk-headless
+ARG JAVA_PACKAGE=java-17-openjdk-headless
 ARG RUN_JAVA_VERSION=1.3.8
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 # Install java and the run-java script
@@ -31,6 +31,8 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
     && microdnf update \
     # && microdnf install -y tar \ Add this is you need to rysnc into and out of the pod
+    && microdnf install -y tar \
+    && microdnf install -y vim-minimal \
     && microdnf clean all \
     && mkdir /deployments \
     && chown 1001 /deployments \
@@ -48,7 +50,7 @@ RUN chgrp -R 0 /deployments && \
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 # Turning off FIPS at the Java level, so be careful on OpenShift Clusters that require FIPS
-ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Dcom.redhat.fips=false"
+ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Dcom.redhat.fips=false -Duser.timezone=America/New_York"
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --chown=1001 target/quarkus-app/lib/ /deployments/lib/
 COPY --chown=1001 target/quarkus-app/*.jar /deployments/
